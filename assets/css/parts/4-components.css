@@ -103,6 +103,9 @@
 .sub-legend{display:flex;gap:18px;font-size:var(--t-xs);color:var(--ink-2)}
 .sub-legend span{display:flex;align-items:center;gap:7px}
 .sg-row{display:grid;grid-template-columns:170px 1fr;gap:18px;align-items:center}
+/* เส้นคั่นระหว่างกลุ่ม — ช่วยให้เห็นว่าสองหลอดไหนเป็นคู่เดียวกัน ไม่ปนกับกลุ่มถัดไป
+   ใช้แบบเดียวกับการ์ดเทียบเหตุผล (.cmp-row) */
+.sg-row + .sg-row{border-top:1px solid var(--hair)}
 .sg-name b{display:block;font-size:var(--t-sm);font-weight:600;color:var(--ink)}
 .sg-diff{display:block;font-size:var(--t-xs);color:var(--muted);margin-top:1px}
 .sg-bars{display:flex;flex-direction:column;gap:8px}
