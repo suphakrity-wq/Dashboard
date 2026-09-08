@@ -118,10 +118,13 @@
   .page-bar p{max-width:56ch}
   /* แถวเครื่องมือกับหัวเรื่องอยู่บรรทัดเดียวกันไม่ไหวบนจอแท็บเล็ต ให้ตกลงมาเต็มแถว */
   .page-tools{align-items:flex-start;width:100%}
-  /* ช่องกรองยืดแบ่งความกว้างแถวกันเอง เหมือนแท็บ ไม่ใช่ความกว้างคงที่ */
-  .filters{flex-wrap:wrap;flex:1 1 auto}
-  .filters label{flex:1 1 220px}
-  .filters select.input{flex:1;max-width:none;width:auto}
+  /* ช่องกรองยืดแบ่งความกว้างแถวกันเอง แต่ยอมหดให้แท็บมาอยู่แถวเดียวกันได้
+     flex-basis 300px + min-width:0 คือกุญแจ ถ้าปล่อยให้ยืดเต็มแถว แท็บจะถูกดันตกบรรทัด */
+  .filters{flex:1 1 300px;min-width:0;flex-wrap:nowrap;column-gap:18px}
+  .filters label{flex:1 1 auto;min-width:0}
+  /* ไม่หดต่ำกว่านี้ ไม่งั้นคำว่า "ทั้งหมด" จะถูกตัดเป็น "ทั้ง..." */
+  .filters select.input{flex:1;min-width:112px;max-width:none;width:auto}
+  .tabs{flex:0 0 auto}
   .summary-bar{grid-template-columns:repeat(4,minmax(0,1fr))}
 }
 
