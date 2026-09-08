@@ -8,10 +8,10 @@
  * ข้อตกลง: ดึงข้อมูลผ่าน groupBy/crossTab จาก core/compute.js เท่านั้น
  */
 
-import { el, growBar, segmentBar } from './dom.js?v=45';
-import { fmt, round1, pct } from '../core/format.js?v=45';
-import { num, groupBy, crossTab, avgOf, pickGroupColumn, distinctValues, compareGroups } from '../core/compute.js?v=45';
-import { welchTTest } from '../core/stats.js?v=45';
+import { el, growBar, segmentBars } from './dom.js?v=50';
+import { fmt, round1, pct } from '../core/format.js?v=50';
+import { num, groupBy, crossTab, avgOf, pickGroupColumn, distinctValues, compareGroups } from '../core/compute.js?v=50';
+import { welchTTest } from '../core/stats.js?v=50';
 
 /* สีของหลอดสื่อ "สถานะ" ไม่ใช่ชื่อชุดข้อมูล:
    ฝั่งที่มีค่ามากกว่า = ม่วง (สีเด่นของงานนี้) อีกฝั่ง = เทาเข้ม
@@ -27,6 +27,7 @@ export function rank(host, cf, rows) {
   // ปัดเพดานขึ้นเป็นจำนวนเต็ม เพื่อให้หลอดแบบแบ่งบล็อก 1 บล็อก = 1 หน่วยพอดี
   const max = Math.ceil(Math.max(...values, 1));
   const list = el('div', 'rank');
+  const segs = [];   // เก็บหลอดทั้งกราฟไว้ตัดสินใจแบ่งบล็อกพร้อมกันทีเดียว
 
   labels.forEach((label, i) => {
     const row = el('div', 'rank-row' + (i === 0 ? ' is-top' : ''));
@@ -52,9 +53,11 @@ export function rank(host, cf, rows) {
 
     row.append(no, body, val);
     list.append(row);
-    segmentBar(track, values[i], max, cf.color || 'var(--accent)');
+    segs.push({ track, value: values[i], color: cf.color || 'var(--accent)' });
     growBar(fill, values[i] / max * 100);
   });
+  // blockUnit = ชื่อหน่วยสำหรับข้อความ "1 ช่อง = N หน่วย" (ไม่แสดงในหน้าเว็บ ใช้ตอนชี้ค้าง)
+  segmentBars(segs, max, cf.blockUnit || cf.valueUnit || cf.unit || '');
 
   host.append(list);
 }
@@ -71,6 +74,7 @@ export function gap(host, cf, rows) {
 
   /* --- ส่วนบน: สองฝั่ง + ส่วนต่างตรงกลาง --- */
   const versus = el('div', 'versus');
+  const sideSegs = [];
   const side = (series, value, cls) => {
     const box = el('div', 'vs-side ' + cls);
     const head = el('div', 'vs-label');
@@ -84,7 +88,7 @@ export function gap(host, cf, rows) {
     fill.style.setProperty('--c', series.color);
     track.append(fill);
     box.append(head, value_, track);
-    segmentBar(track, value, max, series.color);
+    sideSegs.push({ track, value, color: series.color });
     growBar(fill, value / max * 100);
     return box;
   };
@@ -96,6 +100,7 @@ export function gap(host, cf, rows) {
 
   versus.append(side(A, totalA, 'is-a'), mid, side(B, totalB, 'is-b'));
   host.append(versus);
+  segmentBars(sideSegs, max, cf.unit || '');
 
   /* --- ส่วนล่าง: แยกตามกลุ่ม พร้อมส่วนต่างรายกลุ่ม ---
      ถ้ามิติหลักมีค่าเดียว (เช่น ผู้ตอบอยู่ช่วงอายุเดียวกันหมด) ให้ลองมิติสำรอง
@@ -112,6 +117,7 @@ export function gap(host, cf, rows) {
 
   if (gA.labels.length) {
     const sub = el('div', 'subgroup');
+    const subSegs = [];
     const cap = el('div', 'sub-head');
     cap.append(el('span', 'subcap', (cf.groupLabel || 'แยกตามกลุ่ม') + ` · ${groupCol}`));
     const legend = el('div', 'sub-legend');
@@ -148,13 +154,14 @@ export function gap(host, cf, rows) {
         track.append(fill);
         line.append(track, el('b', null, fmt(round1(value))));
         bars.append(line);
-        segmentBar(track, value, groupMax, color);
+        subSegs.push({ track, value, color });
         growBar(fill, value / groupMax * 100);
       });
       row.append(bars);
       sub.append(row);
     });
     host.append(sub);
+    segmentBars(subSegs, groupMax, cf.unit || '');
   }
 }
 
@@ -282,6 +289,7 @@ export function compare(host, cf, rows) {
 
   const max = Math.ceil(Math.max(...groups.map(g => Math.max(g.a || 0, g.b || 0)), 1));
   const list = el('div', 'cmp');
+  const segs = [];
 
   groups.forEach(g => {
     const row = el('div', 'cmp-row' + (g.enough ? '' : ' is-thin'));
@@ -309,7 +317,7 @@ export function compare(host, cf, rows) {
       track.append(fill);
       line.append(track, el('b', null, fmt(round1(v))));
       bars.append(line);
-      segmentBar(track, v || 0, max, color);
+      segs.push({ track, value: v || 0, color });
       growBar(fill, (v || 0) / max * 100);
     });
     row.append(bars);
@@ -317,6 +325,7 @@ export function compare(host, cf, rows) {
     if (!g.enough) row.append(el('p', 'cmp-warn', `กลุ่มนี้มีแค่ ${g.n} คน ตัวเลขยังแกว่งง่าย`));
     list.append(row);
   });
+  segmentBars(segs, max, cf.unit || '');
   host.append(list);
 }
 
@@ -542,6 +551,7 @@ export function paired(host, cf, rows) {
   host.append(legend);
 
   const list = el('div', 'cmp');
+  const segs = [];
   items.forEach((d, i) => {
     // จัดหน้าตาแบบเดียวกับการ์ด "ข่าวรายชิ้น": มีเลขอันดับ และอันดับ 1 เป็นกล่องเด่น
     // is-ranked = แถวที่มีเลขอันดับ (ใช้ layout 2 คอลัมน์) ต่างจาก .cmp-row ของกราฟเทียบกลุ่ม
@@ -578,7 +588,7 @@ export function paired(host, cf, rows) {
       const val = el('b', null, `${fmt(v)} คน`);
       line.append(track, val);
       bars.append(line);
-      segmentBar(track, v, max, color);
+      segs.push({ track, value: v, color });
       growBar(fill, v / max * 100);
     });
     main.append(bars);
@@ -586,6 +596,7 @@ export function paired(host, cf, rows) {
     list.append(row);
   });
   host.append(list);
+  segmentBars(segs, max, 'คน');
 }
 
 /* ---------- 12. Chips: รายการตัวเลือกแบบป้าย ขนาดตามจำนวนคน ----------

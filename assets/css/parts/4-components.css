@@ -148,7 +148,8 @@
 .sg-bars{display:flex;flex-direction:column;gap:8px}
 .sg-line{display:flex;align-items:center;gap:12px}
 .sg-track{flex:1;height:8px;max-width:var(--bar-max)}
-.sg-line b{font-size:var(--t-sm);font-weight:700;min-width:2.6em;font-variant-numeric:tabular-nums}
+/* ต้องใช้ > เพื่อไม่ให้ไปโดนชิ้นส่วนข้างในหลอด (เช่น .seg-part) ซึ่งจะถูกยัด min-width จนล้น */
+.sg-line > b{font-size:var(--t-sm);font-weight:700;min-width:2.6em;font-variant-numeric:tabular-nums}
 .dot{width:10px;height:10px;border-radius:100px;display:inline-block;flex-shrink:0}
 .legend{display:flex;flex-wrap:wrap;gap:22px;margin-bottom:var(--sp-3);
   font-size:var(--t-sm);color:var(--ink-2)}
@@ -290,14 +291,35 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;padding-right:2
   box-shadow:0 1px 2px rgba(0,0,0,.04), 0 10px 22px -16px rgba(0,0,0,.35);
   transform:translateY(-1px)}
 
-/* หลอดในแถวที่ชี้อยู่สว่างขึ้นเล็กน้อย เพื่อยืนยันว่ากำลังอ่านแถวไหน */
-/* ตอนชี้แถว รางจะเข้มขึ้นอีกขั้น เพื่อให้ยังแยกออกจากพื้นหลังที่เปลี่ยนไป */
+/* ตอนชี้แถว รางจะเข้มขึ้นอีกขั้น เพื่อให้ยังแยกออกจากพื้นหลังที่เปลี่ยนไป
+   และหลอดสว่างขึ้นเล็กน้อย ยืนยันว่ากำลังอ่านแถวไหน */
 .rank-row:hover .rank-track,
 .sg-row:hover .sg-track,
 .vs-side:hover .vs-track{background:var(--track-hover)}
 .rank-row:hover .rank-fill,
-.sg-row:hover .sg-track i,
-.vs-side:hover .vs-track i{filter:brightness(1.08)}
+.sg-row:hover .sg-track > i,
+.vs-side:hover .vs-track > i{filter:brightness(1.08)}
+
+/* หลอดแบบแบ่งบล็อกไม่มีราง (บล็อกว่างทำหน้าที่แทน)
+   ต้องเขียนทับกฎ hover ข้างบนด้วย ไม่งั้นตอนชี้จะมี "รางเก่า" เป็นแท่งยาวโผล่ขึ้นมาหลังบล็อก
+   ครอบทุกแถวที่ชี้ได้ในโปรเจกต์ เพิ่มชนิดใหม่ให้เอามาต่อในลิสต์นี้ */
+.is-seg,
+.rank-row:hover .is-seg,
+.sg-row:hover .is-seg,
+.cmp-row:hover .is-seg,
+.vs-side:hover .is-seg,
+.dl-row:hover .is-seg,
+.wf-item:hover .is-seg,
+.stack-item:hover .is-seg{background:none;box-shadow:none}
+/* บล็อกที่มีค่าสว่างขึ้นตอนชี้ ส่วนบล็อกว่างเข้มขึ้นนิดเดียวพอให้เห็นขอบเขต */
+.rank-row:hover .is-seg > .seg-blk.is-on,
+.sg-row:hover .is-seg > .seg-blk.is-on,
+.cmp-row:hover .is-seg > .seg-blk.is-on,
+.vs-side:hover .is-seg > .seg-blk.is-on{filter:brightness(1.1)}
+.rank-row:hover .is-seg > .seg-blk:not(.is-on),
+.sg-row:hover .is-seg > .seg-blk:not(.is-on),
+.cmp-row:hover .is-seg > .seg-blk:not(.is-on),
+.vs-side:hover .is-seg > .seg-blk:not(.is-on){background:var(--track-hover)}
 
 /* กล่อง "ทางแก้" ไม่ใช่แถวที่ชี้ได้ จึงคงพื้นเดิมไว้ */
 .cause-fix{padding:0;margin:0;border:none;background:none;box-shadow:none}
@@ -378,7 +400,7 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;padding-right:2
 .cmp-bars{display:flex;flex-direction:column;gap:8px}
 .cmp-line{display:grid;grid-template-columns:96px 1fr auto;align-items:center;gap:12px}
 .cmp-name{font-size:var(--t-xs);color:var(--muted)}
-.cmp-line b{font-size:var(--t-sm);font-weight:700;min-width:2.6em;text-align:right;
+.cmp-line > b{font-size:var(--t-sm);font-weight:700;min-width:2.6em;text-align:right;
   font-variant-numeric:tabular-nums}
 .cmp-row.is-thin{opacity:.72}
 .cmp-warn{margin-top:9px;font-size:var(--t-xs);color:var(--muted)}

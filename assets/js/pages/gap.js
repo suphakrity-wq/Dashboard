@@ -1,6 +1,6 @@
 /* หน้า 2 — ช่องว่างการรับรู้: เทียบข่าวสองชุดที่ผู้ตอบรู้จักจริง */
 
-import { Q, COL, C } from './columns.js?v=45';
+import { Q, COL, C } from './columns.js?v=50';
 
 export default {
   id: "gap",
@@ -55,11 +55,11 @@ export default {
       charts: [
         { type: "rank", title: "ข่าวโลกที่รู้จักมากที่สุด", note: "เรียงจากมากไปน้อย",
           x: Q.newsA, multi: true, agg: "count", sort: "value", top: 10,
-          color: C.world, accent: C.world, level: 2, showPercent: true },
+          color: C.world, accent: C.world, level: 2, showPercent: true, blockUnit: "คน" },
 
         { type: "rank", title: "ข่าวดราม่าที่รู้จักมากที่สุด", note: "เรียงจากมากไปน้อย",
           x: Q.newsB, multi: true, agg: "count", sort: "value", top: 10,
-          color: C.drama, accent: C.drama, level: 2, showPercent: true }
+          color: C.drama, accent: C.drama, level: 2, showPercent: true, blockUnit: "คน" }
       ] }
   ]
 };
