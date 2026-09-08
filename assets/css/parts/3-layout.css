@@ -118,7 +118,10 @@
   .page-bar p{max-width:56ch}
   /* แถวเครื่องมือกับหัวเรื่องอยู่บรรทัดเดียวกันไม่ไหวบนจอแท็บเล็ต ให้ตกลงมาเต็มแถว */
   .page-tools{align-items:flex-start;width:100%}
-  .filters{flex-wrap:wrap}
+  /* ช่องกรองยืดแบ่งความกว้างแถวกันเอง เหมือนแท็บ ไม่ใช่ความกว้างคงที่ */
+  .filters{flex-wrap:wrap;flex:1 1 auto}
+  .filters label{flex:1 1 220px}
+  .filters select.input{flex:1;max-width:none;width:auto}
   .summary-bar{grid-template-columns:repeat(4,minmax(0,1fr))}
 }
 
@@ -153,9 +156,14 @@
 
   .page-bar-top{gap:12px}
   .page-tools{width:100%;justify-content:flex-start;gap:8px}
-  .filters{flex:1 1 auto;gap:8px}
-  .filters label{flex:1 1 100%;gap:6px}
-  .filters .input{flex:1;min-width:0}
+  /* ช่องกรองยืดเต็มความกว้างจอเหมือนแท็บ ไม่ใช้ความกว้างตามเนื้อหาแบบจอคอม
+     ใช้ grid 2 คอลัมน์: ป้ายชื่อ | ช่องเลือก — ทุกช่องเลือกจึงเริ่มตรงกันและจบที่ขอบจอเท่ากัน
+     display:contents ทำให้ <label> ยุบตัวเอง ปล่อยลูกทั้งสองไปเป็นช่องของ grid โดยตรง */
+  .filters{display:grid;grid-template-columns:max-content minmax(0,1fr);
+    flex:1 1 100%;width:100%;gap:8px 10px}
+  .filters label{display:contents}
+  .filters label > span{white-space:nowrap;align-self:center}
+  .filters select.input{width:100%;max-width:none;min-width:0}
   /* แท็บยืดเต็มความกว้างจอ แบ่งช่องเท่า ๆ กัน (ไม่ล้นจอเพราะ flex:1 + min-width:0) */
   .tabs{flex:1 1 100%;width:100%}
   .tab{flex:1 1 0;min-width:0;justify-content:center;gap:6px;padding:8px 6px}
