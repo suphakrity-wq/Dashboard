@@ -31,9 +31,9 @@
 
 /* ---- เนื้อหา ---- */
 .content{min-width:0;padding:0 var(--sp-5) 60px}
-.page-bar{position:sticky;top:0;z-index:10;background:rgba(245,245,247,.88);
-  backdrop-filter:saturate(180%) blur(14px);-webkit-backdrop-filter:saturate(180%) blur(14px);
-  padding:28px 0 18px;margin-bottom:var(--sp-4);border-bottom:1px solid var(--line)}
+/* หัวเพจและแถบสรุปอยู่กับที่ ไม่ลอยตามการเลื่อน (ผู้ใช้ขอ)
+   ถ้าจะให้ลอยอีกครั้ง ใส่ position:sticky;top:0;z-index:10 กลับเข้ามา */
+.page-bar{padding:28px 0 18px;margin-bottom:var(--sp-4);border-bottom:1px solid var(--line)}
 .page-bar-top{display:flex;align-items:flex-start;justify-content:space-between;gap:24px;flex-wrap:wrap}
 .crumb{font-size:var(--t-xs);font-weight:600;color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
 .page-bar h1{margin-top:2px;font-size:var(--t-xl);font-weight:900;line-height:1.2}
@@ -63,8 +63,10 @@
   .side-brand b{font-size:var(--t-sm)}
   .side-brand span{display:none}
   /* เมนูบนมือถือ: เลื่อนแนวนอนแทนการตกบรรทัด จะได้ไม่กินความสูง */
-  .nav{flex-direction:row;flex:1 1 100%;gap:6px;overflow-x:auto;padding-bottom:2px;
+  .nav{flex-direction:row;flex:1 1 100%;min-width:0;gap:6px;overflow-x:auto;padding-bottom:2px;
     scrollbar-width:none}
+  /* min-width:0 จำเป็น ไม่งั้นเมนูจะดันความกว้างจนหน้าเลื่อนแนวนอนได้ทั้งหน้า */
+  .shell,.sidebar,.content{min-width:0;max-width:100%}
   .nav::-webkit-scrollbar{display:none}
   .nav-item{padding:7px 12px;flex:0 0 auto}
   .nav-ico{width:26px;height:26px;border-radius:8px}
@@ -77,15 +79,43 @@
   .demo-flag{flex:1 1 100%;margin-bottom:0}
   .demo-pick{flex:1 1 180px;width:auto;margin:0}
   .side-foot #updated{flex:1 1 auto;text-align:right}
-  .side-foot .btn{flex:0 0 auto}
+  .side-foot .btn{flex:0 0 auto;width:auto}   /* ยกเลิก .btn-block ที่ตั้งไว้สำหรับแถบซ้ายจอคอม */
   .content{padding:0 22px 46px}
   .page-tools{align-items:flex-start}
 }
+/* ---------- จอแท็บเล็ตแนวนอน (iPad ตะแคง ~1024-1180px) ----------
+   ยังใช้แถบซ้ายอยู่ แต่บีบให้แคบลง เนื้อหาจะได้กว้างสมส่วนกับจอ */
+@media (min-width:1001px) and (max-width:1180px){
+  .shell{grid-template-columns:232px minmax(0,1fr)}
+  .sidebar{padding:18px 12px;gap:18px}
+  .nav-item{padding:9px 11px;gap:10px}
+  .nav-ico{width:28px;height:28px}
+  .nav-txt i{display:none}          /* คำอธิบายเมนู ตัดออกเพื่อลดความกว้าง */
+  .content{padding:0 var(--sp-4) 52px}
+  .grid{grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
+}
+
+/* ---------- จอแท็บเล็ตแนวตั้ง (iPad ตั้ง ~761-1000px) ----------
+   เมนูขึ้นไปอยู่ด้านบนแล้ว ที่เหลือคือคุมสัดส่วนให้เต็มจอพอดี
+   ไม่ใช่ 1 คอลัมน์แบบมือถือ และไม่ยืดจนตัวหนังสือลอย */
+@media (min-width:761px) and (max-width:1000px){
+  .content{padding:0 var(--sp-4) 52px}
+  .grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--sp-3)}
+  .grid > .card:only-child{grid-column:1/-1}
+  .page-bar{padding:22px 0 16px}
+  .page-bar h1{font-size:30px}
+  .page-bar p{max-width:56ch}
+  /* แถวเครื่องมือกับหัวเรื่องอยู่บรรทัดเดียวกันไม่ไหวบนจอแท็บเล็ต ให้ตกลงมาเต็มแถว */
+  .page-tools{align-items:flex-start;width:100%}
+  .filters{flex-wrap:wrap}
+  .summary-bar{grid-template-columns:repeat(4,minmax(0,1fr))}
+}
+
 /* ---------- จอมือถือ ----------
    ปัญหาเดิม: หัวหน้าเพจเป็น sticky + สูงมาก พอเลื่อนแล้วบังเนื้อหาเกือบทั้งจอ
    แก้: ให้หัวเพจเลื่อนหายไปตามปกติ และย่อทุกอย่างในหัวเพจลง */
 @media (max-width:760px){
-  .page-bar{position:static;padding:16px 0 12px;margin-bottom:18px}
+  .page-bar{padding:14px 0 12px;margin-bottom:16px}
   .page-bar h1{font-size:26px}
   .page-bar > .page-bar-top > div > .muted{display:none}   /* คำอธิบายยาว ซ่อนบนมือถือ */
   .page-answers{font-size:16px;padding:8px 12px;margin-top:6px;line-height:1.45}
@@ -102,12 +132,29 @@
   .summary-bar{margin-top:12px}
 }
 
+/* ---------- จอโทรศัพท์ ----------
+   เป้าหมาย: เนื้อหาเต็มความกว้างจอ ขอบซ้ายขวาเท่ากัน อ่านรวดเดียวจบเป็นคอลัมน์เดียว */
 @media (max-width:620px){
-  :root{--t-2xl:32px;--t-3xl:40px;--t-xl:25px}
+  :root{--t-2xl:30px;--t-3xl:38px;--t-xl:24px;
+        --sp-3:16px;--sp-4:22px;--sp-5:28px;--radius:14px}
   .content{padding:0 14px 40px}
-  .grid{grid-template-columns:1fr}
+  .grid{grid-template-columns:1fr;gap:14px}
   .sec-head h2{font-size:21px}
-  .page-body{gap:26px}
+  .sec-head{margin-bottom:12px}
+  .page-body{gap:24px}
+
+  /* แถบบนสุด: โลโก้กับปุ่มอยู่บรรทัดเดียว เมนูเลื่อนแนวนอนใต้ลงมา */
+  .sidebar{padding:10px 14px;gap:8px}
+  .side-brand b{font-size:var(--t-xs)}
+  .nav{margin:0 -14px;padding:0 14px 2px}   /* ให้เลื่อนชนขอบจอ ดูเป็นแถบเต็มความกว้าง */
+  .side-foot #updated{font-size:var(--t-xs)}
+}
+
+/* ---------- จอโทรศัพท์เครื่องเล็ก (iPhone SE / mini) ---------- */
+@media (max-width:400px){
+  :root{--t-xs:18px;--t-sm:20px;--t-md:22px;--t-lg:25px;--t-xl:22px;--t-2xl:27px;--t-3xl:34px}
+  .content{padding:0 12px 36px}
+  .tab{font-size:var(--t-xs)}
 }
 
 /* ป้ายโหมดทดลอง */
