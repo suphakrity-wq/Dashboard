@@ -8,10 +8,10 @@
  * ข้อตกลง: ดึงข้อมูลผ่าน groupBy/crossTab จาก core/compute.js เท่านั้น
  */
 
-import { el, growBar } from './dom.js?v=35';
-import { fmt, round1, pct } from '../core/format.js?v=35';
-import { num, groupBy, crossTab, avgOf, pickGroupColumn, distinctValues, compareGroups } from '../core/compute.js?v=35';
-import { welchTTest } from '../core/stats.js?v=35';
+import { el, growBar } from './dom.js?v=37';
+import { fmt, round1, pct } from '../core/format.js?v=37';
+import { num, groupBy, crossTab, avgOf, pickGroupColumn, distinctValues, compareGroups } from '../core/compute.js?v=37';
+import { welchTTest } from '../core/stats.js?v=37';
 
 /* ---------- 1. อันดับพร้อมหลอดวัดค่า ---------- */
 export function rank(host, cf, rows) {
@@ -219,7 +219,7 @@ export function sparkline(cf, rows) {
 }
 
 
-/* ---------- 10. เทียบช่องว่างระหว่างกลุ่ม ----------
+/* ---------- 5. เทียบช่องว่างระหว่างกลุ่ม ----------
    ตอบคำถามแบบ "กลุ่มไหนห่างกว่ากัน" ซึ่งเป็นการเชื่อมพฤติกรรมกลับไปหาคำถามวิจัย */
 export function compare(host, cf, rows) {
   const groups = compareGroups(rows, {
@@ -303,7 +303,7 @@ export function compare(host, cf, rows) {
 export const CHARTS = { rank, gap, donut, compare };
 
 
-/* ---------- 5. Waffle: 100 จุด = 100% ----------
+/* ---------- 6. Waffle: 100 จุด = 100% ----------
    เหมาะกับ "สัดส่วนของผู้ตอบ" มากกว่าหลอด เพราะนับจุดได้ด้วยตา */
 export function waffle(host, cf, rows) {
   const { labels, values } = groupBy(rows, cf);
@@ -342,7 +342,7 @@ export function waffle(host, cf, rows) {
   host.append(wrap);
 }
 
-/* ---------- 6. Gauge: เข็มวัดครึ่งวงกลม ----------
+/* ---------- 7. Gauge: เข็มวัดครึ่งวงกลม ----------
    ใช้กับค่าเดียวที่อยากให้เห็นว่า "อยู่ตรงไหนของสเกล" */
 export function gauge(host, cf, rows) {
   const value = cf.compute === 'ratio'
@@ -393,7 +393,7 @@ function ratioOf(rows, cf) {
   return b ? a / b * 100 : 0;
 }
 
-/* ---------- 7. Heatmap: ตาราง 2 มิติ ----------
+/* ---------- 8. Heatmap: ตาราง 2 มิติ ----------
    แต่ละแถว = หนึ่งหัวข้อ · แต่ละคอลัมน์ = หนึ่งกลุ่ม · ยิ่งเข้ม = ยิ่งมีคนตอบมาก */
 export function heatmap(host, cf, rows) {
   const groupCol = pickGroupColumn(rows, [cf.group, ...(cf.groupFallback || [])]);
@@ -444,7 +444,7 @@ export function heatmap(host, cf, rows) {
   host.append(scale);
 }
 
-/* ---------- 8. Bubble: วงกลมขนาดตามค่า ---------- */
+/* ---------- 9. Bubble: วงกลมขนาดตามค่า ---------- */
 export function bubbles(host, cf, rows) {
   const { labels, values } = groupBy(rows, cf);
   const max = Math.max(...values, 1);
@@ -465,7 +465,7 @@ export function bubbles(host, cf, rows) {
   host.append(wrap);
 }
 
-/* ---------- 9. Stacked: แถบเดียว 100% ---------- */
+/* ---------- 10. Stacked: แถบเดียว 100% ---------- */
 export function stacked(host, cf, rows) {
   const { labels, values } = groupBy(rows, cf);
   const total = values.reduce((a, b) => a + b, 0) || 1;

@@ -1,4 +1,20 @@
-/* ============ ส่วนประกอบ ============ */
+/* ============================================================
+   4-components.css — ส่วนประกอบที่ใช้ซ้ำทั้งเว็บ (การ์ด, กราฟ, ตาราง)
+
+   ลำดับในไฟล์
+     1. การ์ดและแถบสรุป
+     2. กราฟพื้นฐาน: หลอดวัดค่า, อันดับ, เทียบสองฝั่ง, โดนัท, ตาราง
+     3. กราฟรูปแบบอื่น: waffle, gauge, heatmap, bubbles, stacked
+     4. พฤติกรรม hover ของ "แถวข้อมูล" — ประกาศที่เดียว ใช้ทุกหน้า
+     5. ส่วนที่ต้องเขียนทับกฎในข้อ 4 (จึงต้องอยู่หลังข้อ 4 เท่านั้น)
+     6. ปรับสำหรับจอเล็ก
+
+   ทำไมข้อ 5 ถึงอยู่ท้าย: กฎ hover กลางในข้อ 4 ตั้ง padding/margin/border ให้แถวทุกชนิด
+   ส่วนประกอบที่ต้องการค่าต่างออกไป (เช่น .cmp-row, .vs-side, แถวอันดับ 1)
+   จึงต้องประกาศทีหลัง ไม่งั้นจะถูกทับ
+   ============================================================ */
+
+/* ============ 1 · การ์ดและแถบสรุป ============ */
 
 /* ---------- การ์ด: 3 ระดับความสำคัญ ----------
    ต่างกันที่ ขนาดหัวข้อ + เงา + พื้นหลัง ไม่ใช้สีมาแยกระดับ */
@@ -30,6 +46,8 @@
 /* สีตัวเลขใช้เฉพาะคู่เปรียบเทียบหลัก ที่เหลือเป็นสีหมึกปกติ */
 .stat.world .stat-value{color:var(--graphite)}
 .stat.accent .stat-value{color:var(--purple)}
+
+/* ============ 2 · กราฟพื้นฐาน ============ */
 
 /* ---------- หลอดวัดค่า ---------- */
 .rank-track,.cause-track,.sg-track,.vs-track,.stack{
@@ -149,7 +167,7 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;padding-right:2
 .status:empty{display:none}
 .status.error{color:var(--red)}
 
-/* ============ กราฟรูปแบบอื่น ============ */
+/* ============ 3 · กราฟรูปแบบอื่น ============ */
 
 /* ---- Waffle: 100 จุด ---- */
 .waffle-wrap{display:flex;gap:26px;flex-wrap:wrap;align-items:flex-start}
@@ -221,7 +239,7 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;padding-right:2
 .stack-item b{font-weight:700;font-variant-numeric:tabular-nums;flex-shrink:0}
 
 
-/* ============ พฤติกรรม hover ของ "แถวข้อมูล" — ประกาศที่เดียว ใช้ทุกหน้า ============
+/* ============ 4 · พฤติกรรม hover ของ "แถวข้อมูล" — ประกาศที่เดียว ใช้ทุกหน้า ============
    แถวไหนก็ตามที่ผู้ใช้กวาดสายตาอ่านทีละบรรทัด ให้ตอบสนองแบบเดียวกันหมด
    เพิ่มแถวชนิดใหม่ ให้เอา selector มาต่อในลิสต์นี้ ไม่ต้องเขียน hover ใหม่ */
 .rank-row,
@@ -277,11 +295,13 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;padding-right:2
   transform:translateY(-1px)}
 
 
-/* ============ ผู้ใช้ที่ตั้งค่าลดการเคลื่อนไหวไว้ ให้ตัดอนิเมชันทั้งหมด ============ */
+/* ---------- ผู้ใช้ที่ตั้งค่าลดการเคลื่อนไหวไว้ ให้ตัดอนิเมชันทั้งหมด ---------- */
 @media (prefers-reduced-motion: reduce){
   *,*::before,*::after{animation-duration:.01ms !important;animation-delay:0ms !important;
     transition-duration:.01ms !important;scroll-behavior:auto !important}
 }
+
+/* ============ 5 · ส่วนที่ต้องเขียนทับกฎ hover ข้างบน (ห้ามย้ายขึ้นไปข้างบน) ============ */
 
 /* ---- แถวรายละเอียดในตารางข้อมูลดิบ ---- */
 .th-toggle{width:34px}
@@ -354,7 +374,7 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;padding-right:2
 .cloud-chip.is-strong{background:var(--purple);color:#fff}
 .cloud-chip.is-strong b{color:#fff}
 
-/* ============ ปรับสำหรับจอมือถือ ============
+/* ============ 6 · ปรับสำหรับจอเล็ก ============
    วางไว้ท้ายไฟล์นี้ เพราะ 4-components.css ถูก import ทีหลัง 3-layout.css
    ถ้าเขียนไว้ในไฟล์ layout จะถูกกฎพื้นฐานของไฟล์นี้ทับ */
 @media (max-width:760px){
@@ -373,6 +393,8 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;padding-right:2
   .rank-val{font-size:var(--t-sm)}
   .rank-row.is-top .rank-val b{font-size:var(--t-xl)}
 
+  /* ชื่อกลุ่มขึ้นบรรทัดบน หลอดอยู่บรรทัดล่าง — คอลัมน์ชื่อ 170px กว้างเกินไปบนจอแคบ */
+  .sg-row{grid-template-columns:1fr;gap:10px}
   .versus{grid-template-columns:1fr}
   .vs-mid{flex-direction:row;gap:10px;padding:6px 0;min-width:0}
   .cmp-line{grid-template-columns:74px 1fr auto;gap:8px}
@@ -386,7 +408,7 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;padding-right:2
   .table-tools .input{min-width:0;width:100%}
 }
 
-/* ---- โทรศัพท์เครื่องเล็ก ----
+/* ---- โทรศัพท์เครื่องเล็ก (ไม่เกิน 400px) ----
    ต้องอยู่ไฟล์นี้ (import ทีหลัง 3-layout.css) ไม่งั้นกฎ 2 คอลัมน์ข้างบนจะทับ */
 @media (max-width:400px){
   .card{padding:16px 16px 18px}
