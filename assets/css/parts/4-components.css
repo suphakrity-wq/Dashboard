@@ -406,8 +406,12 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;padding-right:2
 .cmp-name{font-size:var(--t-xs);color:var(--muted)}
 .cmp-line > b{font-size:var(--t-sm);font-weight:700;min-width:2.6em;text-align:right;
   font-variant-numeric:tabular-nums}
-.cmp-row.is-thin{opacity:.72}
-.cmp-warn{margin-top:9px;font-size:var(--t-xs);color:var(--muted)}
+/* กลุ่มที่ผู้ตอบน้อยเกินเกณฑ์ — เดิมใช้วิธีลดความเข้มทั้งแถว (opacity:.72)
+   แต่ดูเหมือนกราฟเรนเดอร์ไม่สมบูรณ์มากกว่าเป็นคำเตือน
+   เปลี่ยนเป็นกรอบประ + พื้นอ่อน ข้อมูลยังคมชัดเท่าแถวอื่น แต่บอกได้ว่า "อ่านด้วยความระวัง" */
+.cmp-row.is-thin{border-style:dashed;border-color:var(--purple-3);background:var(--surface-2)}
+.cmp-warn{margin-top:10px;font-size:var(--t-xs);color:var(--ink-2);
+  background:var(--purple-soft);border-radius:var(--r-sm);padding:6px 11px;display:inline-block}
 .rank-val span{white-space:nowrap}
 
 /* ---- Chips cloud: รายการยาว ๆ ที่ไม่ต้องเทียบละเอียด ---- */

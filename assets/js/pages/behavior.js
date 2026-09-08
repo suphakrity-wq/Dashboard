@@ -1,6 +1,6 @@
 /* หน้า 4 — พฤติกรรมการเข้าถึง: คนเจอข่าวได้อย่างไร */
 
-import { Q, COL, C } from './columns.js?v=54';
+import { Q, COL, C } from './columns.js?v=55';
 
 export default {
   id: "behavior",
