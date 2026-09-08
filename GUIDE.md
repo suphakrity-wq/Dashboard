@@ -170,7 +170,30 @@ causes: [
 
 ---
 
-## 11. ทดสอบก่อน commit
+## 11. หลัง deploy แล้วเว็บยังเป็นของเก่า
+
+GitHub Pages แคชไฟล์ CSS/JS ไว้ **10 นาที** ถ้าอยากให้ผู้ใช้เห็นของใหม่ทันที
+ให้บวกเลขเวอร์ชันใน `index.html` และ `assets/css/style.css` ทีละ 1
+
+```html
+<!-- index.html -->
+<link rel="stylesheet" href="assets/css/style.css?v=2">
+<script src="config.js?v=2"></script>
+<script type="module" src="assets/js/app.js?v=2"></script>
+```
+```css
+/* assets/css/style.css */
+@import url("parts/1-tokens.css?v=2");
+...
+```
+> โมดูล JS ย่อยใน `core/` `ui/` `pages/` ไม่ต้องใส่เวอร์ชัน — เมื่อ `app.js` เปลี่ยน URL
+> เบราว์เซอร์จะโหลดสายพันธุ์ทั้งชุดใหม่เอง
+
+ถ้าแค่อยากเช็คเองว่าของใหม่ขึ้นหรือยัง: กด **Cmd + Shift + R** (hard refresh)
+
+---
+
+## 12. ทดสอบก่อน commit
 
 ```bash
 python3 -m http.server 8000
