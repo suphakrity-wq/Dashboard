@@ -12,7 +12,7 @@
 .verdict.no  .vd-answer{color:#b3a2ff}
 .verdict.mid .vd-answer,.verdict.neutral .vd-answer{color:#c7c7cc}
 
-.vd-bars{margin-top:26px;display:flex;flex-direction:column;gap:12px;max-width:620px}
+.vd-bars{margin-top:26px;display:flex;flex-direction:column;gap:12px}
 .vd-bar{display:grid;grid-template-columns:120px 1fr 58px;align-items:center;gap:14px}
 .vd-name{font-size:var(--t-sm);opacity:.75}
 .vd-track{height:14px;border-radius:100px;background:rgba(255,255,255,.14);overflow:hidden}

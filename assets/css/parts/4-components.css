@@ -69,7 +69,7 @@
 .rank-row.is-top .rank-no{visibility:hidden}
 .rank-row.is-top .rank-label{font-size:var(--t-lg);font-weight:700;color:var(--ink);
   white-space:normal;margin-bottom:11px}
-.rank-row.is-top .rank-track{height:8px;max-width:420px}
+.rank-row.is-top .rank-track{height:8px}   /* ไม่จำกัดความกว้าง ให้หลอดยาวเต็มการ์ด */
 .rank-row.is-top .rank-val{flex-direction:column;align-items:flex-end;gap:0}
 .rank-row.is-top .rank-val b{font-size:var(--t-2xl);line-height:1;color:var(--accent)}
 .rank-row.is-top .rank-val span{font-size:var(--t-sm)}
@@ -107,7 +107,7 @@
 .sg-diff{display:block;font-size:var(--t-xs);color:var(--muted);margin-top:1px}
 .sg-bars{display:flex;flex-direction:column;gap:8px}
 .sg-line{display:flex;align-items:center;gap:12px}
-.sg-track{flex:1;height:8px;max-width:420px}
+.sg-track{flex:1;height:8px}   /* ไม่จำกัดความกว้าง ให้หลอดยาวเต็มการ์ด */
 .sg-line b{font-size:var(--t-sm);font-weight:700;min-width:2.6em;font-variant-numeric:tabular-nums}
 .dot{width:10px;height:10px;border-radius:100px;display:inline-block;flex-shrink:0}
 .legend{display:flex;flex-wrap:wrap;gap:22px;margin-bottom:var(--sp-3);
