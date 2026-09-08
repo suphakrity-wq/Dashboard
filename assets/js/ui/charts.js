@@ -8,10 +8,18 @@
  * ข้อตกลง: ดึงข้อมูลผ่าน groupBy/crossTab จาก core/compute.js เท่านั้น
  */
 
-import { el, growBar, segmentBar } from './dom.js?v=40';
-import { fmt, round1, pct } from '../core/format.js?v=40';
-import { num, groupBy, crossTab, avgOf, pickGroupColumn, distinctValues, compareGroups } from '../core/compute.js?v=40';
-import { welchTTest } from '../core/stats.js?v=40';
+import { el, growBar, segmentBar } from './dom.js?v=45';
+import { fmt, round1, pct } from '../core/format.js?v=45';
+import { num, groupBy, crossTab, avgOf, pickGroupColumn, distinctValues, compareGroups } from '../core/compute.js?v=45';
+import { welchTTest } from '../core/stats.js?v=45';
+
+/* สีของหลอดสื่อ "สถานะ" ไม่ใช่ชื่อชุดข้อมูล:
+   ฝั่งที่มีค่ามากกว่า = ม่วง (สีเด่นของงานนี้) อีกฝั่ง = เทาเข้ม
+   ช่องที่ยังไม่ถึงค่าเป็นสีจาง คุมอยู่ใน 4-components.css
+   ทุกแถวมีชื่อชุดข้อมูลกำกับอยู่แล้ว จึงไม่ต้องพึ่งสีเพื่อบอกว่าแถวไหนคืออะไร */
+const LEAD_COLOR = 'var(--purple)';
+const REST_COLOR = 'var(--graphite)';
+const barColor = (value, top) => (value >= top ? LEAD_COLOR : REST_COLOR);
 
 /* ---------- 1. อันดับพร้อมหลอดวัดค่า ---------- */
 export function rank(host, cf, rows) {
@@ -44,7 +52,7 @@ export function rank(host, cf, rows) {
 
     row.append(no, body, val);
     list.append(row);
-    segmentBar(track, max);
+    segmentBar(track, values[i], max, cf.color || 'var(--accent)');
     growBar(fill, values[i] / max * 100);
   });
 
@@ -76,7 +84,7 @@ export function gap(host, cf, rows) {
     fill.style.setProperty('--c', series.color);
     track.append(fill);
     box.append(head, value_, track);
-    segmentBar(track, max);
+    segmentBar(track, value, max, series.color);
     growBar(fill, value / max * 100);
     return box;
   };
@@ -107,12 +115,13 @@ export function gap(host, cf, rows) {
     const cap = el('div', 'sub-head');
     cap.append(el('span', 'subcap', (cf.groupLabel || 'แยกตามกลุ่ม') + ` · ${groupCol}`));
     const legend = el('div', 'sub-legend');
-    [A, B].forEach(series => {
-      const item = el('span');
-      const dot = el('i', 'dot'); dot.style.background = series.color;
-      item.append(dot, series.label);
-      legend.append(item);
-    });
+    [['var(--purple)', 'ฝั่งที่นำ'], ['var(--graphite)', 'อีกฝั่ง'], ['var(--track)', 'ยังไม่ถึงค่านี้']]
+      .forEach(([color, text]) => {
+        const item = el('span');
+        const dot = el('i', 'dot'); dot.style.background = color;
+        item.append(dot, text);
+        legend.append(item);
+      });
     cap.append(legend);
     sub.append(cap);
 
@@ -127,15 +136,19 @@ export function gap(host, cf, rows) {
       row.append(name);
 
       const bars = el('div', 'sg-bars');
+      const top = Math.max(a, b);
       [[A, a], [B, b]].forEach(([series, value]) => {
-        const line = el('div', 'sg-line');
+        const isLead = value >= top;
+        const color = barColor(value, top);
+        const line = el('div', 'sg-line' + (isLead ? ' is-lead' : ''));
+        line.append(el('span', 'sg-nm', series.label));   // ชื่อชุดข้อมูล — สีไม่ได้บอกแล้ว
         const track = el('div', 'sg-track');
         const fill = el('i');
-        fill.style.setProperty('--c', series.color);
+        fill.style.setProperty('--c', color);
         track.append(fill);
         line.append(track, el('b', null, fmt(round1(value))));
         bars.append(line);
-        segmentBar(track, groupMax);
+        segmentBar(track, value, groupMax, color);
         growBar(fill, value / groupMax * 100);
       });
       row.append(bars);
@@ -285,8 +298,10 @@ export function compare(host, cf, rows) {
     row.append(head);
 
     const bars = el('div', 'cmp-bars');
-    [[cf.labelA || 'ข่าวโลก', g.a, cf.colorA], [cf.labelB || 'ข่าวดราม่า', g.b, cf.colorB]].forEach(([name, v, color]) => {
-      const line = el('div', 'cmp-line');
+    const topValue = Math.max(g.a || 0, g.b || 0);
+    [[cf.labelA || 'ข่าวโลก', g.a], [cf.labelB || 'ข่าวดราม่า', g.b]].forEach(([name, v]) => {
+      const color = barColor(v || 0, topValue);
+      const line = el('div', 'cmp-line' + ((v || 0) >= topValue ? ' is-lead' : ''));
       line.append(el('span', 'cmp-name', name));
       const track = el('div', 'sg-track');
       const fill = el('i');
@@ -294,7 +309,7 @@ export function compare(host, cf, rows) {
       track.append(fill);
       line.append(track, el('b', null, fmt(round1(v))));
       bars.append(line);
-      segmentBar(track, max);
+      segmentBar(track, v || 0, max, color);
       growBar(fill, (v || 0) / max * 100);
     });
     row.append(bars);
@@ -515,13 +530,15 @@ export function paired(host, cf, rows) {
 
   const max = Math.ceil(Math.max(...items.map(d => Math.max(d.a, d.b)), 1));
 
+  // สีบอกสถานะ (นำ / ไม่นำ / ยังไม่ถึงค่า) ชื่อชุดข้อมูลอ่านได้จากป้ายหน้าหลอดแต่ละแถว
   const legend = el('div', 'legend');
-  [[cf.labelA, cf.colorA], [cf.labelB, cf.colorB]].forEach(([name, color]) => {
-    const item = el('span');
-    const dot = el('i', 'dot'); dot.style.background = color;
-    item.append(dot, name);
-    legend.append(item);
-  });
+  [[LEAD_COLOR, 'ฝั่งที่นำ'], [REST_COLOR, 'อีกฝั่ง'], ['var(--track)', 'ยังไม่ถึงค่านี้']]
+    .forEach(([color, text]) => {
+      const item = el('span');
+      const dot = el('i', 'dot'); dot.style.background = color;
+      item.append(dot, text);
+      legend.append(item);
+    });
   host.append(legend);
 
   const list = el('div', 'cmp');
@@ -549,8 +566,10 @@ export function paired(host, cf, rows) {
     main.append(head);
 
     const bars = el('div', 'cmp-bars');
-    [[cf.labelA, d.a, cf.colorA], [cf.labelB, d.b, cf.colorB]].forEach(([name, v, color]) => {
-      const line = el('div', 'cmp-line');
+    const topValue = Math.max(d.a, d.b);
+    [[cf.labelA, d.a], [cf.labelB, d.b]].forEach(([name, v]) => {
+      const color = barColor(v, topValue);
+      const line = el('div', 'cmp-line' + (v >= topValue ? ' is-lead' : ''));
       line.append(el('span', 'cmp-name', name));
       const track = el('div', 'sg-track');
       const fill = el('i');
@@ -559,7 +578,7 @@ export function paired(host, cf, rows) {
       const val = el('b', null, `${fmt(v)} คน`);
       line.append(track, val);
       bars.append(line);
-      segmentBar(track, max);
+      segmentBar(track, v, max, color);
       growBar(fill, v / max * 100);
     });
     main.append(bars);

@@ -55,28 +55,32 @@
   /* เส้นขอบในบาง ๆ ทำให้เห็นขอบเขตของรางแม้พื้นหลังจะเปลี่ยนสี */
   box-shadow:inset 0 0 0 1px rgba(28,28,30,.06);
   transition:background var(--t-base) var(--ease)}
-/* ---- หลอดแบบแบ่งบล็อก ----
-   ตัดหลอดเป็นสี่เหลี่ยมเรียงต่อกัน 1 บล็อก = 1 หน่วย (เช่น 1 ข่าว / 1 คน)
-   นับด้วยตาได้เลยว่าค่าเท่าไร ไม่ต้องอ่านตัวเลขข้าง ๆ
-   ใช้ mask ตัดทั้งชั้น จึงได้ทั้งบล็อกที่มีค่า (สีข้อมูล) และบล็อกว่าง (สีราง) พร้อมกัน
-   --seg = จำนวนบล็อก ตั้งจาก segmentBar() ใน ui/dom.js */
-.is-seg{
-  --seg-gap:3px;
-  -webkit-mask-image:repeating-linear-gradient(90deg,
-    #000 0 calc(100% / var(--seg) - var(--seg-gap)),
-    transparent calc(100% / var(--seg) - var(--seg-gap)) calc(100% / var(--seg)));
-          mask-image:repeating-linear-gradient(90deg,
-    #000 0 calc(100% / var(--seg) - var(--seg-gap)),
-    transparent calc(100% / var(--seg) - var(--seg-gap)) calc(100% / var(--seg)));
-  border-radius:3px;box-shadow:none}
-/* บล็อกสุดท้ายไม่ต้องเว้นช่องไฟท้ายราง ใช้ padding-right ชดเชยความกว้างที่หายไป */
-.is-seg > i{border-radius:0}
-
 .rank-fill,.cause-track i,.sg-track i,.bigbar-track i{
   display:block;height:100%;width:0;border-radius:100px;
   background:var(--c,var(--accent));
   transition:width var(--t-slow) var(--ease), filter var(--t-fast) ease}
 
+/* ---- หลอดแบบแบ่งบล็อก ----
+   ตัดหลอดเป็นสี่เหลี่ยมมุมมนเรียงต่อกัน 1 บล็อก = 1 หน่วย (1 ข่าว / 1 คน)
+   นับด้วยตาได้เลยว่าค่าเท่าไร ไม่ต้องอ่านตัวเลขข้าง ๆ
+   บล็อกสร้างจาก segmentBar() ใน ui/dom.js — ที่นี่คุมแค่หน้าตา */
+.is-seg{display:flex;gap:var(--seg-gap,3px);background:none;box-shadow:none;overflow:visible}
+.is-seg > .seg-blk{flex:1 1 0;width:auto;min-width:0;height:100%;border-radius:4px;background:var(--track);
+  opacity:0;animation:segIn .34s var(--ease) forwards;
+  transition:background var(--t-fast) ease}
+.is-seg > .seg-blk.is-on{background:var(--c)}
+/* บล็อกที่มีเศษ เช่น 4.5 — เติมบางส่วนแล้วมนมุมเหมือนบล็อกเต็ม */
+.is-seg > .seg-blk > .seg-part{display:block;height:100%;border-radius:4px;background:var(--c)}
+@keyframes segIn{from{opacity:0;transform:scaleX(.4)}to{opacity:1;transform:none}}
+
+/* ---- สีบอกสถานะ ไม่ใช่ชื่อชุดข้อมูล ----
+   ม่วง = ฝั่งที่นำ · เทาเข้ม = อีกฝั่ง · เทาจาง = ช่องที่ยังไม่ถึงค่า
+   สีตั้งจาก barColor() ใน ui/charts.js ที่นี่คุมแค่ตัวเลขท้ายหลอด */
+.sg-line.is-lead > b,.cmp-line.is-lead > b{color:var(--purple)}
+.sg-line:not(.is-lead) > b,.cmp-line:not(.is-lead) > b{color:var(--ink-2)}
+
+/* ชื่อชุดข้อมูลหน้าหลอดในกราฟย่อยตามกลุ่ม (สีไม่ได้บอกแล้วว่าแถวไหนคืออะไร) */
+.sg-nm{flex:0 0 84px;font-size:var(--t-xs);color:var(--muted)}
 
 /* ---------- อันดับ ---------- */
 .rank{display:flex;flex-direction:column;gap:8px}   /* กล่องแต่ละแถวมีกรอบแล้ว ต้องมีช่องไฟระหว่างกัน */
