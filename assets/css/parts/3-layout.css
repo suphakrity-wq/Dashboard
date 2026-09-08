@@ -29,6 +29,13 @@
 
 .side-foot{display:flex;flex-direction:column;gap:10px;padding-top:16px;border-top:1px solid var(--line)}
 
+/* ปุ่มเปิดเมนูหมวดหมู่ — จอคอมและแท็บเล็ตเห็นเมนูอยู่แล้ว จึงซ่อนไว้ */
+.nav-toggle{display:none;width:40px;height:40px;border:1px solid var(--line);border-radius:11px;
+  background:var(--surface);color:var(--ink);place-items:center;cursor:pointer;flex-shrink:0;
+  transition:background var(--t-fast) ease, color var(--t-fast) ease}
+.nav-toggle:hover{background:var(--hair)}
+.nav-toggle .ms{font-size:22px}
+
 /* ---- เนื้อหา ---- */
 .content{min-width:0;padding:0 var(--sp-5) 60px}
 /* หัวเพจและแถบสรุปอยู่กับที่ ไม่ลอยตามการเลื่อน (ผู้ใช้ขอ)
@@ -115,6 +122,25 @@
    ปัญหาเดิม: หัวหน้าเพจเป็น sticky + สูงมาก พอเลื่อนแล้วบังเนื้อหาเกือบทั้งจอ
    แก้: ให้หัวเพจเลื่อนหายไปตามปกติ และย่อทุกอย่างในหัวเพจลง */
 @media (max-width:760px){
+  /* ---- เมนูหมวดหมู่บนโทรศัพท์: ยุบเป็นปุ่มไอคอน กดแล้วค่อยคลี่ออก ----
+     เดิมเป็นแถบเลื่อนแนวนอน มองไม่เห็นว่ามีหมวดอะไรบ้างถ้าไม่ลองปัด
+     ตอนนี้แถบบนเหลือแค่ ชื่อเว็บ + ปุ่ม กินความสูงคงที่ ~60px */
+  .sidebar{flex-wrap:wrap;align-items:center;gap:0;padding:10px 14px}
+  .side-brand{flex:1;min-width:0}
+  .nav-toggle{display:grid}
+  .nav,.side-foot{display:none}
+  .sidebar.is-open .nav{display:flex;flex-direction:column;flex:1 1 100%;gap:3px;
+    margin:12px 0 0;padding:0;overflow:visible}
+  .sidebar.is-open .nav-item{padding:11px 12px;width:100%}
+  .sidebar.is-open .nav-ico{width:30px;height:30px}
+  .sidebar.is-open .nav-txt b{font-size:var(--t-sm);white-space:normal}
+  .sidebar.is-open .nav-txt i{display:block}   /* กางแล้วมีที่ว่าง โชว์คำอธิบายหมวดได้ */
+  .sidebar.is-open .side-foot{display:flex;flex-flow:row wrap;align-items:center;gap:8px;
+    flex:1 1 100%;margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}
+  /* โหมดทดลอง: ต้องเห็นคำเตือนแม้ยังไม่ได้กางเมนู */
+  body:has(#demo-flag:not([hidden])) .side-foot{display:flex;flex:1 1 100%;
+    flex-flow:row wrap;align-items:center;gap:8px;margin-top:10px}
+
   .page-bar{padding:14px 0 12px;margin-bottom:16px}
   .page-bar h1{font-size:26px}
   .page-bar > .page-bar-top > div > .muted{display:none}   /* คำอธิบายยาว ซ่อนบนมือถือ */
@@ -146,7 +172,6 @@
   /* แถบบนสุด: โลโก้กับปุ่มอยู่บรรทัดเดียว เมนูเลื่อนแนวนอนใต้ลงมา */
   .sidebar{padding:10px 14px;gap:8px}
   .side-brand b{font-size:var(--t-xs)}
-  .nav{margin:0 -14px;padding:0 14px 2px}   /* ให้เลื่อนชนขอบจอ ดูเป็นแถบเต็มความกว้าง */
   .side-foot #updated{font-size:var(--t-xs)}
 }
 

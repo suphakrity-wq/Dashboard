@@ -1,10 +1,42 @@
 /* [ui] เปลือกของแอป: เมนูซ้าย, แถบเครื่องมือ, แถบสรุปด้านบน, สถานะการโหลด */
 
-import { $, el, countUp } from './dom.js';
-import { aggregate } from '../core/compute.js';
-import { wilsonInterval } from '../core/stats.js';
-import { store } from '../core/store.js';
-import { sparkline } from './charts.js';
+import { $, el, countUp } from './dom.js?v=3';
+import { aggregate } from '../core/compute.js?v=3';
+import { wilsonInterval } from '../core/stats.js?v=3';
+import { store } from '../core/store.js?v=3';
+import { sparkline } from './charts.js?v=3';
+
+/* ---- ปุ่มเปิด/ปิดเมนูบนจอโทรศัพท์ ----
+   จอคอมกับแท็บเล็ตเมนูโชว์อยู่แล้ว ปุ่มนี้ถูกซ่อนด้วย CSS
+   สถานะเปิด = คลาส is-open บน .sidebar (CSS เป็นคนตัดสินใจว่าจะแสดงอย่างไร) */
+function sidebar() { return document.querySelector('.sidebar'); }
+
+/** เปิด/ปิดเมนูหมวดหมู่ */
+export function toggleNav(open) {
+  const bar = sidebar(), btn = $('#nav-toggle');
+  if (!bar || !btn) return;
+  const next = open === undefined ? !bar.classList.contains('is-open') : open;
+  bar.classList.toggle('is-open', next);
+  btn.setAttribute('aria-expanded', String(next));
+  btn.querySelector('.ms').textContent = next ? 'close' : 'menu';
+}
+
+/** ผูกปุ่มเมนู — เรียกครั้งเดียวตอนเปิดแอป */
+export function setupNav() {
+  const btn = $('#nav-toggle');
+  if (!btn) return;
+  btn.onclick = () => toggleNav();
+  // เลือกหมวดแล้วปิดเมนูเอง จะได้เห็นเนื้อหาทันทีไม่ต้องกดปิดซ้ำ
+  $('#nav').addEventListener('click', e => {
+    if (e.target.closest('.nav-item')) toggleNav(false);
+  });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') toggleNav(false); });
+  // แตะนอกแถบเมนู = ปิด
+  document.addEventListener('click', e => {
+    const bar = sidebar();
+    if (bar && bar.classList.contains('is-open') && !e.target.closest('.sidebar')) toggleNav(false);
+  });
+}
 
 /** เมนูด้านซ้าย */
 export function renderNav(pages, activeId) {

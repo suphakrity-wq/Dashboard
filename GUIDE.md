@@ -173,21 +173,20 @@ causes: [
 ## 11. หลัง deploy แล้วเว็บยังเป็นของเก่า
 
 GitHub Pages แคชไฟล์ CSS/JS ไว้ **10 นาที** ถ้าอยากให้ผู้ใช้เห็นของใหม่ทันที
-ให้บวกเลขเวอร์ชันใน `index.html` และ `assets/css/style.css` ทีละ 1
+ให้บวกเลข `?v=` ทีละ 1 **ทุกที่พร้อมกัน** ด้วยคำสั่งเดียว (แทนเลขใหม่ตรง `N`)
 
-```html
-<!-- index.html -->
-<link rel="stylesheet" href="assets/css/style.css?v=2">
-<script src="config.js?v=2"></script>
-<script type="module" src="assets/js/app.js?v=2"></script>
+```bash
+sed -i '' -E 's/\?v=[0-9]+/?v=N/g' index.html assets/css/style.css $(find assets/js test-data -name '*.js')
 ```
-```css
-/* assets/css/style.css */
-@import url("parts/1-tokens.css?v=2");
-...
+
+ที่ต้องบวกพร้อมกันทั้งหมดเพราะโมดูล JS อ้างถึงกันเองด้วย URL ที่มี `?v=` อยู่ในโค้ด
+
+```js
+import { renderNav } from './ui/shell.js?v=3';
 ```
-> โมดูล JS ย่อยใน `core/` `ui/` `pages/` ไม่ต้องใส่เวอร์ชัน — เมื่อ `app.js` เปลี่ยน URL
-> เบราว์เซอร์จะโหลดสายพันธุ์ทั้งชุดใหม่เอง
+
+ถ้าบวกเฉพาะ `app.js` แต่ไฟล์ลูกยังเป็นเลขเก่า เบราว์เซอร์จะหยิบไฟล์ลูกจากแคชมาใช้คู่กับ
+`app.js` ตัวใหม่ แล้วพังทั้งหน้า (เจอมาแล้ว: `does not provide an export named ...`)
 
 ถ้าแค่อยากเช็คเองว่าของใหม่ขึ้นหรือยัง: กด **Cmd + Shift + R** (hard refresh)
 

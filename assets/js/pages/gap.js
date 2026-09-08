@@ -1,6 +1,6 @@
 /* หน้า 2 — ช่องว่างการรับรู้: เทียบข่าวสองชุดที่ผู้ตอบรู้จักจริง */
 
-import { Q, COL, C } from './columns.js';
+import { Q, COL, C } from './columns.js?v=3';
 
 export default {
   id: "gap",

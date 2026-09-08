@@ -9,7 +9,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0&display=swap">
 <!-- ?v= คือเลขเวอร์ชันของไฟล์ static — GitHub Pages แคชไฟล์ไว้ 10 นาที
      ทุกครั้งที่แก้ CSS/JS แล้ว deploy ให้บวกเลขนี้ 1 ผู้ใช้จะได้เห็นของใหม่ทันที -->
-<link rel="stylesheet" href="assets/css/style.css?v=2">
+<link rel="stylesheet" href="assets/css/style.css?v=3">
 </head>
 <body>
 
@@ -24,6 +24,11 @@
         <span id="side-sub" class="muted small">ผลสำรวจ</span>
       </div>
     </div>
+    <!-- ปุ่มเปิดเมนู: โชว์เฉพาะจอโทรศัพท์ (ดู 3-layout.css) -->
+    <button id="nav-toggle" class="nav-toggle" type="button"
+            aria-controls="nav" aria-expanded="false" aria-label="เปิดเมนูหมวดหมู่">
+      <i class="ms">menu</i>
+    </button>
     <nav id="nav" class="nav"></nav>
     <div class="side-foot">
       <span id="demo-flag" class="demo-flag" hidden>โหมดทดลอง · ข้อมูลจำลอง</span>
@@ -58,7 +63,7 @@
 
 <!-- เก็บไลบรารีไว้ในโปรเจกต์เอง เพื่อให้เว็บทำงานได้แม้เครือข่ายบล็อก CDN -->
 <script src="assets/vendor/papaparse.min.js"></script>
-<script src="config.js?v=2"></script>
-<script type="module" src="assets/js/app.js?v=2"></script>
+<script src="config.js?v=3"></script>
+<script type="module" src="assets/js/app.js?v=3"></script>
 </body>
 </html>

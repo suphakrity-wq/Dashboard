@@ -8,16 +8,16 @@
  * ห้าม: ใส่สูตรคำนวณในไฟล์นี้ — ให้เรียกจาก core/ แทน
  */
 
-import { $, el, growBar } from './dom.js';
-import { fmt, round1, pct } from '../core/format.js';
-import { splitValues, isNumericColumn } from '../core/compute.js';
-import { store } from '../core/store.js';
-import { verdict as calcVerdict, causes as calcCauses, pulls as calcPulls } from '../core/insight.js';
-import { analyzeText } from '../core/textAnalysis.js';
-import { wilsonInterval } from '../core/stats.js';
-import { SOURCES, CONTEXT_FACTS, compareBenchmarks } from '../core/benchmarks.js';
-import { aggregate, groupBy as groupRows } from '../core/compute.js';
-import { CHARTS } from './charts.js';
+import { $, el, growBar } from './dom.js?v=3';
+import { fmt, round1, pct } from '../core/format.js?v=3';
+import { splitValues, isNumericColumn } from '../core/compute.js?v=3';
+import { store } from '../core/store.js?v=3';
+import { verdict as calcVerdict, causes as calcCauses, pulls as calcPulls } from '../core/insight.js?v=3';
+import { analyzeText } from '../core/textAnalysis.js?v=3';
+import { wilsonInterval } from '../core/stats.js?v=3';
+import { SOURCES, CONTEXT_FACTS, compareBenchmarks } from '../core/benchmarks.js?v=3';
+import { aggregate, groupBy as groupRows } from '../core/compute.js?v=3';
+import { CHARTS } from './charts.js?v=3';
 
 let rerender = () => {};
 export const onRerender = fn => { rerender = fn; };
