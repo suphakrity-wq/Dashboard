@@ -37,8 +37,18 @@ html.icons-ready .ms{opacity:1}
   font:inherit;font-size:var(--t-sm);font-weight:500;color:var(--ink);outline:none;min-width:150px;
   transition:border-color var(--t-fast) ease, box-shadow var(--t-fast) ease}
 .input:focus{border-color:var(--purple);box-shadow:0 0 0 3px rgba(109,77,251,.16)}
-/* ลูกศรของ select เบราว์เซอร์วาดชิดขอบขวา เพิ่มระยะให้หายอึดอัด */
-select.input{cursor:pointer;padding-right:26px}
+/* select: วาดลูกศรเองด้วย background-image เพราะลูกศรของเบราว์เซอร์
+   ติดขอบขวาและขยับไม่ได้ (padding-right ไม่มีผลกับมัน)
+   ตำแหน่งลูกศรคุมด้วย background-position, ระยะข้อความคุมด้วย padding-right */
+select.input{cursor:pointer;appearance:none;-webkit-appearance:none;
+  padding-right:38px;
+  background-image:url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8' fill='none'%3E%3Cpath d='M1 1.5 6 6.5 11 1.5' stroke='%236b6b73' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;
+  background-position:right 14px center}
+/* ช่องกรองปรับความกว้างตามตัวเลือกที่ยาวที่สุดจริง ๆ ไม่ตั้งความกว้างตายตัว */
+/* ตัวเลือกบางข้อยาวมาก ("สนใจทั้งสองประเภทใกล้เคียงกัน") ถ้าปล่อยตามเนื้อหาช่องจะยาวเกินไป
+   จึงคุมเพดานไว้แล้วตัดด้วย ... ส่วนรายการที่กางออกยังเห็นข้อความเต็ม */
+.filters select.input{min-width:0;width:auto;max-width:min(100%,232px);text-overflow:ellipsis}
 
 /* ---- แท็บ ---- */
 .tabs{display:flex;gap:4px;background:var(--hair);padding:4px;border-radius:12px}
