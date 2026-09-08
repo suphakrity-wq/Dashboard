@@ -176,8 +176,11 @@
   .page-answers{font-size:16px;padding:8px 12px;margin-top:6px;line-height:1.45}
   .crumb{font-size:14px}
 
-  .page-bar-top{gap:12px}
-  .page-tools{width:100%;justify-content:flex-start;gap:8px}
+  /* มือถือ: เครื่องมือ (ตัวกรอง + แท็บ) ขึ้นไปอยู่บนสุดของหน้า แทนที่จะแทรกกลาง
+     จอคอม/แท็บเล็ตยังเรียงเป็นแถวข้างหัวเรื่องเหมือนเดิม */
+  .page-bar-top{gap:12px;flex-direction:column}
+  .page-tools{order:-1;width:100%;justify-content:flex-start;gap:8px;
+    padding-bottom:12px;margin-bottom:2px;border-bottom:1px solid var(--line)}
   /* ช่องกรองยืดเต็มความกว้างจอเหมือนแท็บ ไม่ใช้ความกว้างตามเนื้อหาแบบจอคอม
      ใช้ grid 2 คอลัมน์: ป้ายชื่อ | ช่องเลือก — ทุกช่องเลือกจึงเริ่มตรงกันและจบที่ขอบจอเท่ากัน
      display:contents ทำให้ <label> ยุบตัวเอง ปล่อยลูกทั้งสองไปเป็นช่องของ grid โดยตรง */

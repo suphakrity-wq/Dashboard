@@ -8,10 +8,10 @@
  * ข้อตกลง: ดึงข้อมูลผ่าน groupBy/crossTab จาก core/compute.js เท่านั้น
  */
 
-import { el, growBar } from './dom.js?v=26';
-import { fmt, round1, pct } from '../core/format.js?v=26';
-import { num, groupBy, crossTab, avgOf, pickGroupColumn, distinctValues, compareGroups } from '../core/compute.js?v=26';
-import { welchTTest } from '../core/stats.js?v=26';
+import { el, growBar } from './dom.js?v=29';
+import { fmt, round1, pct } from '../core/format.js?v=29';
+import { num, groupBy, crossTab, avgOf, pickGroupColumn, distinctValues, compareGroups } from '../core/compute.js?v=29';
+import { welchTTest } from '../core/stats.js?v=29';
 
 /* ---------- 1. อันดับพร้อมหลอดวัดค่า ---------- */
 export function rank(host, cf, rows) {
