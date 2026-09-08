@@ -37,7 +37,8 @@ html.icons-ready .ms{opacity:1}
   font:inherit;font-size:var(--t-sm);font-weight:500;color:var(--ink);outline:none;min-width:150px;
   transition:border-color var(--t-fast) ease, box-shadow var(--t-fast) ease}
 .input:focus{border-color:var(--purple);box-shadow:0 0 0 3px rgba(109,77,251,.16)}
-select.input{cursor:pointer}
+/* ลูกศรของ select เบราว์เซอร์วาดชิดขอบขวา เพิ่มระยะให้หายอึดอัด */
+select.input{cursor:pointer;padding-right:26px}
 
 /* ---- แท็บ ---- */
 .tabs{display:flex;gap:4px;background:var(--hair);padding:4px;border-radius:12px}
