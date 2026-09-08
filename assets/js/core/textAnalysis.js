@@ -1,0 +1,119 @@
+/* [core] ประเมินคำตอบปลายเปิด (ข้อ 5 "อะไรทำให้คุณหยุดดูข่าว")
+   วิธี: จับคู่คำสำคัญเป็น "ธีม" แล้วนับความถี่ + เก็บตัวอย่างข้อความจริงไว้อ้างอิง
+   ไม่ใช่ AI — เป็นกฎที่อ่านได้ ตรวจสอบได้ และแก้ได้เองในไฟล์นี้ */
+
+import { pct } from './format.js';
+
+/** ธีมของแรงจูงใจ: kind = pull (แรงดึงให้ดู) | barrier (อุปสรรค) */
+export const THEMES = [
+  { id: 'self', kind: 'pull', label: 'เกี่ยวกับตัวเอง / ใกล้ตัว',
+    keywords: ['เกี่ยวกับตัวเอง', 'ใกล้ตัว', 'เกี่ยวข้องกับตัว', 'กระทบ', 'เรื่องของเรา', 'ตัวเอง', 'ที่บ้าน', 'ที่ทำงาน'],
+    method: 'ขึ้นต้นข่าวด้วยผลกระทบต่อผู้อ่าน เช่น ราคาสินค้า ค่าเงิน หรือคนไทยในพื้นที่',
+    source: 'clt' },
+
+  { id: 'emotion', kind: 'pull', label: 'อารมณ์ร่วม / สะเทือนใจ',
+    keywords: ['อิน', 'สะเทือนใจ', 'สงสาร', 'ตกใจ', 'โกรธ', 'เศร้า', 'ตลก', 'ขำ', 'สนุก', 'อารมณ์'],
+    method: 'เล่าผ่านคนจริงที่ได้รับผลกระทบ ใช้ภาษาที่มีน้ำหนักแต่ไม่บิดเบือน',
+    source: 'robertson' },
+
+  { id: 'trend', kind: 'pull', label: 'กระแส / คนรอบตัวพูดถึง',
+    keywords: ['กระแส', 'ไวรัล', 'เพื่อนแชร์', 'คนพูดถึง', 'กำลังดัง', 'ทุกคนพูด', 'ตามกระแส'],
+    method: 'จับจังหวะที่ประเด็นกำลังถูกพูดถึง แล้วต่อยอดด้วยข้อมูลเชิงลึกในโพสต์เดียวกัน',
+    source: 'frame' },
+
+  { id: 'curious', kind: 'pull', label: 'อยากรู้ / ค้างคาใจ',
+    keywords: ['อยากรู้', 'ตอนจบ', 'สงสัย', 'เกิดอะไร', 'ต่อไป', 'ปลายทาง', 'ผลเป็นไง'],
+    method: 'ตั้งคำถามที่ตอบได้จริงในเนื้อข่าว ไม่ใช่พาดหัวหลอกให้คลิก',
+    source: 'yaros' },
+
+  { id: 'headline', kind: 'pull', label: 'พาดหัว / ภาพปก / คลิป',
+    keywords: ['พาดหัว', 'หัวข้อ', 'หัวเรื่อง', 'ภาพ', 'ปก', 'ธัมบ์', 'คลิป', 'วิดีโอ', 'รูป'],
+    method: 'พาดหัวบอก “แล้วกระทบอะไร” ให้จบในบรรทัดเดียว + มีคลิปแนวตั้งประกอบ',
+    source: 'yaros' },
+
+  { id: 'short', kind: 'pull', label: 'สั้น อ่านจบเร็ว',
+    keywords: ['สั้น', 'เร็ว', 'จบเร็ว', 'ไม่ยาว', 'สรุป', 'ย่อ'],
+    method: 'ทำเวอร์ชันสรุป 30 วินาที คู่กับฉบับเต็มสำหรับคนที่อยากอ่านต่อ',
+    source: 'prior' },
+
+  { id: 'trust', kind: 'pull', label: 'ความน่าเชื่อถือของแหล่งข่าว',
+    keywords: ['น่าเชื่อถือ', 'แหล่งข่าว', 'สำนักข่าว', 'จริงไหม', 'เชื่อถือ', 'อ้างอิง'],
+    method: 'แสดงที่มาและหลักฐานในโพสต์ ไม่ต้องให้ผู้อ่านออกไปหาต่อ',
+    source: 'reuters' },
+
+  { id: 'far', kind: 'barrier', label: 'รู้สึกไกลตัว / ไม่เกี่ยวกับเรา',
+    keywords: ['ไกลตัว', 'ไม่เกี่ยว', 'ไม่ได้เกี่ยว', 'ต่างประเทศไกล', 'ไม่กระทบ', 'เรื่องของเขา'],
+    method: 'ลากเส้นจากเหตุการณ์ไกลตัวมาสู่ผลกระทบในชีวิตประจำวันภายในย่อหน้าแรก',
+    source: 'clt' },
+
+  { id: 'hard', kind: 'barrier', label: 'เข้าใจยาก / ภาษาเป็นอุปสรรค',
+    keywords: ['ยาก', 'งง', 'ศัพท์', 'ภาษาอังกฤษ', 'อ่านไม่เข้าใจ', 'ซับซ้อน', 'วิชาการ'],
+    method: 'ตัดศัพท์เทคนิค ใช้ไทม์ไลน์/ภาพอธิบาย และแปลศัพท์ในบรรทัดเดียวกัน',
+    source: 'yaros' },
+
+  { id: 'notime', kind: 'barrier', label: 'ไม่มีเวลา / ยาวเกินไป',
+    keywords: ['ไม่มีเวลา', 'ยาว', 'ขี้เกียจ', 'เบื่อ', 'ไม่ว่าง'],
+    method: 'ตัดเวอร์ชันสั้นลงฟีด แล้วค่อยพาไปฉบับเต็ม',
+    source: 'prior' },
+
+  { id: 'heavy', kind: 'barrier', label: 'หนักใจ / ข่าวร้ายเยอะ',
+    keywords: ['หนัก', 'เครียด', 'ข่าวร้าย', 'ท้อ', 'ไม่อยากรู้', 'หดหู่'],
+    method: 'เติมมุมทางออกและความคืบหน้า ไม่ใช่มีแต่ความเสียหาย',
+    source: 'robertson' }
+];
+
+const clean = s => String(s ?? '').replace(/\s+/g, ' ').trim();
+
+/* คำที่มีคำอื่นซ่อนอยู่ข้างใน ต้องปิดบังก่อนจับคู่ ไม่งั้นจะจับผิดธีม
+   เช่น "อยากรู้" มีคำว่า "ยาก" อยู่ข้างใน จะไปตรงกับธีม "เข้าใจยาก" */
+const MASK = ['อยาก', 'อยากรู้', 'ยากจน'];
+const mask = t => MASK.reduce((acc, w) => acc.split(w).join('◻'.repeat(w.length)), t);
+
+/** จัดหมวดข้อความหนึ่งชิ้น -> คืน id ของธีมที่ตรง (อาจมากกว่าหนึ่ง) */
+export function classify(text) {
+  const raw = clean(text).toLowerCase();
+  if (!raw || raw.length < 2) return [];
+  const t = mask(raw);
+  return THEMES
+    .filter(th => th.keywords.some(k => (k.startsWith('อยาก') ? raw : t).includes(k.toLowerCase())))
+    .map(th => th.id);
+}
+
+/**
+ * วิเคราะห์คำตอบปลายเปิดทั้งคอลัมน์
+ * คืน: ธีมเรียงตามความถี่ (พร้อมตัวอย่างข้อความจริง) + รายการที่จัดหมวดไม่ได้
+ */
+export function analyzeText(rows, column) {
+  const answers = rows.map(r => clean(r[column])).filter(t => t.length > 1);
+  const counts = new Map();
+  const samples = new Map();
+  let matched = 0;
+  const unmatched = [];
+
+  answers.forEach(text => {
+    const ids = classify(text);
+    if (!ids.length) { unmatched.push(text); return; }
+    matched++;
+    ids.forEach(id => {
+      counts.set(id, (counts.get(id) || 0) + 1);
+      const list = samples.get(id) || [];
+      if (list.length < 3 && !list.includes(text)) list.push(text);
+      samples.set(id, list);
+    });
+  });
+
+  const themes = [...counts.entries()]
+    .map(([id, count]) => {
+      const th = THEMES.find(t => t.id === id);
+      return { ...th, count, share: pct(count, answers.length), samples: samples.get(id) || [] };
+    })
+    .sort((a, b) => b.count - a.count);
+
+  return {
+    total: answers.length,
+    matched,
+    coverage: pct(matched, answers.length),
+    themes,
+    unmatched: unmatched.slice(0, 8)
+  };
+}

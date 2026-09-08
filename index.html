@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0&display=swap">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+<div class="shell">
+
+  <!-- แถบนำทางด้านซ้าย -->
+  <aside class="sidebar">
+    <div class="side-brand">
+      <span class="side-mark"><i class="ms">newspaper</i></span>
+      <div>
+        <b id="side-title">News Behavior</b>
+        <span id="side-sub" class="muted small">ผลสำรวจ</span>
+      </div>
+    </div>
+    <nav id="nav" class="nav"></nav>
+    <div class="side-foot">
+      <span id="demo-flag" class="demo-flag" hidden>โหมดทดลอง · ข้อมูลจำลอง</span>
+      <span id="updated" class="muted small"></span>
+      <button id="refresh" class="btn btn-ghost btn-block" type="button">รีเฟรชข้อมูล</button>
+    </div>
+  </aside>
+
+  <!-- เนื้อหา -->
+  <main class="content">
+    <header class="page-bar">
+      <div class="page-bar-top">
+        <div>
+          <span id="crumb" class="crumb"></span>
+          <h1 id="page-title"></h1>
+          <p id="page-desc" class="muted"></p>
+          <p id="page-answers" class="page-answers" hidden></p>
+        </div>
+        <div class="page-tools">
+          <div id="tabs" class="tabs"></div>
+          <div id="filters" class="filters"></div>
+        </div>
+      </div>
+      <div id="summary" class="summary-bar"></div>
+    </header>
+
+    <div id="page-body" class="page-body"></div>
+    <div id="status" class="status"></div>
+    <footer class="page-foot muted small">อัปเดตอัตโนมัติจาก Google Sheet ทุก 3 นาที</footer>
+  </main>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<script src="config.js"></script>
+<script type="module" src="assets/js/app.js"></script>
+</body>
+</html>

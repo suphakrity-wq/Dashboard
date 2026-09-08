@@ -1,0 +1,61 @@
+/* ============ ตัวแปรกลาง: ฟอนต์ สี ระยะ เงา ============ */
+
+@font-face{font-family:"DB Heavent";src:url("../../fonts/DBHeavent-Light.woff2") format("woff2");font-weight:300;font-display:swap}
+@font-face{font-family:"DB Heavent";src:url("../../fonts/DBHeavent-Regular.woff2") format("woff2");font-weight:400;font-display:swap}
+@font-face{font-family:"DB Heavent";src:url("../../fonts/DBHeavent-Medium.woff2") format("woff2");font-weight:500;font-display:swap}
+@font-face{font-family:"DB Heavent";src:url("../../fonts/DBHeavent-Bold.woff2") format("woff2");font-weight:700;font-display:swap}
+@font-face{font-family:"DB Heavent";src:url("../../fonts/DBHeavent-Black.woff2") format("woff2");font-weight:900;font-display:swap}
+
+:root{
+  /* ---- พื้นผิว ---- */
+  --canvas:#f5f5f7;
+  --surface:#fff;
+  --surface-2:#fafafc;
+  --line:#e6e6ea;
+  --hair:#f0f0f4;
+
+  /* ---- ตัวอักษร ---- */
+  --ink:#1c1c1e;
+  --ink-2:#3c3c43;
+  --muted:#6b6b73;
+
+  /* ---- สีข้อมูล: โทนม่วงชุดเดียว + ดำ + มะนาว ----
+     ม่วง   = ข่าวดราม่า / ตัวเอกของงานวิจัย
+     ดำ-เทา = ข่าวโลก / ค่าอ้างอิง
+     มะนาว  = ทางแก้ / สิ่งที่ดี (ใช้เป็นพื้น ตัวหนังสือสีดำ)
+     แดง    = ตัวเลขที่เป็นปัญหา เท่านั้น */
+  --purple:#6d4dfb;   --purple-2:#9b86ff;  --purple-3:#cdc2ff;  --purple-soft:#f3f0ff;
+  --graphite:#2a2a30; --graphite-2:#6e6e78; --graphite-3:#c3c3cb;
+  --lime:#c9f24e;     --lime-soft:#f2fcd9;
+  --red:#e0483d;      --red-soft:#fdeeed;
+  --gray:#8e8e93;     --gray-soft:#eeeef2;
+  --accent:var(--purple);          /* สีประจำการ์ด เปลี่ยนได้รายใบ */
+
+  /* รางของหลอดวัดค่า — ต้องเข้มกว่าพื้น hover (--hair #f0f0f4) เสมอ
+     ไม่งั้นตอนชี้แถวจะกลืนกันจนไม่เห็นว่าหลอดจบตรงไหน */
+  --track:#e4e1ee; --track-hover:#d9d5e8;
+
+  /* สเกลไล่เฉด ใช้กับ heatmap / bubble / waffle */
+  --sc-1:#f3f0ff; --sc-2:#ddd5ff; --sc-3:#b9a9ff; --sc-4:#8f76ff; --sc-5:#6d4dfb;
+
+  /* ---- ขนาดตัวอักษร (DB Heavent เล็กกว่าฟอนต์ทั่วไป ~20% จึงตั้งฐานสูง) ---- */
+  --t-xs:19px; --t-sm:21px; --t-md:23px; --t-lg:27px;
+  --t-xl:33px; --t-2xl:42px; --t-3xl:60px;
+
+  /* ---- ระยะห่าง ---- */
+  --sp-1:8px; --sp-2:14px; --sp-3:20px; --sp-4:28px; --sp-5:40px;
+  --radius:16px;
+
+  /* ---- จังหวะการเคลื่อนไหว: ใช้ชุดนี้ทั้งเว็บ อย่าใส่ค่าเวลาดิบในคอมโพเนนต์ ---- */
+  --ease:cubic-bezier(.22,1,.36,1);      /* ออกตัวเร็ว ชะลอปลาย — ให้ความรู้สึกนุ่ม */
+  --t-fast:.2s;                          /* สีเปลี่ยน, ไอคอน */
+  --t-base:.32s;                         /* hover ของแถวและการ์ด */
+  --t-slow:.5s;                          /* ข้อความคลี่ออก, แผงกาง */
+
+  /* ---- เงา 3 ระดับ ---- */
+  --sh-1:0 1px 2px rgba(0,0,0,.04);
+  --sh-2:0 1px 2px rgba(0,0,0,.04), 0 4px 12px rgba(0,0,0,.05);
+  --sh-3:0 2px 4px rgba(0,0,0,.05), 0 10px 26px rgba(0,0,0,.07), 0 28px 50px -28px rgba(0,0,0,.18);
+
+  --font:"DB Heavent",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+}

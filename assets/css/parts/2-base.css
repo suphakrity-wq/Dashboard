@@ -1,0 +1,52 @@
+/* ============ พื้นฐาน + ตัวควบคุม ============ */
+
+*{box-sizing:border-box}
+/* คลาสที่ตั้ง display เอง จะทับ [hidden] ของเบราว์เซอร์ ทำให้ของที่สั่งซ่อนยังโผล่
+   จึงบังคับกฎนี้ไว้ตัวหนึ่ง ครอบทุกกรณี */
+[hidden]{display:none !important}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--canvas);color:var(--ink);font-family:var(--font);
+  font-size:var(--t-md);line-height:1.55;font-weight:400;-webkit-font-smoothing:antialiased}
+h1,h2,h3{margin:0;letter-spacing:-.015em}
+/* DB Heavent ไม่มีน้ำหนักเอียง เบราว์เซอร์จะสังเคราะห์ให้เองแล้วดูเบี้ยว
+   จึงบังคับให้ทุกแท็กที่ปกติเป็นตัวเอียง แสดงเป็นตัวตรง */
+i,em,cite,address,dfn,var{font-style:normal}
+p{margin:0}
+.muted{color:var(--muted)}
+.small{font-size:var(--t-xs)}
+
+/* ไอคอน Google Material Symbols — โผล่เมื่อฟอนต์พร้อม */
+.ms{font-family:"Material Symbols Rounded","Material Symbols Outlined";font-weight:400;
+  font-size:24px;line-height:1;display:inline-block;white-space:nowrap;direction:ltr;
+  -webkit-font-feature-settings:'liga';-webkit-font-smoothing:antialiased;
+  font-variation-settings:'opsz' 24;opacity:0;transition:opacity var(--t-fast) ease}
+html.icons-ready .ms{opacity:1}
+
+/* ---- ปุ่ม ---- */
+.btn{border:none;background:var(--ink);color:#fff;padding:9px 20px;border-radius:11px;
+  font:inherit;font-size:var(--t-sm);font-weight:500;cursor:pointer;
+  transition:background var(--t-fast) ease, color var(--t-fast) ease, transform var(--t-fast) var(--ease)}
+.btn:hover{background:#000}
+.btn-ghost{background:var(--surface);color:var(--ink-2);border:1px solid var(--line)}
+.btn-ghost:hover{background:var(--hair);color:var(--ink)}
+.btn:disabled{opacity:.35;cursor:default}
+.btn-block{width:100%}
+
+/* ---- อินพุต ---- */
+.input{border:1px solid var(--line);background:var(--surface);border-radius:11px;padding:8px 13px;
+  font:inherit;font-size:var(--t-sm);font-weight:500;color:var(--ink);outline:none;min-width:150px;
+  transition:border-color var(--t-fast) ease, box-shadow var(--t-fast) ease}
+.input:focus{border-color:var(--purple);box-shadow:0 0 0 3px rgba(109,77,251,.16)}
+select.input{cursor:pointer}
+
+/* ---- แท็บ ---- */
+.tabs{display:flex;gap:4px;background:var(--hair);padding:4px;border-radius:12px}
+.tab{background:none;border:none;font:inherit;font-size:var(--t-sm);font-weight:500;color:var(--muted);
+  padding:6px 16px;border-radius:9px;cursor:pointer;
+  transition:background var(--t-base) var(--ease), color var(--t-fast) ease, box-shadow var(--t-base) ease}
+.tab:hover{color:var(--ink)}
+.tab.on{background:var(--surface);color:var(--ink);font-weight:700;box-shadow:var(--sh-1)}
+
+/* ---- ตัวกรอง ---- */
+.filters{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+.filters label{display:flex;align-items:center;gap:8px;font-size:var(--t-xs);font-weight:500;color:var(--muted)}

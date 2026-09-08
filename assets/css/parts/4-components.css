@@ -1,0 +1,337 @@
+/* ============ ส่วนประกอบ ============ */
+
+/* ---------- การ์ด: 3 ระดับความสำคัญ ----------
+   ต่างกันที่ ขนาดหัวข้อ + เงา + พื้นหลัง ไม่ใช้สีมาแยกระดับ */
+.card{background:var(--surface);border-radius:var(--radius);padding:22px 24px 24px;box-shadow:var(--sh-2);
+  transition:box-shadow var(--t-base) var(--ease)}
+.card-head{margin-bottom:var(--sp-3)}
+.card h3{font-size:var(--t-md);font-weight:700}
+.card-note{margin-top:2px;font-size:var(--t-xs);color:var(--muted)}
+
+.card.lv1{box-shadow:var(--sh-3);padding:28px 30px 30px;border-radius:20px}
+.card.lv1 h3{font-size:var(--t-lg)}
+.card.lv3{background:var(--surface-2);box-shadow:none;border:1px solid var(--line);padding:18px 20px}
+.card.lv3 h3{font-size:var(--t-sm);color:var(--ink-2)}
+
+.hint{margin-top:var(--sp-3);font-size:var(--t-xs);line-height:1.5;color:var(--muted);
+  border-top:1px solid var(--hair);padding-top:12px}
+
+/* ---------- แถบสรุปด้านบน ---------- */
+.summary-bar{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1px;
+  background:var(--line);border:1px solid var(--line);border-radius:12px;overflow:hidden;margin-top:var(--sp-2)}
+.stat{background:var(--surface);padding:10px 14px;display:flex;flex-direction:column;justify-content:center}
+.stat-label{font-size:var(--t-xs);font-weight:500;color:var(--muted);line-height:1.3}
+.stat-value{font-size:var(--t-lg);font-weight:900;line-height:1.2;font-variant-numeric:tabular-nums;color:var(--ink)}
+.stat-value.is-text{font-size:var(--t-sm);font-weight:700}
+.stat-value .unit{font-size:var(--t-xs);font-weight:500;color:var(--muted);margin-left:4px}
+/* รายละเอียดรอง (จำนวนคน/ช่วงเชื่อมั่น) ซ่อนไว้ใน tooltip ไม่ให้กินความสูง */
+.stat-sub{display:none}
+.stat-spark{height:40px;margin-top:8px}
+/* สีตัวเลขใช้เฉพาะคู่เปรียบเทียบหลัก ที่เหลือเป็นสีหมึกปกติ */
+.stat.world .stat-value{color:var(--graphite)}
+.stat.accent .stat-value{color:var(--purple)}
+
+/* ---------- หลอดวัดค่า ---------- */
+.rank-track,.cause-track,.sg-track,.vs-track,.stack{
+  background:var(--track);border-radius:100px;overflow:hidden;
+  /* เส้นขอบในบาง ๆ ทำให้เห็นขอบเขตของรางแม้พื้นหลังจะเปลี่ยนสี */
+  box-shadow:inset 0 0 0 1px rgba(28,28,30,.06);
+  transition:background var(--t-base) var(--ease)}
+.rank-fill,.cause-track i,.sg-track i,.bigbar-track i{
+  display:block;height:100%;width:0;border-radius:100px;
+  background:var(--c,var(--accent));
+  transition:width var(--t-slow) var(--ease), filter var(--t-fast) ease}
+
+
+/* ---------- อันดับ ---------- */
+.rank{display:flex;flex-direction:column;gap:6px}
+.rank-row{display:grid;grid-template-columns:26px minmax(0,1fr) auto;align-items:center;gap:14px;
+  opacity:0;animation:rise var(--t-base) var(--ease) forwards}
+@keyframes rise{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.rank-no{font-size:var(--t-xs);font-weight:600;color:var(--muted);font-variant-numeric:tabular-nums;text-align:center}
+.rank-body{min-width:0}
+/* ข้อความยาว: ตัดเหลือบรรทัดเดียว แล้ว "คลี่" ออกตอน hover
+   ใช้ max-height เป็นตัววิ่ง (line-clamp เปลี่ยนทันทีแต่ถูก max-height คุมไว้) จึงลื่นไม่กระตุก */
+.rank-label{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:1;
+  font-size:var(--t-sm);font-weight:500;line-height:1.45;margin-bottom:7px;
+  overflow:hidden;max-height:1.45em;
+  transition:max-height var(--t-slow) var(--ease)}
+.rank-row:hover .rank-label{-webkit-line-clamp:6;max-height:8.7em}
+.rank-track{height:8px}
+.rank-val{display:flex;align-items:baseline;justify-content:flex-end;gap:10px}
+.rank-val b{font-size:var(--t-md);font-weight:700;font-variant-numeric:tabular-nums}
+.rank-val span{font-size:var(--t-xs);color:var(--muted);font-variant-numeric:tabular-nums;min-width:3.2em;text-align:right}
+/* ---- อันดับ 1: ทำเป็นแถบเด่นเต็มใบ ----
+   ต่างจากแถวอื่นทั้ง พื้นหลัง / เส้นขอบซ้าย / ขนาดตัวอักษร / ความหนาหลอด / ป้ายกำกับ */
+/* พื้นหลังอ่อน ๆ ผสมจากสีประจำการ์ด กรอบจึงเข้าชุดกับพื้นเสมอ ไม่ว่าการ์ดนั้นจะเป็นสีม่วงหรือดำ */
+.rank-row.is-top .rank-no{display:none}
+.rank-row.is-top .rank-body{grid-column:1/3}
+.rank-row.is-top .rank-label{font-size:var(--t-lg);font-weight:700;color:var(--ink);
+  white-space:normal;margin-bottom:11px}
+.rank-row.is-top .rank-track{height:8px;max-width:420px}
+.rank-row.is-top .rank-val{flex-direction:column;align-items:flex-end;gap:0}
+.rank-row.is-top .rank-val b{font-size:var(--t-2xl);line-height:1;color:var(--accent)}
+.rank-row.is-top .rank-val span{font-size:var(--t-sm)}
+.rank-top-tag{position:absolute;top:-10px;left:16px;background:var(--accent);color:#fff;
+  font-size:var(--t-xs);font-weight:700;padding:1px 11px;border-radius:100px}
+.rank-row.is-top{position:relative;margin-top:12px}
+
+/* ---------- เทียบสองฝั่ง ---------- */
+.versus{display:grid;grid-template-columns:1fr auto 1fr;gap:var(--sp-3);align-items:stretch}
+.vs-side{background:var(--surface-2);border:1px solid var(--line);border-radius:16px;padding:20px 22px}
+.vs-label{display:flex;align-items:center;gap:9px;font-size:var(--t-sm);font-weight:600;color:var(--ink-2)}
+.vs-num{font-size:var(--t-3xl);font-weight:900;line-height:1.05;letter-spacing:-.03em;
+  font-variant-numeric:tabular-nums;margin:6px 0 14px}
+.vs-num small{font-size:var(--t-xs);font-weight:500;color:var(--muted);margin-left:8px;letter-spacing:0}
+.vs-track{height:9px}
+.vs-track i{display:block;height:100%;width:0;border-radius:100px;background:var(--c);
+  transition:width var(--t-slow) var(--ease)}
+
+.vs-mid{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
+  min-width:150px;padding:0 var(--sp-2)}
+.vs-cap{font-size:var(--t-xs);color:var(--muted);font-weight:500}
+.vs-mid b{font-size:var(--t-xl);font-weight:900;line-height:1;font-variant-numeric:tabular-nums}
+.vs-unit{font-size:var(--t-xs);color:var(--muted)}
+.vs-chip{margin-top:8px;background:var(--ink);color:#fff;font-size:var(--t-xs);font-weight:600;
+  padding:3px 13px;border-radius:100px;text-align:center;line-height:1.4}
+
+.subgroup{margin-top:var(--sp-4);padding-top:var(--sp-3);border-top:1px solid var(--line)}
+.sub-head{display:flex;align-items:center;justify-content:space-between;gap:16px;
+  flex-wrap:wrap;margin-bottom:var(--sp-2)}
+.subcap{font-size:var(--t-xs);font-weight:600;color:var(--muted)}
+.sub-legend{display:flex;gap:18px;font-size:var(--t-xs);color:var(--ink-2)}
+.sub-legend span{display:flex;align-items:center;gap:7px}
+.sg-row{display:grid;grid-template-columns:170px 1fr;gap:18px;align-items:center}
+.sg-name b{display:block;font-size:var(--t-sm);font-weight:600;color:var(--ink)}
+.sg-diff{display:block;font-size:var(--t-xs);color:var(--muted);margin-top:1px}
+.sg-bars{display:flex;flex-direction:column;gap:8px}
+.sg-line{display:flex;align-items:center;gap:12px}
+.sg-track{flex:1;height:8px;max-width:420px}
+.sg-line b{font-size:var(--t-sm);font-weight:700;min-width:2.6em;font-variant-numeric:tabular-nums}
+.dot{width:10px;height:10px;border-radius:100px;display:inline-block;flex-shrink:0}
+.legend{display:flex;flex-wrap:wrap;gap:22px;margin-bottom:var(--sp-3);
+  font-size:var(--t-sm);color:var(--ink-2)}
+.legend span{display:flex;align-items:center;gap:8px}
+
+/* ---------- โดนัท ---------- */
+.donut-wrap{display:flex;align-items:center;gap:24px;flex-wrap:wrap}
+.donut-chart{position:relative;width:158px;height:158px;flex-shrink:0}
+.donut{width:100%;height:100%}
+.donut-mid{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.donut-mid b{font-size:var(--t-xl);font-weight:900;line-height:1}
+.donut-mid span{font-size:var(--t-xs);color:var(--muted)}
+.donut-legend{flex:1 1 200px;min-width:0;display:flex;flex-direction:column;gap:9px}
+.dl-row{display:flex;align-items:center;gap:10px;font-size:var(--t-sm)}
+.dl-name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--ink-2)}
+.dl-row b{font-weight:700;font-variant-numeric:tabular-nums;flex-shrink:0}
+
+/* ---------- ตาราง ---------- */
+.table-tools{display:flex;align-items:center;justify-content:space-between;gap:16px;
+  margin-bottom:var(--sp-3);flex-wrap:wrap}
+.table-tools .input{min-width:280px}
+.table-info{font-size:var(--t-xs);color:var(--muted)}
+.table-scroll{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:var(--t-sm)}
+th,td{text-align:left;padding:12px 18px 12px 0;border-bottom:1px solid var(--hair);
+  white-space:nowrap;max-width:320px;overflow:hidden;text-overflow:ellipsis}
+th{font-weight:700;font-size:var(--t-xs);color:var(--muted);border-bottom:1px solid var(--line)}
+td{color:var(--ink-2)}
+tbody tr{transition:background var(--t-base) var(--ease)}
+tbody tr:hover{background:var(--purple-soft)}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;padding-right:26px;color:var(--ink);font-weight:700}
+.table-foot{display:flex;align-items:center;justify-content:space-between;margin-top:var(--sp-3)}
+.pager{display:flex;gap:9px}
+
+.status{background:var(--surface);border-radius:var(--radius);box-shadow:var(--sh-1);
+  padding:18px 22px;margin-top:var(--sp-3);font-size:var(--t-sm);color:var(--ink-2)}
+.status:empty{display:none}
+.status.error{color:var(--red)}
+
+/* ============ กราฟรูปแบบอื่น ============ */
+
+/* ---- Waffle: 100 จุด ---- */
+.waffle-wrap{display:flex;gap:26px;flex-wrap:wrap;align-items:flex-start}
+.waffle{display:grid;grid-template-columns:repeat(10,1fr);gap:5px;width:210px;flex-shrink:0}
+.wf-cell{width:100%;aspect-ratio:1;border-radius:4px;display:block;
+  opacity:0;animation:pop .24s ease forwards}
+.wf-cell{transition:transform var(--t-fast) var(--ease)}
+.wf-cell:hover{transform:scale(1.22)}
+@keyframes pop{from{opacity:0;transform:scale(.4)}to{opacity:1;transform:none}}
+.wf-legend{flex:1 1 200px;min-width:0;display:flex;flex-direction:column;gap:10px}
+.wf-item{display:flex;align-items:center;gap:10px;font-size:var(--t-sm);min-width:0}
+.wf-name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--ink-2)}
+.wf-item b{font-weight:700;font-variant-numeric:tabular-nums;flex-shrink:0}
+
+/* ---- Gauge ---- */
+.gauge-box{position:relative;max-width:260px;margin:0 auto}
+.gauge{width:100%;display:block}
+.gauge path{transition:stroke-dasharray var(--t-slow) var(--ease)}
+.gauge-mid{position:absolute;left:0;right:0;bottom:2px;text-align:center}
+.gauge-mid b{display:block;font-size:var(--t-2xl);font-weight:900;line-height:1;
+  font-variant-numeric:tabular-nums;letter-spacing:-.03em}
+.gauge-mid span{font-size:var(--t-xs);color:var(--muted)}
+.gauge-scale{display:flex;justify-content:space-between;max-width:260px;margin:6px auto 0;
+  font-size:var(--t-xs);color:var(--muted)}
+
+/* ---- Heatmap ---- */
+.heat{display:grid;grid-template-columns:minmax(160px,1fr) repeat(var(--cols),96px);
+  gap:0;align-items:stretch;overflow-x:auto}
+.heat-corner{display:block}
+.heat-line{display:contents}
+.heat-col{display:flex;flex-direction:column;align-items:center;gap:1px;padding:0 4px 10px;
+  text-align:center;line-height:1.25}
+.heat-col b{font-size:var(--t-xs);font-weight:700;color:var(--ink-2)}
+.heat-col span{font-size:var(--t-xs);color:var(--muted);font-weight:400}
+.heat-row{font-size:var(--t-sm);color:var(--ink);display:flex;align-items:center;
+  padding:0 14px 0 0;border-top:1px solid var(--hair);min-height:46px;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;transition:color var(--t-fast) ease}
+.heat-cell{display:grid;place-items:center;min-height:46px;border-top:1px solid var(--hair);
+  font-size:var(--t-sm);font-weight:700;color:var(--ink-2);font-variant-numeric:tabular-nums;
+  position:relative}
+.heat-cell::before{content:"";position:absolute;inset:5px 4px;border-radius:8px;
+  background:var(--cell,transparent);transition:transform var(--t-base) var(--ease)}
+.heat-cell span{position:relative}
+.heat-cell.is-dark{color:#fff}
+.heat-cell:hover::before{transform:scale(1.06)}
+/* ไฮไลต์ทั้งแถวเมื่อชี้ ทำให้ตาไม่หลุดบรรทัด */
+.heat-line:hover .heat-row{color:var(--purple)}
+.heat-scale{display:flex;align-items:center;gap:9px;margin-top:var(--sp-3);
+  font-size:var(--t-xs);color:var(--muted)}
+.heat-scale i{width:26px;height:12px;border-radius:4px;display:block}
+
+/* ---- Bubbles ---- */
+.bubbles{display:flex;flex-wrap:wrap;gap:22px;align-items:flex-end;justify-content:center;padding:8px 0}
+.bubble-item{display:flex;flex-direction:column;align-items:center;gap:9px;max-width:120px;min-width:0}
+.bubble{border-radius:100px;display:grid;place-items:center;color:#fff;
+  transition:transform var(--t-base) var(--ease), box-shadow var(--t-base) ease}
+.bubble.is-light{color:var(--ink)}
+.bubble:hover{transform:translateY(-4px) scale(1.03);box-shadow:0 14px 30px -16px rgba(0,0,0,.5)}
+.bubble b{font-size:var(--t-md);font-weight:900;font-variant-numeric:tabular-nums}
+.bubble-name{font-size:var(--t-xs);color:var(--ink-2);text-align:center;line-height:1.3}
+
+/* ---- Stacked bar ---- */
+.stack{display:flex;height:34px}
+.stack i{display:block;height:100%;width:0;transition:width var(--t-slow) var(--ease)}
+.stack i + i{box-shadow:inset 1px 0 0 rgba(255,255,255,.9)}
+.stack-legend{display:flex;flex-direction:column;gap:9px;margin-top:var(--sp-3)}
+.stack-item{display:flex;align-items:center;gap:10px;font-size:var(--t-sm);min-width:0}
+.stack-name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--ink-2)}
+.stack-item b{font-weight:700;font-variant-numeric:tabular-nums;flex-shrink:0}
+
+
+/* ============ พฤติกรรม hover ของ "แถวข้อมูล" — ประกาศที่เดียว ใช้ทุกหน้า ============
+   แถวไหนก็ตามที่ผู้ใช้กวาดสายตาอ่านทีละบรรทัด ให้ตอบสนองแบบเดียวกันหมด
+   เพิ่มแถวชนิดใหม่ ให้เอา selector มาต่อในลิสต์นี้ ไม่ต้องเขียน hover ใหม่ */
+.rank-row,
+.vs-side,
+.sg-row,
+.dl-row,
+.wf-item,
+.stack-item,
+.cause-fix{
+  padding:14px;margin:0 -14px;border-radius:14px;
+  /* ประกาศค่าเริ่มต้นไว้ก่อน transition จึงลื่นทั้งตอนเมาส์เข้าและออก */
+  background:transparent;box-shadow:0 0 0 0 rgba(0,0,0,0);
+  transition:background var(--t-base) var(--ease), box-shadow var(--t-base) var(--ease),
+              transform var(--t-base) var(--ease)}
+
+.rank-row:hover,
+.vs-side:hover,
+.sg-row:hover,
+.dl-row:hover,
+.wf-item:hover,
+.stack-item:hover{
+  background:var(--hair);
+  box-shadow:0 1px 2px rgba(0,0,0,.04), 0 10px 22px -16px rgba(0,0,0,.35);
+  transform:translateY(-1px)}
+
+/* หลอดในแถวที่ชี้อยู่สว่างขึ้นเล็กน้อย เพื่อยืนยันว่ากำลังอ่านแถวไหน */
+/* ตอนชี้แถว รางจะเข้มขึ้นอีกขั้น เพื่อให้ยังแยกออกจากพื้นหลังที่เปลี่ยนไป */
+.rank-row:hover .rank-track,
+.sg-row:hover .sg-track,
+.vs-side:hover .vs-track{background:var(--track-hover)}
+.rank-row:hover .rank-fill,
+.sg-row:hover .sg-track i,
+.vs-side:hover .vs-track i{filter:brightness(1.08)}
+
+/* กล่อง "ทางแก้" ไม่ใช่แถวที่ชี้ได้ จึงคงพื้นเดิมไว้ */
+.cause-fix{padding:0;margin:0;background:none;box-shadow:none}
+
+/* การ์ดสองฝั่งมีพื้น/ขอบของตัวเอง ให้คงไว้แล้วเพิ่มแค่การยกตัว */
+.vs-side{background:var(--surface-2);margin:0;padding:20px 22px;border-radius:16px}
+.vs-side:hover{background:var(--surface)}
+
+/* แถวอันดับ 1 มีพื้นของตัวเองอยู่แล้ว จึงคุมสไตล์เองทั้งหมด */
+.rank-row.is-top{background:color-mix(in srgb, var(--accent) 7%, #fff);
+  box-shadow:inset 0 0 0 1.5px color-mix(in srgb, var(--accent) 55%, #fff);
+  padding:20px 18px;margin:14px -14px 12px;border-radius:16px}
+.rank-row.is-top:hover{background:color-mix(in srgb, var(--accent) 11%, #fff);
+  box-shadow:inset 0 0 0 1.5px var(--accent), 0 10px 26px -18px rgba(0,0,0,.5);
+  transform:translateY(-1px)}
+
+
+/* ============ ผู้ใช้ที่ตั้งค่าลดการเคลื่อนไหวไว้ ให้ตัดอนิเมชันทั้งหมด ============ */
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation-duration:.01ms !important;animation-delay:0ms !important;
+    transition-duration:.01ms !important;scroll-behavior:auto !important}
+}
+
+/* ---- แถวรายละเอียดในตารางข้อมูลดิบ ---- */
+.th-toggle{width:34px}
+.td-toggle{width:34px;color:var(--muted);font-size:var(--t-md);text-align:center;
+  transition:transform var(--t-base) var(--ease), color var(--t-fast) ease;padding-right:0}
+.row-main{cursor:pointer}
+.row-main.is-open{background:var(--purple-soft)}
+.row-main.is-open .td-toggle{transform:rotate(90deg);color:var(--purple);display:inline-block}
+.row-detail > td{padding:0;background:var(--surface-2);border-bottom:1px solid var(--line)}
+
+/* ตรึงแผงรายละเอียดไว้ซ้ายสุด จะได้ไม่ต้องเลื่อนตารางแนวนอนตามไปอ่าน */
+.record{padding:22px 24px;position:sticky;left:0;max-width:1080px;
+  animation:unfold var(--t-slow) var(--ease)}
+@keyframes unfold{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+.record-no{font-size:var(--t-xs);font-weight:700;color:var(--purple);letter-spacing:.06em;
+  text-transform:uppercase;margin-bottom:14px}
+.record-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px;align-items:start}
+.record-item{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+.record-q{font-size:var(--t-xs);color:var(--muted);font-weight:500;line-height:1.4;margin-bottom:7px;
+  white-space:normal}
+.record-a{font-size:var(--t-sm);line-height:1.5;color:var(--ink);white-space:normal;word-break:break-word}
+.chips{display:flex;flex-wrap:wrap;gap:7px}
+.chip{background:var(--purple-soft);color:var(--ink);border-radius:100px;padding:4px 13px;
+  font-size:var(--t-xs);line-height:1.45;white-space:normal}
+
+/* สถานะ "ยังไม่มีคำตอบ" — เป็นข้อมูล ไม่ใช่ข้อผิดพลาด */
+.status.empty-note{background:var(--purple-soft);color:var(--ink-2);box-shadow:none}
+
+/* ---- เทียบช่องว่างระหว่างกลุ่ม ---- */
+.cmp{display:flex;flex-direction:column;gap:6px}
+.cmp-row{padding:16px 14px;margin:0 -14px;border-radius:14px;
+  transition:background var(--t-base) var(--ease)}
+.cmp-row:hover{background:var(--hair)}
+.cmp-row + .cmp-row{border-top:1px solid var(--hair)}
+.cmp-head{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+.cmp-head b{font-size:var(--t-md);font-weight:700}
+.cmp-n{font-size:var(--t-xs);color:var(--muted)}
+.cmp-gap{margin-left:auto;font-size:var(--t-xs);font-weight:700;padding:3px 12px;border-radius:100px}
+.cmp-gap.is-drama{background:var(--purple-soft);color:var(--purple)}
+.cmp-gap.is-world{background:var(--gray-soft);color:var(--ink-2)}
+.cmp-gap.is-same{background:var(--hair);color:var(--muted)}
+.cmp-bars{display:flex;flex-direction:column;gap:8px}
+.cmp-line{display:grid;grid-template-columns:96px 1fr auto;align-items:center;gap:12px}
+.cmp-name{font-size:var(--t-xs);color:var(--muted)}
+.cmp-line b{font-size:var(--t-sm);font-weight:700;min-width:2.6em;text-align:right;
+  font-variant-numeric:tabular-nums}
+.cmp-row.is-thin{opacity:.72}
+.cmp-warn{margin-top:9px;font-size:var(--t-xs);color:var(--muted)}
+.rank-val span{white-space:nowrap}
+
+/* ---- Chips cloud: รายการยาว ๆ ที่ไม่ต้องเทียบละเอียด ---- */
+.chips-cloud{display:flex;flex-wrap:wrap;gap:9px}
+.cloud-chip{display:inline-flex;align-items:center;gap:9px;padding:8px 14px;border-radius:100px;
+  background:var(--gray-soft);color:var(--ink-2);font-size:var(--t-sm);line-height:1.35;
+  transition:transform var(--t-fast) var(--ease)}
+.cloud-chip:hover{transform:translateY(-2px)}
+.cloud-chip b{font-weight:700;font-variant-numeric:tabular-nums;color:var(--ink)}
+.cloud-chip.is-mid{background:var(--purple-soft);color:var(--ink)}
+.cloud-chip.is-strong{background:var(--purple);color:#fff}
+.cloud-chip.is-strong b{color:#fff}
