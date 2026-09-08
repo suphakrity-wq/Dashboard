@@ -55,6 +55,23 @@
   /* เส้นขอบในบาง ๆ ทำให้เห็นขอบเขตของรางแม้พื้นหลังจะเปลี่ยนสี */
   box-shadow:inset 0 0 0 1px rgba(28,28,30,.06);
   transition:background var(--t-base) var(--ease)}
+/* ---- หลอดแบบแบ่งบล็อก ----
+   ตัดหลอดเป็นสี่เหลี่ยมเรียงต่อกัน 1 บล็อก = 1 หน่วย (เช่น 1 ข่าว / 1 คน)
+   นับด้วยตาได้เลยว่าค่าเท่าไร ไม่ต้องอ่านตัวเลขข้าง ๆ
+   ใช้ mask ตัดทั้งชั้น จึงได้ทั้งบล็อกที่มีค่า (สีข้อมูล) และบล็อกว่าง (สีราง) พร้อมกัน
+   --seg = จำนวนบล็อก ตั้งจาก segmentBar() ใน ui/dom.js */
+.is-seg{
+  --seg-gap:3px;
+  -webkit-mask-image:repeating-linear-gradient(90deg,
+    #000 0 calc(100% / var(--seg) - var(--seg-gap)),
+    transparent calc(100% / var(--seg) - var(--seg-gap)) calc(100% / var(--seg)));
+          mask-image:repeating-linear-gradient(90deg,
+    #000 0 calc(100% / var(--seg) - var(--seg-gap)),
+    transparent calc(100% / var(--seg) - var(--seg-gap)) calc(100% / var(--seg)));
+  border-radius:3px;box-shadow:none}
+/* บล็อกสุดท้ายไม่ต้องเว้นช่องไฟท้ายราง ใช้ padding-right ชดเชยความกว้างที่หายไป */
+.is-seg > i{border-radius:0}
+
 .rank-fill,.cause-track i,.sg-track i,.bigbar-track i{
   display:block;height:100%;width:0;border-radius:100px;
   background:var(--c,var(--accent));

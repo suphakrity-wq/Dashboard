@@ -8,15 +8,16 @@
  * ข้อตกลง: ดึงข้อมูลผ่าน groupBy/crossTab จาก core/compute.js เท่านั้น
  */
 
-import { el, growBar } from './dom.js?v=37';
-import { fmt, round1, pct } from '../core/format.js?v=37';
-import { num, groupBy, crossTab, avgOf, pickGroupColumn, distinctValues, compareGroups } from '../core/compute.js?v=37';
-import { welchTTest } from '../core/stats.js?v=37';
+import { el, growBar, segmentBar } from './dom.js?v=40';
+import { fmt, round1, pct } from '../core/format.js?v=40';
+import { num, groupBy, crossTab, avgOf, pickGroupColumn, distinctValues, compareGroups } from '../core/compute.js?v=40';
+import { welchTTest } from '../core/stats.js?v=40';
 
 /* ---------- 1. อันดับพร้อมหลอดวัดค่า ---------- */
 export function rank(host, cf, rows) {
   const { labels, values } = groupBy(rows, cf);
-  const max = Math.max(...values, 1);
+  // ปัดเพดานขึ้นเป็นจำนวนเต็ม เพื่อให้หลอดแบบแบ่งบล็อก 1 บล็อก = 1 หน่วยพอดี
+  const max = Math.ceil(Math.max(...values, 1));
   const list = el('div', 'rank');
 
   labels.forEach((label, i) => {
@@ -43,6 +44,7 @@ export function rank(host, cf, rows) {
 
     row.append(no, body, val);
     list.append(row);
+    segmentBar(track, max);
     growBar(fill, values[i] / max * 100);
   });
 
@@ -53,7 +55,7 @@ export function rank(host, cf, rows) {
 export function gap(host, cf, rows) {
   const [A, B] = cf.ys;
   const totalA = avgOf(rows, A.column) ?? 0, totalB = avgOf(rows, B.column) ?? 0;
-  const max = Math.max(totalA, totalB, 1);
+  const max = Math.ceil(Math.max(totalA, totalB, 1));
   const hi = totalB >= totalA ? B : A;
   const hiV = Math.max(totalA, totalB), loV = Math.min(totalA, totalB);
   const diffPct = loV ? Math.round((hiV / loV - 1) * 100) : 0;
@@ -74,6 +76,7 @@ export function gap(host, cf, rows) {
     fill.style.setProperty('--c', series.color);
     track.append(fill);
     box.append(head, value_, track);
+    segmentBar(track, max);
     growBar(fill, value / max * 100);
     return box;
   };
@@ -97,7 +100,7 @@ export function gap(host, cf, rows) {
   }
   const gA = groupBy(rows, { ...cf, x: groupCol, y: A.column });
   const gB = groupBy(rows, { ...cf, x: groupCol, y: B.column });
-  const groupMax = Math.max(...gA.values, ...gB.values, 1);
+  const groupMax = Math.ceil(Math.max(...gA.values, ...gB.values, 1));
 
   if (gA.labels.length) {
     const sub = el('div', 'subgroup');
@@ -132,6 +135,7 @@ export function gap(host, cf, rows) {
         track.append(fill);
         line.append(track, el('b', null, fmt(round1(value))));
         bars.append(line);
+        segmentBar(track, groupMax);
         growBar(fill, value / groupMax * 100);
       });
       row.append(bars);
@@ -263,7 +267,7 @@ export function compare(host, cf, rows) {
     }
   }
 
-  const max = Math.max(...groups.map(g => Math.max(g.a || 0, g.b || 0)), 1);
+  const max = Math.ceil(Math.max(...groups.map(g => Math.max(g.a || 0, g.b || 0)), 1));
   const list = el('div', 'cmp');
 
   groups.forEach(g => {
@@ -290,6 +294,7 @@ export function compare(host, cf, rows) {
       track.append(fill);
       line.append(track, el('b', null, fmt(round1(v))));
       bars.append(line);
+      segmentBar(track, max);
       growBar(fill, (v || 0) / max * 100);
     });
     row.append(bars);
@@ -508,7 +513,7 @@ export function paired(host, cf, rows) {
 
   if (!items.length) { host.append(el('p', 'hint', 'ยังไม่มีคำตอบในข้อนี้')); return; }
 
-  const max = Math.max(...items.map(d => Math.max(d.a, d.b)), 1);
+  const max = Math.ceil(Math.max(...items.map(d => Math.max(d.a, d.b)), 1));
 
   const legend = el('div', 'legend');
   [[cf.labelA, cf.colorA], [cf.labelB, cf.colorB]].forEach(([name, color]) => {
@@ -554,6 +559,7 @@ export function paired(host, cf, rows) {
       const val = el('b', null, `${fmt(v)} คน`);
       line.append(track, val);
       bars.append(line);
+      segmentBar(track, max);
       growBar(fill, v / max * 100);
     });
     main.append(bars);

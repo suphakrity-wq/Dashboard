@@ -28,3 +28,28 @@ export function countUp(node, target, dur = 600) {
 /** ตั้งความกว้างของหลอดวัดค่าแบบมีอนิเมชัน */
 export const growBar = (node, percent) =>
   requestAnimationFrame(() => { node.style.width = Math.max(0, Math.min(100, percent)) + '%'; });
+
+/** แบ่งหลอดวัดค่าเป็นบล็อกสี่เหลี่ยมเรียงต่อกัน (1 บล็อก = 1 หน่วย)
+ *  ช่วยให้นับค่าได้ด้วยตาโดยไม่ต้องอ่านตัวเลข
+ *
+ *  จะแบ่งก็ต่อเมื่อ
+ *    - จำนวนบล็อกอยู่ระหว่าง 3-20 (มากกว่านี้บล็อกเยอะจนนับไม่ไหว)
+ *    - แต่ละบล็อกกว้างอย่างน้อย 9px หลังจัดหน้าเสร็จแล้ว (จอแคบหลอดจะสั้น
+ *      ถ้าฝืนแบ่งจะกลายเป็นเส้นประจุด ๆ อ่านยากกว่าเดิม)
+ *  ถ้าไม่เข้าเงื่อนไข ปล่อยเป็นหลอดยาวต่อเนื่องเหมือนเดิม
+ *
+ *  วิธีตัด: ใช้ CSS mask ที่คลาส .is-seg (ดู 4-components.css)
+ *  จึงตัดทั้งส่วนที่มีค่าและรางว่างพร้อมกันในครั้งเดียว
+ */
+export function segmentBar(track, max) {
+  const n = Math.round(max);
+  if (!(n >= 3 && n <= 20)) return;
+  requestAnimationFrame(() => {
+    const block = track.getBoundingClientRect().width / n;
+    if (block < 9) return;
+    track.classList.add('is-seg');
+    track.style.setProperty('--seg', n);
+    // บล็อกยิ่งเล็ก ช่องไฟยิ่งต้องบางลง ไม่งั้นเนื้อบล็อกจะเหลือนิดเดียว
+    track.style.setProperty('--seg-gap', (block < 16 ? 2 : 3) + 'px');
+  });
+}
