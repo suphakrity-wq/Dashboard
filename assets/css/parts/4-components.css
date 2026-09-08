@@ -57,7 +57,7 @@
   overflow:hidden;max-height:1.45em;
   transition:max-height var(--t-slow) var(--ease)}
 .rank-row:hover .rank-label{-webkit-line-clamp:6;max-height:8.7em}
-.rank-track{height:8px}
+.rank-track{height:8px;max-width:var(--bar-max)}
 .rank-val{display:flex;align-items:baseline;justify-content:flex-end;gap:10px}
 .rank-val b{font-size:var(--t-md);font-weight:700;font-variant-numeric:tabular-nums}
 .rank-val span{font-size:var(--t-xs);color:var(--muted);font-variant-numeric:tabular-nums;min-width:3.2em;text-align:right}
@@ -69,7 +69,7 @@
 .rank-row.is-top .rank-no{visibility:hidden}
 .rank-row.is-top .rank-label{font-size:var(--t-lg);font-weight:700;color:var(--ink);
   white-space:normal;margin-bottom:11px}
-.rank-row.is-top .rank-track{height:8px}   /* ไม่จำกัดความกว้าง ให้หลอดยาวเต็มการ์ด */
+.rank-row.is-top .rank-track{height:8px;max-width:var(--bar-max)}   /* ไม่จำกัดความกว้าง ให้หลอดยาวเต็มการ์ด */
 .rank-row.is-top .rank-val{flex-direction:column;align-items:flex-end;gap:0}
 .rank-row.is-top .rank-val b{font-size:var(--t-2xl);line-height:1;color:var(--accent)}
 .rank-row.is-top .rank-val span{font-size:var(--t-sm)}
@@ -107,7 +107,7 @@
 .sg-diff{display:block;font-size:var(--t-xs);color:var(--muted);margin-top:1px}
 .sg-bars{display:flex;flex-direction:column;gap:8px}
 .sg-line{display:flex;align-items:center;gap:12px}
-.sg-track{flex:1;height:8px}   /* ไม่จำกัดความกว้าง ให้หลอดยาวเต็มการ์ด */
+.sg-track{flex:1;height:8px;max-width:var(--bar-max)}
 .sg-line b{font-size:var(--t-sm);font-weight:700;min-width:2.6em;font-variant-numeric:tabular-nums}
 .dot{width:10px;height:10px;border-radius:100px;display:inline-block;flex-shrink:0}
 .legend{display:flex;flex-wrap:wrap;gap:22px;margin-bottom:var(--sp-3);
@@ -308,7 +308,21 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;padding-right:2
 
 /* ---- เทียบช่องว่างระหว่างกลุ่ม ---- */
 .cmp{display:flex;flex-direction:column;gap:6px}
+/* โครงเดียวกับ .rank-row: เลขอันดับ | เนื้อหา  และอันดับ 1 เป็นกล่องเด่น */
+.cmp-row{display:grid;grid-template-columns:26px minmax(0,1fr);gap:14px;align-items:start;
+  position:relative}
+.cmp-no{font-size:var(--t-xs);font-weight:600;color:var(--muted);
+  font-variant-numeric:tabular-nums;text-align:center;padding-top:3px}
+.cmp-main{min-width:0}
 .cmp-row + .cmp-row{border-top:1px solid var(--hair)}
+.cmp-row.is-top{background:color-mix(in srgb, var(--accent) 7%, #fff);
+  box-shadow:inset 0 0 0 1.5px color-mix(in srgb, var(--accent) 55%, #fff);
+  margin:14px calc(var(--row-bleed) * -1) 12px;border-radius:16px;border-top:none}
+.cmp-row.is-top:hover{background:color-mix(in srgb, var(--accent) 11%, #fff);
+  box-shadow:inset 0 0 0 1.5px var(--accent), 0 10px 26px -18px rgba(0,0,0,.5);
+  transform:translateY(-1px)}
+.cmp-row.is-top .cmp-no{visibility:hidden}   /* ยังกินที่ ให้หัวข้อตรงคอลัมน์เดียวกับแถวอื่น */
+.cmp-row.is-top .cmp-head b{font-size:var(--t-lg)}
 .cmp-head{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:12px}
 .cmp-head b{font-size:var(--t-md);font-weight:700}
 .cmp-n{font-size:var(--t-xs);color:var(--muted)}

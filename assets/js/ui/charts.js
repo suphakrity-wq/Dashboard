@@ -8,10 +8,10 @@
  * ข้อตกลง: ดึงข้อมูลผ่าน groupBy/crossTab จาก core/compute.js เท่านั้น
  */
 
-import { el, growBar } from './dom.js?v=30';
-import { fmt, round1, pct } from '../core/format.js?v=30';
-import { num, groupBy, crossTab, avgOf, pickGroupColumn, distinctValues, compareGroups } from '../core/compute.js?v=30';
-import { welchTTest } from '../core/stats.js?v=30';
+import { el, growBar } from './dom.js?v=31';
+import { fmt, round1, pct } from '../core/format.js?v=31';
+import { num, groupBy, crossTab, avgOf, pickGroupColumn, distinctValues, compareGroups } from '../core/compute.js?v=31';
+import { welchTTest } from '../core/stats.js?v=31';
 
 /* ---------- 1. อันดับพร้อมหลอดวัดค่า ---------- */
 export function rank(host, cf, rows) {
@@ -520,9 +520,13 @@ export function paired(host, cf, rows) {
   host.append(legend);
 
   const list = el('div', 'cmp');
-  items.forEach(d => {
-    const row = el('div', 'cmp-row');
+  items.forEach((d, i) => {
+    // จัดหน้าตาแบบเดียวกับการ์ด "ข่าวรายชิ้น": มีเลขอันดับ และอันดับ 1 เป็นกล่องเด่น
+    const row = el('div', 'cmp-row' + (i === 0 ? ' is-top' : ''));
+    if (i === 0) row.append(el('span', 'rank-top-tag', 'ต่างกันมากที่สุด'));
+    row.append(el('span', 'cmp-no', String(i + 1).padStart(2, '0')));
 
+    const main = el('div', 'cmp-main');
     const head = el('div', 'cmp-head');
     head.append(el('b', null, d.label));
     if (d.gap !== 0) {
@@ -536,7 +540,7 @@ export function paired(host, cf, rows) {
       chip.textContent = 'เท่ากัน';
       head.append(chip);
     }
-    row.append(head);
+    main.append(head);
 
     const bars = el('div', 'cmp-bars');
     [[cf.labelA, d.a, cf.colorA], [cf.labelB, d.b, cf.colorB]].forEach(([name, v, color]) => {
@@ -551,7 +555,8 @@ export function paired(host, cf, rows) {
       bars.append(line);
       growBar(fill, v / max * 100);
     });
-    row.append(bars);
+    main.append(bars);
+    row.append(main);
     list.append(row);
   });
   host.append(list);
