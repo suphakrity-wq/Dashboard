@@ -65,8 +65,12 @@
    นับด้วยตาได้เลยว่าค่าเท่าไร ไม่ต้องอ่านตัวเลขข้าง ๆ
    บล็อกสร้างจาก segmentBar() ใน ui/dom.js — ที่นี่คุมแค่หน้าตา */
 .is-seg{display:flex;gap:var(--seg-gap,3px);background:none;box-shadow:none;overflow:visible}
+/* opacity ต้องเป็น 1 ตั้งแต่แรก แล้วใช้ animation-fill-mode:backwards ให้สถานะ from
+   มีผลเฉพาะช่วงหน่วงก่อนเริ่มเล่น
+   ห้ามตั้ง opacity:0 ไว้แล้วพึ่ง animation ให้พาไป 1 เพราะตอนวาดใหม่ (ย่อ/ขยายจอ)
+   เราปิดอนิเมชันด้วย animation:none บล็อกจะค้างที่ opacity 0 = หลอดหายทั้งแถบ */
 .is-seg > .seg-blk{flex:1 1 0;width:auto;min-width:0;height:100%;border-radius:var(--r-xs);background:var(--track);
-  opacity:0;animation:segIn .34s var(--ease) forwards;
+  opacity:1;animation:segIn .34s var(--ease) backwards;
   transition:background var(--t-fast) ease}
 .is-seg > .seg-blk.is-on{background:var(--c)}
 /* บล็อกที่มีเศษ เช่น 4.5 — เติมบางส่วนแล้วมนมุมเหมือนบล็อกเต็ม */
