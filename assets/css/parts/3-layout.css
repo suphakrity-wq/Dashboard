@@ -26,7 +26,7 @@
 
 /* ---- หัวแถบ: โลโก้ + ชื่อเว็บ ---- */
 .side-brand{display:flex;align-items:center;gap:12px;padding:0 8px}
-.side-mark{width:42px;height:42px;border-radius:12px;background:var(--hair);color:var(--ink);
+.side-mark{width:42px;height:42px;border-radius:var(--r-md);background:var(--hair);color:var(--ink);
   display:grid;place-items:center;flex-shrink:0}
 .side-brand b{display:block;font-size:var(--t-md);font-weight:700;line-height:1.25}
 .side-brand span{display:block;line-height:1.25}
@@ -34,12 +34,12 @@
 /* ---- รายการหมวด ---- */
 .nav{display:flex;flex-direction:column;gap:2px;flex:1}
 .nav::-webkit-scrollbar{display:none}      /* ใช้ตอนเมนูเลื่อนแนวนอนบนจอแคบ */
-.nav-item{display:flex;align-items:center;gap:12px;padding:11px 13px;border-radius:11px;
+.nav-item{display:flex;align-items:center;gap:12px;padding:11px 13px;border-radius:var(--r-md);
   text-decoration:none;color:var(--ink-2);
   transition:background var(--t-base) var(--ease), color var(--t-fast) ease}
 .nav-item:hover{background:var(--hair)}
 .nav-item.on{background:var(--ink);color:#fff}
-.nav-ico{width:32px;height:32px;border-radius:9px;background:var(--hair);color:var(--ink-2);
+.nav-ico{width:32px;height:32px;border-radius:var(--r-sm);background:var(--hair);color:var(--ink-2);
   display:grid;place-items:center;flex-shrink:0;
   transition:background var(--t-base) var(--ease), color var(--t-fast) ease}
 .nav-item.on .nav-ico{background:rgba(255,255,255,.16);color:#fff}
@@ -56,15 +56,15 @@
 /* ============ 3 · ปุ่มเปิดเมนู + ป้ายโหมดทดลอง ============ */
 
 /* จอคอมและแท็บเล็ตเห็นเมนูอยู่แล้ว ปุ่มนี้จึงโผล่เฉพาะจอมือถือ (ดูหัวข้อ 6.6) */
-.nav-toggle{display:none;width:40px;height:40px;border:1px solid var(--line);border-radius:11px;
+.nav-toggle{display:none;width:40px;height:40px;border:1px solid var(--line);border-radius:var(--r-md);
   background:var(--surface);color:var(--ink);place-items:center;cursor:pointer;flex-shrink:0;
   transition:background var(--t-fast) ease, color var(--t-fast) ease}
 .nav-toggle:hover{background:var(--hair)}
-.nav-toggle .ms{font-size:22px}
+.nav-toggle .ms{font-size:var(--ico-lg)}
 
 /* ป้ายเตือนว่ากำลังดูข้อมูลจำลอง (เปิดด้วย ?demo=<id>) */
-.demo-flag{display:block;background:var(--lime);color:#33420a;font-size:var(--t-xs);font-weight:700;
-  text-align:center;padding:5px 10px;border-radius:9px;margin-bottom:4px}
+.demo-flag{display:block;background:var(--lime);color:var(--lime-ink);font-size:var(--t-xs);font-weight:700;
+  text-align:center;padding:5px 10px;border-radius:var(--r-sm);margin-bottom:4px}
 .demo-pick{width:100%;margin-bottom:8px;font-size:var(--t-xs)}
 
 
@@ -84,7 +84,7 @@
 
 /* บรรทัด "หน้านี้ตอบว่า ..." ใต้ชื่อหน้า */
 .page-answers{margin-top:8px;font-size:var(--t-sm);font-weight:500;color:var(--ink-2);
-  background:var(--purple-soft);border-radius:0 12px 12px 0;border-left:3px solid var(--purple);
+  background:var(--purple-soft);border-radius:0 var(--r-md) var(--r-md) 0;border-left:3px solid var(--purple);
   padding:9px 14px;max-width:70ch}
 
 /* แถวเครื่องมือ: ตัวกรอง + แท็บ อยู่แถวเดียวกัน ชิดขวา */
@@ -166,7 +166,7 @@
   .grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--sp-3)}
   .grid > .card:only-child{grid-column:1/-1}
   .page-bar{padding:22px 0 16px}
-  .page-bar h1{font-size:30px}
+  :root{--t-xl:30px}
   .page-bar p{max-width:56ch}
   .page-tools{align-items:flex-start;width:100%}
   .summary-bar{grid-template-columns:repeat(4,minmax(0,1fr))}
@@ -191,7 +191,7 @@
   .sidebar{position:static;height:auto;flex-direction:row;align-items:center;flex-wrap:wrap;
     border-right:none;border-bottom:1px solid var(--line);gap:10px;padding:12px 16px}
   .side-brand{gap:9px;padding:0}
-  .side-mark{width:34px;height:34px;border-radius:10px}
+  .side-mark{width:34px;height:34px;border-radius:var(--r-sm)}
   .side-brand b{font-size:var(--t-sm)}
   .side-brand span{display:none}
 
@@ -199,8 +199,8 @@
   .nav{flex-direction:row;flex:1 1 100%;min-width:0;gap:6px;overflow-x:auto;padding-bottom:2px;
     scrollbar-width:none}
   .nav-item{padding:7px 12px;flex:0 0 auto}
-  .nav-ico{width:26px;height:26px;border-radius:8px}
-  .nav-ico .ms{font-size:18px}
+  .nav-ico{width:26px;height:26px;border-radius:var(--r-sm)}
+  .nav-ico .ms{font-size:var(--ico-sm)}
   .nav-txt b{font-size:var(--t-xs);white-space:nowrap}
   .nav-txt i{display:none}
 
@@ -222,6 +222,7 @@
    - เครื่องมือ (ตัวกรอง + แท็บ) ขึ้นไปอยู่บนสุดของหน้า
    - ย่อหัวเพจลงทั้งหมด */
 @media (max-width:760px){
+  :root{--t-xl:26px}
   /* ---- เมนูแบบกดเปิด ---- */
   .sidebar{flex-wrap:wrap;align-items:center;gap:0;padding:10px 14px}
   .side-brand{flex:1;min-width:0}
@@ -241,10 +242,8 @@
 
   /* ---- หัวเพจ ---- */
   .page-bar{padding:14px 0 12px;margin-bottom:16px}
-  .page-bar h1{font-size:26px}
   .page-bar > .page-bar-top > div > .muted{display:none}   /* คำอธิบายยาว ซ่อนบนมือถือ */
-  .page-answers{font-size:16px;padding:8px 12px;margin-top:6px;line-height:1.45}
-  .crumb{font-size:14px}
+  .page-answers{font-size:var(--t-xs);padding:8px 12px;margin-top:6px;line-height:1.45}
 
   /* ---- เครื่องมือขึ้นไปบนสุด ---- */
   .page-bar-top{gap:12px;flex-direction:column}
@@ -275,7 +274,7 @@
   .content{padding:0 14px 40px}
   .grid{grid-template-columns:1fr;gap:14px}
   .sec-head{margin-bottom:12px}
-  .sec-head h2{font-size:21px}
+  .sec-head h2{font-size:var(--t-md)}
   .page-body{gap:24px}
   .sidebar{padding:10px 14px;gap:8px}
   .side-brand b{font-size:var(--t-xs)}

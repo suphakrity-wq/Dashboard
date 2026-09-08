@@ -17,13 +17,13 @@ p{margin:0}
 
 /* ไอคอน Google Material Symbols — โผล่เมื่อฟอนต์พร้อม */
 .ms{font-family:"Material Symbols Rounded","Material Symbols Outlined";font-weight:400;
-  font-size:24px;line-height:1;display:inline-block;white-space:nowrap;direction:ltr;
+  font-size:var(--ico-xl);line-height:1;display:inline-block;white-space:nowrap;direction:ltr;
   -webkit-font-feature-settings:'liga';-webkit-font-smoothing:antialiased;
   font-variation-settings:'opsz' 24;opacity:0;transition:opacity var(--t-fast) ease}
 html.icons-ready .ms{opacity:1}
 
 /* ---- ปุ่ม ---- */
-.btn{border:none;background:var(--ink);color:#fff;padding:9px 20px;border-radius:11px;
+.btn{border:none;background:var(--ink);color:#fff;padding:9px 20px;border-radius:var(--r-md);
   font:inherit;font-size:var(--t-sm);font-weight:500;cursor:pointer;
   transition:background var(--t-fast) ease, color var(--t-fast) ease, transform var(--t-fast) var(--ease)}
 .btn:hover{background:#000}
@@ -33,7 +33,7 @@ html.icons-ready .ms{opacity:1}
 .btn-block{width:100%}
 
 /* ---- อินพุต ---- */
-.input{border:1px solid var(--line);background:var(--surface);border-radius:11px;padding:8px 13px;
+.input{border:1px solid var(--line);background:var(--surface);border-radius:var(--r-md);padding:8px 13px;
   font:inherit;font-size:var(--t-sm);font-weight:500;color:var(--ink);outline:none;min-width:150px;
   transition:border-color var(--t-fast) ease, box-shadow var(--t-fast) ease}
 .input:focus{border-color:var(--purple);box-shadow:0 0 0 3px rgba(109,77,251,.16)}
@@ -51,12 +51,12 @@ select.input{cursor:pointer;appearance:none;-webkit-appearance:none;
 .filters select.input{min-width:0;width:auto;max-width:min(100%,232px);text-overflow:ellipsis}
 
 /* ---- แท็บ ---- */
-.tabs{display:flex;gap:4px;background:var(--hair);padding:4px;border-radius:12px}
+.tabs{display:flex;gap:4px;background:var(--hair);padding:4px;border-radius:var(--r-md)}
 .tab{display:inline-flex;align-items:center;gap:7px;
   background:none;border:none;font:inherit;font-size:var(--t-sm);font-weight:500;color:var(--muted);
-  padding:6px 14px;border-radius:9px;cursor:pointer;white-space:nowrap;
+  padding:6px 14px;border-radius:var(--r-sm);cursor:pointer;white-space:nowrap;
   transition:background var(--t-base) var(--ease), color var(--t-fast) ease, box-shadow var(--t-base) ease}
-.tab .ms{font-size:19px}
+.tab .ms{font-size:var(--ico-md)}
 .tab:hover{color:var(--ink)}
 .tab.on{background:var(--surface);color:var(--ink);font-weight:700;box-shadow:var(--sh-1)}
 
