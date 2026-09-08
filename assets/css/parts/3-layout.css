@@ -57,8 +57,19 @@
 @media (max-width:1000px){
   .shell{grid-template-columns:1fr}
   .sidebar{position:static;height:auto;flex-direction:row;align-items:center;flex-wrap:wrap;
-    border-right:none;border-bottom:1px solid var(--line);gap:14px;padding:14px 18px}
-  .nav{flex-direction:row;flex-wrap:wrap;flex:1 1 100%;gap:4px}
+    border-right:none;border-bottom:1px solid var(--line);gap:10px;padding:12px 16px}
+  .side-brand{gap:9px;padding:0}
+  .side-mark{width:34px;height:34px;border-radius:10px}
+  .side-brand b{font-size:var(--t-sm)}
+  .side-brand span{display:none}
+  /* เมนูบนมือถือ: เลื่อนแนวนอนแทนการตกบรรทัด จะได้ไม่กินความสูง */
+  .nav{flex-direction:row;flex:1 1 100%;gap:6px;overflow-x:auto;padding-bottom:2px;
+    scrollbar-width:none}
+  .nav::-webkit-scrollbar{display:none}
+  .nav-item{padding:7px 12px;flex:0 0 auto}
+  .nav-ico{width:26px;height:26px;border-radius:8px}
+  .nav-ico .ms{font-size:18px}
+  .nav-txt b{font-size:var(--t-xs);white-space:nowrap}
   .nav-txt i{display:none}
   /* จอเล็ก: แถบล่างของเมนูวางเรียงกันแบบยืดหยุ่น ไม่งั้นป้ายโหมดทดลองจะถูกบีบจนตัวอักษรตกบรรทัดทีละตัว */
   .side-foot{flex-flow:row wrap;align-items:center;gap:8px;
@@ -70,10 +81,33 @@
   .content{padding:0 22px 46px}
   .page-tools{align-items:flex-start}
 }
+/* ---------- จอมือถือ ----------
+   ปัญหาเดิม: หัวหน้าเพจเป็น sticky + สูงมาก พอเลื่อนแล้วบังเนื้อหาเกือบทั้งจอ
+   แก้: ให้หัวเพจเลื่อนหายไปตามปกติ และย่อทุกอย่างในหัวเพจลง */
+@media (max-width:760px){
+  .page-bar{position:static;padding:16px 0 12px;margin-bottom:18px}
+  .page-bar h1{font-size:26px}
+  .page-bar > .page-bar-top > div > .muted{display:none}   /* คำอธิบายยาว ซ่อนบนมือถือ */
+  .page-answers{font-size:16px;padding:8px 12px;margin-top:6px;line-height:1.45}
+  .crumb{font-size:14px}
+
+  .page-bar-top{gap:12px}
+  .page-tools{width:100%;align-items:stretch;gap:8px}
+  .tabs{width:100%}
+  .tab{flex:1;text-align:center;padding:6px 4px}
+  .filters{width:100%;gap:8px}
+  .filters label{flex:1 1 100%;gap:6px}
+  .filters .input{flex:1;min-width:0}
+
+  .summary-bar{margin-top:12px}
+}
+
 @media (max-width:620px){
-  :root{--t-2xl:34px;--t-3xl:44px;--t-xl:27px}
-  .content{padding:0 16px 40px}
+  :root{--t-2xl:32px;--t-3xl:40px;--t-xl:25px}
+  .content{padding:0 14px 40px}
   .grid{grid-template-columns:1fr}
+  .sec-head h2{font-size:21px}
+  .page-body{gap:26px}
 }
 
 /* ป้ายโหมดทดลอง */

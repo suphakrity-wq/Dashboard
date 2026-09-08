@@ -335,3 +335,34 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;padding-right:2
 .cloud-chip.is-mid{background:var(--purple-soft);color:var(--ink)}
 .cloud-chip.is-strong{background:var(--purple);color:#fff}
 .cloud-chip.is-strong b{color:#fff}
+
+/* ============ ปรับสำหรับจอมือถือ ============
+   วางไว้ท้ายไฟล์นี้ เพราะ 4-components.css ถูก import ทีหลัง 3-layout.css
+   ถ้าเขียนไว้ในไฟล์ layout จะถูกกฎพื้นฐานของไฟล์นี้ทับ */
+@media (max-width:760px){
+  .summary-bar{grid-template-columns:repeat(2,1fr)}
+  .stat{padding:10px 12px}
+  .stat-label{font-size:var(--t-xs)}
+  .stat-value{font-size:var(--t-md)}
+
+  .card{padding:18px 16px 20px}
+  .card-head{margin-bottom:14px}
+
+  /* หลอดกับตัวเลขบีบเข้าหากันบนจอแคบ */
+  .rank-row{grid-template-columns:22px minmax(0,1fr) auto;gap:10px}
+  .rank-track{max-width:none}
+  .rank-val{font-size:var(--t-sm)}
+  .rank-row.is-top .rank-val b{font-size:var(--t-xl)}
+
+  .versus{grid-template-columns:1fr}
+  .vs-mid{flex-direction:row;gap:10px;padding:6px 0;min-width:0}
+  .cmp-line{grid-template-columns:74px 1fr auto;gap:8px}
+  .dl-row,.wf-item,.stack-item{font-size:var(--t-xs)}
+  .donut-chart{width:130px;height:130px}
+  .waffle{width:170px}
+
+  .vd-stats{grid-template-columns:1fr}
+  .verdict{padding:24px 20px}
+  .summary-card{padding:22px 18px}
+  .table-tools .input{min-width:0;width:100%}
+}
