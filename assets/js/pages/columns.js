@@ -43,10 +43,11 @@ export const C = {
 };
 
 /** แท็บและตัวกรองด้านบน ใช้ร่วมกันทุกหน้า */
+/* icon = ชื่อไอคอน Material Symbols ใช้แทนข้อความเมื่อจอแคบ (ดู .tab-text ใน 2-base.css) */
 export const TABS = [
-  { label: "ทั้งหมด" },
-  { label: "ชาย", column: Q.gender, value: "ชาย" },
-  { label: "หญิง", column: Q.gender, value: "หญิง" }
+  { label: "ทั้งหมด", icon: "group" },
+  { label: "ชาย",    icon: "man",   column: Q.gender, value: "ชาย" },
+  { label: "หญิง",   icon: "woman", column: Q.gender, value: "หญิง" }
 ];
 
 export const FILTERS = [

@@ -175,8 +175,8 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;padding-right:2
   font-size:var(--t-xs);color:var(--muted)}
 
 /* ---- Heatmap ---- */
-.heat{display:grid;grid-template-columns:minmax(160px,1fr) repeat(var(--cols),96px);
-  gap:0;align-items:stretch;overflow-x:auto}
+.heat{display:grid;grid-template-columns:minmax(120px,1fr) repeat(var(--cols),96px);
+  gap:0;align-items:stretch;overflow-x:auto;min-width:0}
 .heat-corner{display:block}
 .heat-line{display:contents}
 .heat-col{display:flex;flex-direction:column;align-items:center;gap:1px;padding:0 4px 10px;

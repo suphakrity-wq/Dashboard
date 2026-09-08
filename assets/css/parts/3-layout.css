@@ -46,7 +46,8 @@
 .page-bar h1{margin-top:2px;font-size:var(--t-xl);font-weight:900;line-height:1.2}
 .page-bar h1 em{font-style:normal;color:var(--purple)}
 .page-bar p{margin-top:4px;font-size:var(--t-sm);color:var(--muted);max-width:64ch}
-.page-tools{display:flex;flex-direction:column;align-items:flex-end;gap:10px}
+/* ตัวกรองกับแท็บอยู่แถวเดียวกัน ชิดขวา ถ้าที่ไม่พอค่อยตกบรรทัด */
+.page-tools{display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-end;gap:12px}
 
 .page-body{display:flex;flex-direction:column;gap:var(--sp-5)}
 .page-foot{padding-top:var(--sp-5);color:var(--muted);font-size:var(--t-xs)}
@@ -59,6 +60,9 @@
 .empty{color:var(--muted);font-size:var(--t-sm)}
 
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(360px,1fr));gap:var(--sp-3)}
+/* min-width:0 จำเป็นกับลูกของ grid ทุกใบ ไม่งั้นการ์ดที่มีตารางกว้าง (เช่น heatmap)
+   จะดันตัวเองจนล้นจอ แทนที่จะให้ตารางข้างในเลื่อนเอง */
+.grid > *{min-width:0}
 .grid > .span-all{grid-column:1/-1}
 
 @media (max-width:1000px){
@@ -148,12 +152,14 @@
   .crumb{font-size:14px}
 
   .page-bar-top{gap:12px}
-  .page-tools{width:100%;align-items:stretch;gap:8px}
-  .tabs{width:100%}
-  .tab{flex:1;text-align:center;padding:6px 4px}
-  .filters{width:100%;gap:8px}
+  .page-tools{width:100%;justify-content:flex-start;gap:8px}
+  .filters{flex:1 1 auto;gap:8px}
   .filters label{flex:1 1 100%;gap:6px}
   .filters .input{flex:1;min-width:0}
+  /* ที่ไม่พอสำหรับข้อความ ใช้ไอคอนแทน (มี title/aria-label กำกับไว้แล้ว) */
+  .tabs{flex:0 0 auto}
+  .tab{padding:7px 11px;gap:0}
+  .tab-text{display:none}
 
   .summary-bar{margin-top:12px}
 }
@@ -179,7 +185,6 @@
 @media (max-width:400px){
   :root{--t-xs:18px;--t-sm:20px;--t-md:22px;--t-lg:25px;--t-xl:22px;--t-2xl:27px;--t-3xl:34px}
   .content{padding:0 12px 36px}
-  .tab{font-size:var(--t-xs)}
 }
 
 /* ป้ายโหมดทดลอง */

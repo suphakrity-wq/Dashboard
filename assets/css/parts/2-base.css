@@ -42,9 +42,11 @@ select.input{cursor:pointer;padding-right:26px}
 
 /* ---- แท็บ ---- */
 .tabs{display:flex;gap:4px;background:var(--hair);padding:4px;border-radius:12px}
-.tab{background:none;border:none;font:inherit;font-size:var(--t-sm);font-weight:500;color:var(--muted);
-  padding:6px 16px;border-radius:9px;cursor:pointer;
+.tab{display:inline-flex;align-items:center;gap:7px;
+  background:none;border:none;font:inherit;font-size:var(--t-sm);font-weight:500;color:var(--muted);
+  padding:6px 14px;border-radius:9px;cursor:pointer;white-space:nowrap;
   transition:background var(--t-base) var(--ease), color var(--t-fast) ease, box-shadow var(--t-base) ease}
+.tab .ms{font-size:19px}
 .tab:hover{color:var(--ink)}
 .tab.on{background:var(--surface);color:var(--ink);font-weight:700;box-shadow:var(--sh-1)}
 

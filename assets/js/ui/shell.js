@@ -1,10 +1,10 @@
 /* [ui] เปลือกของแอป: เมนูซ้าย, แถบเครื่องมือ, แถบสรุปด้านบน, สถานะการโหลด */
 
-import { $, el, countUp } from './dom.js?v=4';
-import { aggregate } from '../core/compute.js?v=4';
-import { wilsonInterval } from '../core/stats.js?v=4';
-import { store } from '../core/store.js?v=4';
-import { sparkline } from './charts.js?v=4';
+import { $, el, countUp } from './dom.js?v=6';
+import { aggregate } from '../core/compute.js?v=6';
+import { wilsonInterval } from '../core/stats.js?v=6';
+import { store } from '../core/store.js?v=6';
+import { sparkline } from './charts.js?v=6';
 
 /* ---- ปุ่มเปิด/ปิดเมนูบนจอโทรศัพท์ ----
    จอคอมกับแท็บเล็ตเมนูโชว์อยู่แล้ว ปุ่มนี้ถูกซ่อนด้วย CSS
@@ -59,8 +59,13 @@ export function renderTabs(cfg, onChange) {
   const defs = cfg.tabs || [];
   host.hidden = !defs.length;
   defs.forEach((t, i) => {
-    const btn = el('button', 'tab' + (i === store.tab ? ' on' : ''), t.label);
+    const btn = el('button', 'tab' + (i === store.tab ? ' on' : ''));
     btn.type = 'button';
+    // จอแคบจะซ่อน .tab-text เหลือแต่ไอคอน จึงต้องมี title/aria-label กำกับไว้เสมอ
+    btn.title = t.label;
+    btn.setAttribute('aria-label', t.label);
+    btn.innerHTML = (t.icon ? `<i class="ms">${t.icon}</i>` : '') +
+                    `<span class="tab-text">${t.label}</span>`;
     btn.onclick = () => {
       store.tab = i; store.page = 0;
       host.querySelectorAll('.tab').forEach((x, j) => x.classList.toggle('on', j === i));
