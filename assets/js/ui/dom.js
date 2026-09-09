@@ -48,8 +48,13 @@ export const growBar = (node, percent) =>
            ฟังก์ชันนี้เป็นเจ้าของเนื้อหาใน track ทั้งหมด (วาดทั้งแบบบล็อกและแบบต่อเนื่อง)
    ============================================================ */
 
-const MIN_BLOCK_PX = 9;    // บล็อกแคบกว่านี้จะกลายเป็นเส้นประจุด ๆ นับไม่ไหว
+/* จอเล็กลง = ช่องต้องรวบกันให้ใหญ่ขึ้น ไม่ใช่ยังคงถี่เหมือนเดิมจนเป็นเส้นประ
+   MIN_BLOCK_PX คือความกว้างขั้นต่ำที่ยัง "นับด้วยตา" ได้สบาย
+   ตั้งไว้กว้างพอควร หลอดสั้นจึงรวบเหลือไม่กี่ช่องอัตโนมัติ */
+const MIN_BLOCK_PX = 22;   // ช่องแคบกว่านี้ให้รวบหน่วยเพิ่ม
+const MIN_BLOCKS = 3;      // อย่างน้อย 3 ช่อง — น้อยกว่านี้ดูไม่ออกว่าเป็นหลอดวัดค่า
 const MAX_BLOCKS = 20;     // มากกว่านี้ตาก็ไม่นับทีละอันแล้ว
+const HARD_MIN_PX = 6;     // ถ้า 3 ช่องยังแคบกว่านี้ ค่อยยอมกลับไปเป็นหลอดต่อเนื่อง
 
 /** กราฟทั้งหมดในหน้าที่ต้องวาดใหม่เมื่อความกว้างเปลี่ยน */
 const barGroups = [];
@@ -98,13 +103,15 @@ function planBlocks(items, max) {
   const narrowest = Math.min(...items.map(it => it.track.getBoundingClientRect().width));
   if (!(narrowest > 0)) return null;
 
+  // เริ่มจาก 1 ช่อง = 1 หน่วย แล้วรวบเพิ่มทีละขั้นจนช่องกว้างพอ หรือจนเหลือ 3 ช่อง
   let per = Math.max(1, Math.ceil(Math.round(max) / MAX_BLOCKS));
   let n = Math.ceil(max / per);
-  while (n >= 3 && narrowest / n < MIN_BLOCK_PX) {
+  while (n > MIN_BLOCKS && narrowest / n < MIN_BLOCK_PX) {
     per += 1;
     n = Math.ceil(max / per);
   }
-  if (n < 3 || narrowest / n < MIN_BLOCK_PX) return null;   // แคบเกินไปจริง ๆ
+  if (n < MIN_BLOCKS) { n = MIN_BLOCKS; per = max / MIN_BLOCKS; }
+  if (narrowest / n < HARD_MIN_PX) return null;   // แคบเกินไปจริง ๆ ใช้หลอดต่อเนื่องแทน
   return { per, n, gap: narrowest / n < 16 ? 2 : 3 };
 }
 

@@ -75,6 +75,10 @@
 .is-seg > .seg-blk{flex:1 1 0;width:auto;min-width:0;height:100%;border-radius:var(--r-xs);background:var(--track);
   opacity:1;animation:segIn .34s var(--ease);
   transition:background var(--t-fast) ease}
+/* บล็อกที่ถึงค่าแล้ว — สีมาจากตัวแปร --c ที่ JS ใส่ให้รายบล็อก */
+.is-seg > .seg-blk.is-on{background:var(--c)}
+/* บล็อกที่มีเศษ เช่น 4.5 — เติมบางส่วนแล้วมนมุมเหมือนบล็อกเต็ม */
+.is-seg > .seg-blk > .seg-part{display:block;height:100%;border-radius:var(--r-xs);background:var(--c)}
 @keyframes segIn{from{opacity:.25;transform:scaleX(.55)}to{opacity:1;transform:none}}
 
 /* ---- สีบอกสถานะ ไม่ใช่ชื่อชุดข้อมูล ----
