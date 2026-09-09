@@ -118,6 +118,29 @@ function planBlocks(items, max) {
   return { per, n, gap: narrowest / n < 40 ? 4 : 6 };
 }
 
+/* ป้ายบอกสเกลใต้กลุ่มหลอด — ต้องเห็นได้โดยไม่ต้องเอาเมาส์ไปชี้
+   เพราะตอนนำเสนอบนจอโปรเจกเตอร์หรือบนมือถือไม่มี hover ให้ใช้
+   ถ้าไม่มีบรรทัดนี้ คนดูจะไม่มีทางรู้ว่า "หลอดเต็ม" แปลว่าเท่าไร */
+const SCALE_ANCHOR = '.versus, .subgroup, .rank, .cmp, .vd-bars, .fig-vs, .grid';
+
+function scaleNote(group, plan, max, unitName) {
+  const first = group.items[0];
+  if (!first || !first.track.isConnected) return;
+  const anchor = first.track.closest(SCALE_ANCHOR);
+  if (!anchor) return;
+
+  if (!group.note || !group.note.isConnected) {
+    group.note = el('p', 'scale-note');
+    anchor.after(group.note);
+  }
+  const u = unitName ? ' ' + unitName : '';
+  group.note.textContent = plan
+    ? `หลอดเต็ม = ${fmtNum(plan.n * plan.per)}${u} · 1 ช่อง = ${fmtNum(plan.per)}${u}`
+    : `หลอดเต็ม = ${fmtNum(max)}${u}`;
+}
+
+const fmtNum = n => (Math.round(n * 10) / 10).toLocaleString('th-TH');
+
 function paintGroup(group, animate) {
   const { items, max, unitName } = group;
   const plan = planBlocks(items, max);
@@ -125,6 +148,7 @@ function paintGroup(group, animate) {
     if (plan) drawBlocks(track, value, plan.per, plan.n, color, plan.gap, unitName, animate);
     else drawSolid(track, value, max, color);
   });
+  scaleNote(group, plan, max, unitName);
 
   // ปลายหลอดต้องมน: เศษที่บางกว่าความสูงหลอดวาดหัวมนไม่ได้ (ออกมาเป็นขีดตรง ๆ)
   // จึงติดหัวกลมให้แทน โดย "กึ่งกลางวงกลม = ค่าจริง" ความกว้างของแถบยังตรงกับตัวเลขเป๊ะ
@@ -140,8 +164,21 @@ export function segmentBars(items, max, unitName = '') {
   if (!items.length || !(max >= 3)) return;
   const group = { items, max, unitName };
   barGroups.push(group);
-  requestAnimationFrame(() => paintGroup(group, true));
+
+  /* วาดทันทีถ้าวัดความกว้างได้แล้ว ไม่งั้นรอเฟรมถัดไป
+     และมี setTimeout สำรองไว้ด้วย เพราะแท็บที่ถูกซ่อน/ยังไม่แสดงผล
+     requestAnimationFrame จะไม่ทำงานเลย หลอดจะค้างเป็นแบบไม่แบ่งช่อง */
+  const paint = () => paintGroup(group, true);
+  if (items.some(it => it.track.getBoundingClientRect().width > 0)) paint();
+  else { requestAnimationFrame(paint); setTimeout(paint, 150); }
 }
+
+/* กลับมาดูแท็บอีกครั้ง: วาดใหม่ให้ทุกกลุ่มที่ยังอยู่บนหน้า
+   (ถ้าตอนวาดครั้งแรกแท็บถูกซ่อนอยู่ ความกว้างจะเป็น 0 จนแบ่งช่องไม่ได้) */
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) return;
+  barGroups.forEach(g => { if (g.items.some(it => it.track.isConnected)) paintGroup(g, false); });
+});
 
 /* วาดใหม่เมื่อความกว้างหน้าต่างเปลี่ยน — หน่วงไว้กันวาดรัวตอนลากขอบหน้าต่าง
    และทิ้งกราฟที่ถูกถอดออกจากหน้าไปแล้ว (เปลี่ยนหน้า/กรองข้อมูลใหม่) */

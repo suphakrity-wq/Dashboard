@@ -1,6 +1,6 @@
 /* หน้า 4 — พฤติกรรมการเข้าถึง: คนเจอข่าวได้อย่างไร */
 
-import { Q, COL, C } from './columns.js?v=102';
+import { Q, COL, C } from './columns.js?v=105';
 
 export default {
   id: "behavior",
@@ -26,7 +26,7 @@ export default {
         { type: "compare", wide: true, level: 1, accent: C.drama,
           title: "เจอข่าวโดยบังเอิญ vs ตั้งใจหาข่าวเอง",
           note: "ตัวเลขคือจำนวนข่าวที่รู้จักโดยเฉลี่ยของแต่ละกลุ่ม",
-          by: Q.howFound, colA: COL.countA, colB: COL.countB,
+          by: Q.howFound, colA: COL.countA, colB: COL.countB, unit: "ข่าว/คน",
           colorA: C.world, colorB: C.drama, minN: 3,
           groups: [
             { label: "บังเอิญเลื่อนเจอ", match: "บังเอิญ" },
@@ -38,7 +38,7 @@ export default {
         { type: "compare", wide: true,
           title: "คนใช้ TikTok vs ไม่ได้ใช้ TikTok",
           note: "แยกตามช่องทางที่ผู้ตอบเลือก",
-          by: Q.channel, colA: COL.countA, colB: COL.countB,
+          by: Q.channel, colA: COL.countA, colB: COL.countB, unit: "ข่าว/คน",
           colorA: C.world, colorB: C.drama, minN: 3,
           groups: [
             { label: "ใช้ TikTok", match: "TikTok" },

@@ -1,6 +1,6 @@
 /* หน้า 3 — เหตุผลเบื้องหลัง: อะไรทำให้กดดู และอะไรทำให้เลื่อนผ่าน */
 
-import { Q, C } from './columns.js?v=102';
+import { Q, C } from './columns.js?v=105';
 
 export default {
   id: "reasons",
@@ -28,7 +28,7 @@ export default {
           note: "เรียงจากข้อที่สองฝั่งต่างกันมากที่สุด",
           columnA: Q.whyA, columnB: Q.whyB,
           labelA: "ข่าวโลก", labelB: "ข่าวดราม่า",
-          colorA: C.world, colorB: C.drama, top: 8,
+          colorA: C.world, colorB: C.drama, top: 8, unit: "คน",
           hint: "ข้อที่ป้ายเขียนว่า “ข่าวดราม่านำ” มาก ๆ คือจุดแข็งที่ข่าวโลกยังไม่มี" }
       ] },
 
@@ -41,7 +41,7 @@ export default {
           note: "เรียงจากข้อที่สองฝั่งต่างกันมากที่สุด",
           columnA: Q.whyNotA, columnB: Q.whyNotB,
           labelA: "ข่าวโลก", labelB: "ข่าวดราม่า",
-          colorA: C.world, colorB: C.drama, top: 8,
+          colorA: C.world, colorB: C.drama, top: 8, unit: "คน",
           hint: "ข้อที่ป้ายเขียนว่า “ข่าวโลกนำ” คือกำแพงเฉพาะของข่าวโลกที่ต้องแก้ก่อน" }
       ] },
 

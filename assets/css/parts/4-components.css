@@ -509,3 +509,8 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;padding-right:2
 .odd-btn.on{background:var(--ink);border-color:var(--ink);color:var(--on-dark)}
 .odd-btn.on .odd-n{background:var(--lime);color:var(--lime-ink)}
 @media (max-width:920px){ .odd-btn .odd-txt{display:none} }   /* แคบแล้วเหลือไอคอน + จำนวน */
+
+/* ป้ายบอกสเกลใต้กลุ่มหลอด — ต้องอ่านได้โดยไม่ต้องชี้เมาส์ */
+.scale-note{margin:10px 0 0;font-size:var(--t-xs);color:var(--muted);line-height:1.4}
+.verdict .scale-note{color:var(--on-dark-muted)}
+.slide-fig .scale-note{margin-top:8px}
