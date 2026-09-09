@@ -8,10 +8,10 @@
  * ข้อตกลง: ดึงข้อมูลผ่าน groupBy/crossTab จาก core/compute.js เท่านั้น
  */
 
-import { el, growBar, segmentBars } from './dom.js?v=120';
-import { fmt, round1, pct } from '../core/format.js?v=120';
-import { num, groupBy, crossTab, avgOf, pickGroupColumn, distinctValues, compareGroups } from '../core/compute.js?v=120';
-import { welchTTest } from '../core/stats.js?v=120';
+import { el, growBar, segmentBars } from './dom.js?v=122';
+import { fmt, round1, pct } from '../core/format.js?v=122';
+import { num, groupBy, crossTab, avgOf, pickGroupColumn, distinctValues, compareGroups } from '../core/compute.js?v=122';
+import { welchTTest } from '../core/stats.js?v=122';
 
 /* สีของหลอดสื่อ "สถานะ" ไม่ใช่ชื่อชุดข้อมูล:
    ฝั่งที่มีค่ามากกว่า = ม่วง (สีเด่นของงานนี้) อีกฝั่ง = เทาเข้ม
@@ -665,109 +665,91 @@ export function chips(host, cf, rows) {
 }
 
 
-/* ---------- 13. Pyramid: แท่งสองฝั่งคนละข้างของแกนกลาง ----------
-   ใช้แทน histogram สองสีที่วางซ้อนกัน เพราะแบบนั้นตาต้องกระโดดไปมาระหว่างสองสี
-   แบบนี้แต่ละฝั่งอยู่คนละข้าง เทียบได้ทันทีว่าคนกองอยู่ทางไหนมากกว่า */
-export function pyramid(host, cf, rows) {
-  const [A, B] = cf.series || [];
-  if (!A || !B) return;
-  const maxVal = cf.max ?? 10;
-  const bins = [];
-  for (let v = maxVal; v >= 0; v--) bins.push(v);
+/* ---------- 13. Buckets: จัดค่าเป็นช่วงกว้าง ๆ แล้วเทียบกันเป็นแถบ ----------
+   แทนกราฟที่มี 11 แถว ซึ่งต้องกวาดตาอ่านทีละแถว
+   แบ่งเป็น "น้อย / กลาง / มาก" แค่ 3 ช่วง เทียบสองฝั่งได้ในบรรทัดเดียว */
+export function buckets(host, cf, rows) {
+  if (!rows.length) { host.append(el('p', 'hint', 'ยังไม่มีคำตอบให้แบ่งช่วง')); return; }
+  const ranges = cf.ranges || [
+    { label: 'รู้จักน้อย', from: 0, to: 3 },
+    { label: 'ปานกลาง',   from: 4, to: 6 },
+    { label: 'รู้จักมาก', from: 7, to: 10 }
+  ];
+  const shades = cf.shades || ['var(--sc-2)', 'var(--sc-3)', 'var(--sc-5)'];
 
-  const countOf = (col, v) => rows.filter(r => Math.round(num(r[col]) ?? -1) === v).length;
-  const data = bins.map(v => ({ v, a: countOf(A.column, v), b: countOf(B.column, v) }));
-  const peak = Math.max(1, ...data.map(d => Math.max(d.a, d.b)));
-
-  const head = el('div', 'pyr-head');
-  head.append(el('span', 'pyr-h-a', A.label), el('span', 'pyr-h-mid', cf.tickLabel || 'จำนวนข่าว'),
-              el('span', 'pyr-h-b', B.label));
-
-  const chart = el('div', 'pyr');
-  data.forEach(d => {
-    const row = el('div', 'pyr-row');
-
-    const left = el('div', 'pyr-side is-left');
-    if (d.a) left.append(el('span', 'pyr-num', String(d.a)));
-    const barA = el('i');
-    barA.style.setProperty('--c', A.color || 'var(--graphite)');
-    barA.style.width = (d.a / peak * 100) + '%';
-    barA.title = `${A.label}: รู้จัก ${d.v} ${cf.unit || ''} — ${d.a} คน`;
-    left.append(barA);
-
-    const tick = el('span', 'pyr-tick', String(d.v));
-
-    const right = el('div', 'pyr-side is-right');
-    const barB = el('i');
-    barB.style.setProperty('--c', B.color || 'var(--purple)');
-    barB.style.width = (d.b / peak * 100) + '%';
-    barB.title = `${B.label}: รู้จัก ${d.v} ${cf.unit || ''} — ${d.b} คน`;
-    right.append(barB);
-    if (d.b) right.append(el('span', 'pyr-num', String(d.b)));
-
-    row.append(left, tick, right);
-    chart.append(row);
+  const legend = el('div', 'legend');
+  ranges.forEach((r, i) => {
+    const item = el('span');
+    const dot = el('i', 'dot'); dot.style.background = shades[i % shades.length];
+    item.append(dot, `${r.label} (${r.from}–${r.to} ${cf.unit || ''})`.trim());
+    legend.append(item);
   });
+  host.append(legend);
 
-  host.append(head, chart);
-  host.append(el('p', 'scale-note',
-    `แต่ละแถวคือ "รู้จักกี่${cf.unit || 'ข่าว'}" · ความยาวแท่ง = จำนวนคน (ยาวสุด ${peak} คน)`));
-}
+  const box = el('div', 'buckets');
+  (cf.series || []).forEach(sr => {
+    const counts = ranges.map(r =>
+      rows.filter(x => { const v = num(x[sr.column]); return v != null && v >= r.from && v <= r.to; }).length);
+    const total = counts.reduce((a, b) => a + b, 0) || 1;
 
-/* ---------- 14. Diverging: ผลต่างรายคน เรียงจากมากไปน้อย ----------
-   ตอบคำถามว่า "ทุกคนเป็นเหมือนกันไหม" ได้ในภาพเดียว
-   ถ้าแท่งอยู่ข้างเดียวกันหมด แปลว่าไม่ได้มาจากคนไม่กี่คนที่ค่าสูงผิดปกติ */
-export function diverging(host, cf, rows) {
-  const pairs = rows.map(r => ({ a: num(r[cf.columnA]), b: num(r[cf.columnB]) }))
-    .filter(p => p.a != null && p.b != null)
-    .map(p => ({ ...p, d: p.b - p.a }))
-    .sort((x, y) => y.d - x.d);
-  if (!pairs.length) { host.append(el('p', 'hint', 'ยังไม่มีข้อมูลพอจะวาด')); return; }
+    const row = el('div', 'bk-row');
+    row.append(el('span', 'bk-name', sr.label));
 
-  const up = pairs.filter(p => p.d > 0).length;
-  const down = pairs.filter(p => p.d < 0).length;
-  const same = pairs.length - up - down;
-
-  /* วางเส้นศูนย์ตามข้อมูลจริง ไม่ตรึงไว้กลางการ์ด
-     ถ้าทุกคนไปทางเดียวกัน (เช่นบวกหมด) เส้นศูนย์จะไปอยู่ริมซ้าย
-     แท่งจึงได้ใช้ความกว้างเต็มการ์ด ไม่เหลือครึ่งซ้ายว่างเปล่า */
-  const maxPos = Math.max(0, ...pairs.map(p => p.d));
-  const maxNeg = Math.max(0, ...pairs.map(p => -p.d));
-  const span = (maxPos + maxNeg) || 1;
-  const zero = maxNeg / span;                       // ตำแหน่งเส้นศูนย์ 0–1
-
-  const head = el('div', 'div-head');
-  if (maxNeg > 0) head.append(el('span', null, `${cf.labelA}มากกว่า`));
-  const zeroTag = el('span', 'div-zero', '0');
-  zeroTag.style.left = (zero * 100) + '%';
-  head.append(zeroTag);
-  if (maxPos > 0) head.append(el('span', 'div-h-b', `${cf.labelB}มากกว่า`));
-
-  const chart = el('div', 'diverge');
-  chart.style.setProperty('--zero', (zero * 100) + '%');
-  pairs.forEach((p, i) => {
-    const row = el('div', 'div-row');
-    const bar = el('i', p.d > 0 ? 'is-b' : p.d < 0 ? 'is-a' : 'is-zero');
-    const w = Math.abs(p.d) / span * 100;
-    bar.style.width = w + '%';
-    bar.style.left = (p.d >= 0 ? zero * 100 : zero * 100 - w) + '%';
-    bar.title = `คนที่ ${i + 1} — ${cf.labelA} ${p.a} · ${cf.labelB} ${p.b} · ` +
-                `ต่างกัน ${round1(Math.abs(p.d))} ${cf.unit || 'ข่าว'}`;
+    const bar = el('div', 'bk-bar');
+    counts.forEach((n, i) => {
+      if (!n) return;
+      const seg = el('span', 'bk-seg');
+      seg.style.width = (n / total * 100) + '%';
+      seg.style.background = shades[i % shades.length];
+      if (i >= 2) seg.classList.add('is-dark');
+      seg.title = `${sr.label} · ${ranges[i].label} (${ranges[i].from}–${ranges[i].to}) — ${n} คน`;
+      seg.append(el('b', null, String(n)));
+      bar.append(seg);
+    });
     row.append(bar);
-    chart.append(row);
+    box.append(row);
   });
 
-  // แถบบอกสเกลใต้กราฟ: ต่างกันมากที่สุดกี่หน่วย
-  const axis = el('div', 'div-axis');
-  if (maxNeg > 0) { const s = el('span', null, round1(maxNeg) + ''); s.style.left = '0'; axis.append(s); }
-  const z = el('span', 'is-zero', '0'); z.style.left = (zero * 100) + '%'; axis.append(z);
-  if (maxPos > 0) { const s = el('span', 'is-end', round1(maxPos) + ' ' + (cf.unit || 'ข่าว')); axis.append(s); }
-  chart.after ? host.append(chart, axis) : host.append(chart);
-
-  host.insertBefore(head, chart);
+  host.append(box);
   host.append(el('p', 'scale-note',
-    `หนึ่งแท่ง = ผู้ตอบหนึ่งคน (เรียงจากต่างมากไปน้อย) · ` +
-    `${cf.labelB}มากกว่า ${up} คน · ${cf.labelA}มากกว่า ${down} คน · เท่ากัน ${same} คน`));
+    `ตัวเลขในแถบคือจำนวนคน · ความยาวแถบรวมกันคือผู้ตอบทั้งหมด ${rows.length} คน`));
 }
 
-Object.assign(CHARTS, { waffle, gauge, heatmap, bubbles, stacked, paired, chips, pyramid, diverging });
+/* ---------- 14. People: หนึ่งไอคอน = หนึ่งคน ----------
+   ไม่มีแกน ไม่มีสเกล นับหัวคนได้ตรง ๆ ใช้ตอบคำถามแบบ "กี่คนที่เป็นแบบไหน" */
+export function people(host, cf, rows) {
+  if (!rows.length) { host.append(el('p', 'hint', 'ยังไม่มีผู้ตอบให้นับ')); return; }
+  const groups = (cf.groups || []).map(g => ({ ...g, n: 0 }));
+  rows.forEach(r => {
+    const a = num(r[cf.columnA]), b = num(r[cf.columnB]);
+    if (a == null || b == null) return;
+    const d = b - a;
+    const k = d > 0 ? 0 : d < 0 ? 1 : 2;
+    if (groups[k]) groups[k].n++;
+  });
+
+  const total = groups.reduce((s, g) => s + g.n, 0) || 1;
+
+  const grid = el('div', 'ppl');
+  groups.forEach(g => {
+    for (let i = 0; i < g.n; i++) {
+      const one = el('i', 'ms ppl-one', 'person');
+      one.style.color = g.color;
+      one.title = g.label;
+      grid.append(one);
+    }
+  });
+  host.append(grid);
+
+  const list = el('div', 'ppl-legend');
+  groups.forEach(g => {
+    const row = el('div', 'ppl-item');
+    const dot = el('i', 'dot'); dot.style.background = g.color;
+    row.append(dot, el('span', 'ppl-name', g.label),
+      el('b', null, `${g.n} คน`), el('span', 'ppl-pct', pct(g.n, total) + '%'));
+    list.append(row);
+  });
+  host.append(list);
+}
+
+Object.assign(CHARTS, { waffle, gauge, heatmap, bubbles, stacked, paired, chips, buckets, people });
