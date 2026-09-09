@@ -8,16 +8,17 @@
  * ห้าม: ใส่สูตรคำนวณในไฟล์นี้ — ให้เรียกจาก core/ แทน
  */
 
-import { $, el, growBar, segmentBars } from './dom.js?v=61';
-import { fmt, round1, pct } from '../core/format.js?v=61';
-import { splitValues, isNumericColumn } from '../core/compute.js?v=61';
-import { store } from '../core/store.js?v=61';
-import { verdict as calcVerdict, causes as calcCauses, pulls as calcPulls } from '../core/insight.js?v=61';
-import { analyzeText } from '../core/textAnalysis.js?v=61';
-import { wilsonInterval } from '../core/stats.js?v=61';
-import { SOURCES, CONTEXT_FACTS, compareBenchmarks } from '../core/benchmarks.js?v=61';
-import { aggregate, groupBy as groupRows } from '../core/compute.js?v=61';
-import { CHARTS } from './charts.js?v=61';
+import { $, el, growBar, segmentBars } from './dom.js?v=65';
+import { fmt, round1, pct } from '../core/format.js?v=65';
+import { splitValues, isNumericColumn } from '../core/compute.js?v=65';
+import { store } from '../core/store.js?v=65';
+import { verdict as calcVerdict, causes as calcCauses, pulls as calcPulls } from '../core/insight.js?v=65';
+import { recommend } from '../core/recommend.js?v=65';
+import { analyzeText } from '../core/textAnalysis.js?v=65';
+import { wilsonInterval } from '../core/stats.js?v=65';
+import { SOURCES, CONTEXT_FACTS, compareBenchmarks } from '../core/benchmarks.js?v=65';
+import { aggregate, groupBy as groupRows } from '../core/compute.js?v=65';
+import { CHARTS } from './charts.js?v=65';
 
 let rerender = () => {};
 export const onRerender = fn => { rerender = fn; };
@@ -441,44 +442,45 @@ function conclusion(host, b, rows, cfg) {
   const cz = calcCauses(rows, A, { top: 3 });
   const pl = calcPulls(rows, A, { top: 3 });
   const tx = analyzeText(rows, b.textColumn || A.openTextCol);
+  const rec = recommend(rows, A, { top: b.actionCount || 5, textColumn: b.textColumn });
 
   const sec = section(host, b);
   const card = el('article', 'card summary-card');
 
-  /* 1. สาเหตุหลัก */
+  /* ---- 1. สาเหตุหลัก ---- */
   const mainCause = cz[0];
-  const barrierTheme = tx.themes.find(t => t.kind === 'barrier');   // อุปสรรคจากข้อความปลายเปิด
-  const pullTheme = tx.themes.find(t => t.kind === 'pull');         // แรงดึงจากข้อความปลายเปิด
-  const mainPull = pl[0];
+  const barrierTheme = tx.themes.find(t => t.kind === 'barrier');
+  const pullTheme = tx.themes.find(t => t.kind === 'pull');
 
   const q1 = el('div', 'sum-sec');
-  q1.append(el('h3', null, '1 · สาเหตุหลักคืออะไร'));
-  if (!mainCause) q1.append(el('p', null, 'ยังไม่มีคำตอบมากพอจะสรุป'));
-  else {
+  q1.append(el('h3', null, '1 · สาเหตุหลัก'));
+  if (!mainCause) {
+    q1.append(el('p', null, 'ยังมีคำตอบไม่พอจะสรุป'));
+  } else {
     const p = el('p', 'sum-lead');
-    let html = `จากคำตอบแบบเลือกตอบ สาเหตุที่พบมากที่สุดคือ <b>“${mainCause.label}”</b> ` +
-      `(${mainCause.share}% ของผู้ตอบ)`;
-    // ระวังการสรุปเกินข้อมูล: จะบอกว่า "สอดคล้องกัน" ได้ ก็ต่อเมื่อข้อความปลายเปิดพูดถึงอุปสรรคเหมือนกัน
+    let html = `คนไม่ดูข่าวโลกเพราะ <b>“${mainCause.label}”</b> มากที่สุด — ` +
+               `${mainCause.share}% ของผู้ตอบ`;
+    // จะบอกว่า "ตรงกัน" ได้ ต่อเมื่อคำตอบปลายเปิดพูดถึงอุปสรรคเหมือนกัน
     if (barrierTheme) {
-      html += ` และคำตอบปลายเปิดชี้ไปทางเดียวกันคือ <b>“${barrierTheme.label}”</b> (${barrierTheme.share}%)`;
+      html += ` คำตอบปลายเปิดบอกตรงกันว่า <b>“${barrierTheme.label}”</b> (${barrierTheme.share}%)`;
     } else if (pullTheme) {
-      html += ` ส่วนคำตอบปลายเปิดไม่ได้พูดถึงอุปสรรคโดยตรง แต่บอกว่าสิ่งที่ทำให้ “หยุดดู” ข่าวคือ ` +
-        `<b>“${pullTheme.label}”</b> (${pullTheme.share}%) — คือสิ่งที่ข่าวโลกต้องมีให้ได้`;
+      html += ` ส่วนคำตอบปลายเปิดไม่ได้พูดถึงอุปสรรค แต่บอกว่าสิ่งที่ทำให้หยุดดูคือ ` +
+              `<b>“${pullTheme.label}”</b> (${pullTheme.share}%) — คือสิ่งที่ข่าวโลกต้องมี`;
     }
     p.innerHTML = html;
     q1.append(p);
   }
   card.append(q1);
 
-  /* 2. ทำไมถึงเป็นแบบนั้น */
+  /* ---- 2. ทำไมเป็นแบบนี้ ---- */
   const q2 = el('div', 'sum-sec');
-  q2.append(el('h3', null, '2 · ทำไมถึงเป็นแบบนั้น'));
+  q2.append(el('h3', null, '2 · ทำไมเป็นแบบนี้'));
   const ev = el('ul', 'evidence');
   ev.append(el('li', null,
-    `ข้อมูลของเรา: ผู้ตอบ ${fmt(v.n)} คน รู้จักข่าวโลกเฉลี่ย ${fmt(round1(v.world))} ข่าว ` +
-    `เทียบกับข่าวดราม่า ${fmt(round1(v.drama))} ข่าว (${v.answer})`));
-  if (mainPull) ev.append(el('li', null,
-    `แรงดึงฝั่งดราม่าอันดับ 1 คือ “${mainPull.label}” (${mainPull.share}%) — สิ่งที่ข่าวโลกมักไม่มี`));
+    `ผู้ตอบ ${fmt(v.n)} คน รู้จักข่าวโลก ${fmt(round1(v.world))} ข่าว ` +
+    `ข่าวดราม่า ${fmt(round1(v.drama))} ข่าว → ${v.answer}`));
+  if (pl[0]) ev.append(el('li', null,
+    `ข่าวดราม่าชนะเพราะ “${pl[0].label}” (${pl[0].share}%) — สิ่งที่ข่าวโลกมักไม่มี`));
   CONTEXT_FACTS.slice(0, b.factCount || 3).forEach(f => {
     const li = el('li');
     li.append(document.createTextNode(f.text + ' '));
@@ -488,29 +490,30 @@ function conclusion(host, b, rows, cfg) {
   q2.append(ev);
   card.append(q2);
 
-  /* 3. ควรแก้ยังไง ใช้วิธีอะไร */
+  /* ---- 3. ทำอะไรก่อน ----
+     เรียงตามจำนวนคนที่ติดปัญหานั้น ทุกข้อบอกครบว่า ทำอะไร / แก้ที่ไหน / งานวิจัยพบอะไร */
   const q3 = el('div', 'sum-sec');
-  q3.append(el('h3', null, '3 · ควรแก้ยังไง ใช้วิธีอะไร'));
-  const steps = el('ol', 'steps');
-  const actions = [];
-  cz.filter(c => c.fix).forEach(c => actions.push({ why: c.label, how: c.fix, share: c.share, src: null }));
-  // ถ้าไม่มีอุปสรรคจากข้อความปลายเปิด ให้ใช้ "แรงดึง" อันดับต้นมาเป็นสิ่งที่ต้องเติมให้ข่าวโลกแทน
-  const textActions = tx.themes.filter(t => t.kind === 'barrier').length
-    ? tx.themes.filter(t => t.kind === 'barrier').slice(0, 2)
-    : tx.themes.filter(t => t.kind === 'pull').slice(0, 2);
-  textActions.forEach(t => actions.push({
-    why: (t.kind === 'barrier' ? 'อุปสรรคจากคำตอบปลายเปิด: ' : 'สิ่งที่ทำให้คนหยุดดู: ') + t.label,
-    how: t.method, share: t.share, src: t.source
-  }));
+  q3.append(el('h3', null, '3 · ทำอะไรก่อน'));
+  q3.append(el('p', 'sec-note', 'เรียงตามจำนวนคนที่ติดปัญหานั้น — ข้อบนสุดคุ้มที่สุด'));
 
-  if (!actions.length) steps.append(el('li', null, 'ยังไม่มีข้อมูลมากพอจะเสนอแนวทาง'));
-  actions.slice(0, b.actionCount || 5).forEach(a => {
+  const steps = el('ol', 'steps');
+  if (!rec.actions.length) {
+    steps.append(el('li', null, 'ยังมีข้อมูลไม่พอจะเสนอแนวทาง'));
+  }
+  rec.actions.forEach(a => {
     const li = el('li');
-    li.append(el('b', null, a.how));
+    li.append(el('b', null, a.do));
+
     const meta = el('span', 'step-meta');
-    meta.textContent = `แก้ที่: ${a.why} (${a.share}% ของผู้ตอบ)` +
-      (a.src && SOURCES[a.src] ? ` · วิธีนี้อ้างอิง ${SOURCES[a.src].short}` : '');
+    meta.textContent = `แก้ที่: ${a.why} · ${a.share}% ของผู้ตอบ (${fmt(a.count)} คน)`;
     li.append(meta);
+
+    if (a.effect || a.sourceFull) {
+      const ref = el('span', 'step-ref');
+      if (a.effect) ref.append(document.createTextNode(a.effect + ' '));
+      if (a.sourceFull) ref.append(el('cite', null, '— ' + a.sourceFull));
+      li.append(ref);
+    }
     steps.append(li);
   });
   q3.append(steps);

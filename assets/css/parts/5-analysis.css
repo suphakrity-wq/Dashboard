@@ -117,7 +117,11 @@
 .steps{margin:0;padding-left:22px;display:flex;flex-direction:column;gap:14px;counter-reset:none}
 .steps li{font-size:var(--t-sm);line-height:1.55}
 .steps li b{display:block;font-size:var(--t-md);font-weight:700;color:var(--ink);margin-bottom:3px}
-.step-meta{font-size:var(--t-xs);color:var(--muted)}
+.step-meta{display:block;font-size:var(--t-xs);color:var(--muted)}
+/* บรรทัดอ้างอิงงานวิจัย — แยกให้เห็นว่าเป็นคนละชั้นกับข้อมูลของเรา */
+.step-ref{display:block;margin-top:6px;font-size:var(--t-xs);color:var(--ink-2);
+  background:var(--purple-soft);border-radius:var(--r-sm);padding:7px 11px;line-height:1.5}
+.step-ref cite{color:var(--muted)}
 .sum-warn{margin-top:var(--sp-3);background:var(--warn-bg,#fdf6e3);color:#7a5c12;
   border-radius:var(--r-sm);padding:11px 14px;font-size:var(--t-xs)}
 

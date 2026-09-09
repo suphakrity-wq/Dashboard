@@ -1,9 +1,9 @@
 /* [core] ตรรกะการวิเคราะห์ — คืนค่าเป็น "ข้อมูล" ล้วน ไม่มี HTML
    ฝั่งหน้าตาเอาผลลัพธ์ไปวาดเอง จะเปลี่ยนหน้าตาโดยไม่กระทบตรรกะได้ */
 
-import { avgOf, groupBy, num } from './compute.js?v=61';
-import { pct } from './format.js?v=61';
-import { pairedTTest, wilcoxonSignedRank, effectSizeLabel, requiredN } from './stats.js?v=61';
+import { avgOf, groupBy, num } from './compute.js?v=65';
+import { pct } from './format.js?v=65';
+import { pairedTTest, wilcoxonSignedRank, effectSizeLabel, requiredN } from './stats.js?v=65';
 
 /**
  * ตัดสินคำถามวิจัยด้วยการทดสอบทางสถิติ ไม่ใช่เกณฑ์ที่ตั้งเอง
@@ -81,7 +81,10 @@ export function causes(rows, analysis = {}, { column, top = 4 } = {}) {
     label,
     count: g.values[i],
     share: pct(g.values[i], rows.length),
-    fix: (analysis.causes || []).find(c => label.includes(c.match))?.fix || null
+    ...(() => {
+      const m = (analysis.causes || []).find(c => label.includes(c.match)) || {};
+      return { fix: m.fix || null, source: m.source || null, effect: m.effect || null };
+    })()
   }));
 }
 
