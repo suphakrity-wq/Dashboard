@@ -8,10 +8,10 @@
  * ข้อตกลง: ดึงข้อมูลผ่าน groupBy/crossTab จาก core/compute.js เท่านั้น
  */
 
-import { el, growBar, segmentBars } from './dom.js?v=109';
-import { fmt, round1, pct } from '../core/format.js?v=109';
-import { num, groupBy, crossTab, avgOf, pickGroupColumn, distinctValues, compareGroups } from '../core/compute.js?v=109';
-import { welchTTest } from '../core/stats.js?v=109';
+import { el, growBar, segmentBars } from './dom.js?v=111';
+import { fmt, round1, pct } from '../core/format.js?v=111';
+import { num, groupBy, crossTab, avgOf, pickGroupColumn, distinctValues, compareGroups } from '../core/compute.js?v=111';
+import { welchTTest } from '../core/stats.js?v=111';
 
 /* สีของหลอดสื่อ "สถานะ" ไม่ใช่ชื่อชุดข้อมูล:
    ฝั่งที่มีค่ามากกว่า = ม่วง (สีเด่นของงานนี้) อีกฝั่ง = เทาเข้ม
@@ -641,4 +641,116 @@ export function chips(host, cf, rows) {
   host.append(el('p', 'hint', cf.scaleNote || 'ป้ายยิ่งเข้ม = ยิ่งมีคนเลือกมาก · ตัวเลขคือจำนวนคน'));
 }
 
-Object.assign(CHARTS, { waffle, gauge, heatmap, bubbles, stacked, paired, chips });
+
+/* ---------- 13. Histogram: การกระจายตัวของค่ารายคน ----------
+   ค่าเฉลี่ยบอกแค่ "จุดกึ่งกลาง" แต่ไม่บอกว่าคนกระจุกอยู่ตรงไหน
+   กราฟนี้ตอบว่า "คนส่วนใหญ่รู้จักกี่ข่าว" ซึ่งค่าเฉลี่ยตัวเดียวบอกไม่ได้ */
+export function histogram(host, cf, rows) {
+  const series = (cf.series || []).map(s => ({ ...s }));
+  const maxVal = cf.max ?? 10;
+  const bins = [];
+  for (let v = 0; v <= maxVal; v++) bins.push(v);
+
+  series.forEach(s => {
+    s.counts = bins.map(v => rows.filter(r => Math.round(num(r[s.column]) ?? -1) === v).length);
+  });
+  const peak = Math.max(1, ...series.flatMap(s => s.counts));
+
+  const chart = el('div', 'hist');
+  bins.forEach((v, i) => {
+    const col = el('div', 'hist-col');
+    const stack = el('div', 'hist-bars');
+    series.forEach(s => {
+      const bar = el('i');
+      bar.style.setProperty('--c', s.color || 'var(--accent)');
+      bar.style.height = '0%';
+      bar.title = `${s.label}: ${s.counts[i]} คนรู้จัก ${v} ${cf.unit || ''}`.trim();
+      requestAnimationFrame(() => { bar.style.height = (s.counts[i] / peak * 100) + '%'; });
+      setTimeout(() => { bar.style.height = (s.counts[i] / peak * 100) + '%'; }, 120);
+      if (s.counts[i]) bar.append(el('b', null, String(s.counts[i])));
+      stack.append(bar);
+    });
+    col.append(stack, el('span', 'hist-x', String(v)));
+    chart.append(col);
+  });
+
+  const legend = el('div', 'legend');
+  series.forEach(s => {
+    const item = el('span');
+    const dot = el('i', 'dot'); dot.style.background = s.color || 'var(--accent)';
+    item.append(dot, s.label);
+    legend.append(item);
+  });
+
+  host.append(legend, chart);
+  // ไม่ต้องเติมคำอธิบายแกนซ้ำ การ์ดมี note กับ hint ของตัวเองอยู่แล้ว
+}
+
+/* ---------- 14. Slope: เส้นต่อคน จากฝั่งซ้ายไปฝั่งขวา ----------
+   ใช้พิสูจน์ด้วยตาว่าผลต่างมาจาก "เกือบทุกคนไปทางเดียวกัน"
+   ไม่ใช่คนไม่กี่คนที่ค่าสูงมากจนดึงค่าเฉลี่ย */
+export function slope(host, cf, rows) {
+  const pairs = rows.map(r => ({ a: num(r[cf.columnA]), b: num(r[cf.columnB]) }))
+    .filter(p => p.a != null && p.b != null);
+  if (!pairs.length) { host.append(el('p', 'hint', 'ยังไม่มีข้อมูลพอจะวาด')); return; }
+
+  const top = Math.max(cf.max ?? 10, ...pairs.map(p => Math.max(p.a, p.b)));
+  const NS = 'http://www.w3.org/2000/svg';
+  const W = 320, H = 220, PAD = 26;
+  const y = v => H - PAD - (v / top) * (H - PAD * 2);
+
+  const svg = document.createElementNS(NS, 'svg');
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  svg.setAttribute('class', 'slope');
+
+  [[PAD, cf.labelA], [W - PAD, cf.labelB]].forEach(([x, label]) => {
+    const axis = document.createElementNS(NS, 'line');
+    axis.setAttribute('x1', x); axis.setAttribute('x2', x);
+    axis.setAttribute('y1', PAD); axis.setAttribute('y2', H - PAD);
+    axis.setAttribute('class', 'slope-axis');
+    svg.append(axis);
+    const t = document.createElementNS(NS, 'text');
+    t.setAttribute('x', x); t.setAttribute('y', H - 8);
+    t.setAttribute('text-anchor', 'middle');
+    t.setAttribute('class', 'slope-label');
+    t.textContent = label;
+    svg.append(t);
+  });
+
+  pairs.forEach(p => {
+    const line = document.createElementNS(NS, 'line');
+    line.setAttribute('x1', PAD); line.setAttribute('y1', y(p.a));
+    line.setAttribute('x2', W - PAD); line.setAttribute('y2', y(p.b));
+    line.setAttribute('class', 'slope-line ' + (p.b > p.a ? 'is-up' : p.b < p.a ? 'is-down' : 'is-flat'));
+    const title = document.createElementNS(NS, 'title');
+    title.textContent = `${cf.labelA} ${p.a} → ${cf.labelB} ${p.b}`;
+    line.append(title);
+    svg.append(line);
+  });
+
+  const avgA = pairs.reduce((s, p) => s + p.a, 0) / pairs.length;
+  const avgB = pairs.reduce((s, p) => s + p.b, 0) / pairs.length;
+  const mean = document.createElementNS(NS, 'line');
+  mean.setAttribute('x1', PAD); mean.setAttribute('y1', y(avgA));
+  mean.setAttribute('x2', W - PAD); mean.setAttribute('y2', y(avgB));
+  mean.setAttribute('class', 'slope-mean');
+  svg.append(mean);
+
+  [[PAD, avgA], [W - PAD, avgB]].forEach(([x, v]) => {
+    const t = document.createElementNS(NS, 'text');
+    t.setAttribute('x', x); t.setAttribute('y', y(v) - 8);
+    t.setAttribute('text-anchor', 'middle');
+    t.setAttribute('class', 'slope-val');
+    t.textContent = round1(v);
+    svg.append(t);
+  });
+
+  const up = pairs.filter(p => p.b > p.a).length;
+  const down = pairs.filter(p => p.b < p.a).length;
+  host.append(svg);
+  host.append(el('p', 'hint',
+    `หนึ่งเส้น = ผู้ตอบหนึ่งคน · ${cf.labelB}สูงกว่า ${up} คน · ${cf.labelA}สูงกว่า ${down} คน · ` +
+    `เท่ากัน ${pairs.length - up - down} คน (เส้นหนาคือค่าเฉลี่ย)`));
+}
+
+Object.assign(CHARTS, { waffle, gauge, heatmap, bubbles, stacked, paired, chips, histogram, slope });

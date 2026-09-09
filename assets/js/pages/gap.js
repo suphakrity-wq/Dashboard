@@ -1,6 +1,6 @@
 /* หน้า 2 — ช่องว่างการรับรู้: เทียบข่าวสองชุดที่ผู้ตอบรู้จักจริง */
 
-import { Q, COL, C } from './columns.js?v=109';
+import { Q, COL, C } from './columns.js?v=111';
 
 export default {
   id: "gap",
@@ -34,6 +34,28 @@ export default {
             { column: COL.countA, label: "ข่าวโลก",   color: C.world },
             { column: COL.countB, label: "ข่าวดราม่า", color: C.drama }
           ] }
+      ] },
+
+    { type: "charts",
+      title: "คนกระจุกอยู่ตรงไหน",
+      desc: "ค่าเฉลี่ยบอกจุดกึ่งกลาง แต่ไม่บอกว่าคนส่วนใหญ่อยู่ตรงไหน",
+      charts: [
+        { type: "histogram", wide: true,
+          title: "รู้จักกี่ข่าว · นับเป็นจำนวนคน",
+          note: "แกนนอนคือจำนวนข่าวที่รู้จัก (0–10) ความสูงคือจำนวนคนที่ตอบเท่านั้น",
+          max: 10, unit: "ข่าว",
+          series: [
+            { column: COL.countA, label: "ข่าวโลก",   color: C.world },
+            { column: COL.countB, label: "ข่าวดราม่า", color: C.drama }
+          ],
+          hint: "ถ้าสองสีกองอยู่คนละฝั่งของแกน แปลว่าช่องว่างเกิดกับคนส่วนใหญ่ ไม่ใช่แค่บางคน" },
+
+        { type: "slope", wide: true,
+          title: "เส้นของผู้ตอบรายคน",
+          note: "หนึ่งเส้นคือหนึ่งคน ลากจากข่าวโลกไปข่าวดราม่า",
+          columnA: COL.countA, columnB: COL.countB,
+          labelA: "ข่าวโลก", labelB: "ข่าวดราม่า", max: 10,
+          hint: "ถ้าเส้นส่วนใหญ่เอียงไปทางเดียวกัน แปลว่าผลไม่ได้มาจากคนไม่กี่คนที่ค่าสูงผิดปกติ" }
       ] },
 
     { type: "charts",
