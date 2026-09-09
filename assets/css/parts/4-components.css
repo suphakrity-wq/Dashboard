@@ -274,9 +274,16 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;padding-right:2
 /* ---- Stacked bar ---- */
 /* แถบสัดส่วน: เว้นช่องไฟระหว่างสีให้เห็นขอบเขตชัด (เดิมใช้เส้นขาว 1px แทบมองไม่เห็น)
    ต้องปิดพื้นและเส้นขอบในของราง เพราะแต่ละสีมีขอบมนของตัวเองแล้ว */
-.stack{display:flex;height:34px;gap:6px;background:none;box-shadow:none;overflow:visible}
-.stack i{display:block;height:100%;width:0;border-radius:var(--r-pill);min-width:8px;
-  transition:width var(--t-slow) var(--ease)}
+/* แถบเดียวต่อกันสนิท มนเฉพาะหัวกับท้าย ตรงกลางไม่มีช่องว่าง
+   (เดิมเว้นช่องไฟระหว่างส่วน ทำให้ดูเหมือนข้อมูลขาดหายไป) */
+.stack{display:flex;height:38px;gap:0;background:var(--track);box-shadow:none;
+  border-radius:var(--r-pill);overflow:hidden}
+.stack i{display:flex;align-items:center;justify-content:center;height:100%;width:0;
+  border-radius:0;min-width:0;color:#fff;
+  transition:width var(--t-slow) var(--ease), filter var(--t-fast) ease}
+.stack i.is-light{color:var(--ink)}
+.stack i b{font-size:var(--t-xs);font-weight:800;font-variant-numeric:tabular-nums;
+  padding:0 4px;overflow:hidden;white-space:nowrap}
 .stack-legend{display:flex;flex-direction:column;gap:9px;margin-top:var(--sp-3)}
 .stack-item{display:flex;align-items:center;gap:10px;font-size:var(--t-sm);min-width:0}
 .stack-name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--ink-2)}
@@ -538,19 +545,22 @@ td.is-fixed{color:var(--lime-ink);background:var(--lime-soft)}
 .buckets{display:flex;flex-direction:column;gap:14px;margin-top:var(--sp-2)}
 .bk-row{display:grid;grid-template-columns:minmax(84px,auto) minmax(0,1fr);gap:14px;align-items:center}
 .bk-name{font-size:var(--t-sm);font-weight:700;color:var(--ink-2);white-space:nowrap}
-.bk-bar{display:flex;gap:4px;height:38px}
-.bk-seg{display:flex;align-items:center;justify-content:center;min-width:0;
-  border-radius:var(--r-pill);color:var(--ink);
+.bk-bar{display:flex;gap:0;height:38px;border-radius:var(--r-pill);overflow:hidden;background:var(--track)}
+.bk-seg{display:flex;align-items:center;justify-content:center;gap:6px;min-width:0;
+  border-radius:0;color:var(--ink);overflow:hidden;white-space:nowrap;
   transition:filter var(--t-fast) ease}
+.bk-tag{font-size:var(--t-xs);opacity:.85;overflow:hidden;text-overflow:ellipsis}
 .bk-seg.is-dark{color:#fff}
 .bk-seg b{font-size:var(--t-sm);font-weight:800;font-variant-numeric:tabular-nums}
 .bk-seg:hover{filter:brightness(1.06)}
 
 /* ---------- ไอคอนคน (people) ----------
    หนึ่งไอคอน = หนึ่งคน นับหัวได้ ไม่ต้องอ่านแกนหรือสเกล */
-.ppl{display:flex;flex-wrap:wrap;gap:4px;margin:var(--sp-2) 0 var(--sp-3)}
+.ppl-groups{display:flex;flex-direction:column;gap:var(--sp-3);margin-top:var(--sp-2)}
+.ppl-group{display:flex;flex-direction:column;gap:8px}
+.ppl{display:flex;flex-wrap:wrap;gap:4px}
+.ppl-none{font-size:var(--t-xs);color:var(--muted)}
 .ppl-one{font-size:28px;line-height:1;display:block}
-.ppl-legend{display:flex;flex-direction:column;gap:9px}
 .ppl-item{display:flex;align-items:center;gap:10px;font-size:var(--t-sm);min-width:0}
 .ppl-name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--ink-2)}
 .ppl-item b{font-weight:800;font-variant-numeric:tabular-nums;flex-shrink:0}
@@ -606,6 +616,3 @@ td.is-fixed{color:var(--lime-ink);background:var(--lime-soft)}
 /* ฐานของกราฟ — บอกว่ากราฟใบนี้คำนวณจากคนกี่คน อ่านการ์ดเดียวจบ */
 .chart-base{margin-top:10px;font-size:var(--t-xs);color:var(--muted)}
 .hint + .chart-base{margin-top:6px;border-top:none;padding-top:0}
-
-/* เส้นคั่นส่วนของโดนัท — สีเดียวกับพื้นการ์ด จึงดูเหมือนช่องว่างแต่ค่าไม่เพี้ยน */
-.donut-cut{stroke:var(--surface);stroke-width:.55;stroke-linecap:butt}

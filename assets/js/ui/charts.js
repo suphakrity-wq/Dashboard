@@ -8,10 +8,10 @@
  * ข้อตกลง: ดึงข้อมูลผ่าน groupBy/crossTab จาก core/compute.js เท่านั้น
  */
 
-import { el, growBar, segmentBars } from './dom.js?v=122';
-import { fmt, round1, pct } from '../core/format.js?v=122';
-import { num, groupBy, crossTab, avgOf, pickGroupColumn, distinctValues, compareGroups } from '../core/compute.js?v=122';
-import { welchTTest } from '../core/stats.js?v=122';
+import { el, growBar, segmentBars } from './dom.js?v=124';
+import { fmt, round1, pct } from '../core/format.js?v=124';
+import { num, groupBy, crossTab, avgOf, pickGroupColumn, distinctValues, compareGroups } from '../core/compute.js?v=124';
+import { welchTTest } from '../core/stats.js?v=124';
 
 /* สีของหลอดสื่อ "สถานะ" ไม่ใช่ชื่อชุดข้อมูล:
    ฝั่งที่มีค่ามากกว่า = ม่วง (สีเด่นของงานนี้) อีกฝั่ง = เทาเข้ม
@@ -201,22 +201,8 @@ export function donut(host, cf, rows) {
     acc += v / total * C;
   });
 
-  // เส้นคั่นระหว่างส่วน ใช้สีเดียวกับพื้นการ์ด ทำให้เห็นขอบเขตโดยไม่ต้องเว้นช่องจริง
-  if (values.length > 1) {
-    let at = 0;
-    values.forEach(v => {
-      at += v / total;
-      const ang = at * Math.PI * 2 - Math.PI / 2;
-      const line = document.createElementNS(NS, 'line');
-      const r1 = R - W / 2 - 0.2, r2 = R + W / 2 + 0.2;
-      line.setAttribute('x1', 21 + Math.cos(ang) * r1);
-      line.setAttribute('y1', 21 + Math.sin(ang) * r1);
-      line.setAttribute('x2', 21 + Math.cos(ang) * r2);
-      line.setAttribute('y2', 21 + Math.sin(ang) * r2);
-      line.setAttribute('class', 'donut-cut');
-      svg.append(line);
-    });
-  }
+  /* ไม่ใส่เส้นคั่นระหว่างส่วน — เคยลองแล้วมันอ่านเป็น "ช่องว่าง/ข้อมูลขาด"
+     สีของแต่ละส่วนไล่เฉดต่างกันอยู่แล้ว จึงแยกออกโดยไม่ต้องมีเส้น */
 
   const mid = el('div', 'donut-mid');
   mid.innerHTML = `<b>${fmt(total)}</b><span>${cf.unit || 'คำตอบ'}</span>`;
@@ -543,7 +529,11 @@ export function stacked(host, cf, rows) {
   values.forEach((v, i) => {
     const seg = el('i');
     seg.style.background = palette[i % palette.length];
-    seg.title = `${labels[i]} — ${pct(v, total)}%`;
+    seg.title = `${labels[i]} — ${v} คน (${pct(v, total)}%)`;
+    // ตัวเลขอยู่ในแถบเลย ไม่ต้องกวาดตาไปหาในรายการข้างล่าง
+    const tag = el('b', null, pct(v, total) + '%');
+    if (i >= 2) seg.classList.add('is-light');
+    seg.append(tag);
     bar.append(seg);
     growBar(seg, v / total * 100);
   });
@@ -699,11 +689,14 @@ export function buckets(host, cf, rows) {
     counts.forEach((n, i) => {
       if (!n) return;
       const seg = el('span', 'bk-seg');
-      seg.style.width = (n / total * 100) + '%';
+      const w = n / total * 100;
+      seg.style.width = w + '%';
       seg.style.background = shades[i % shades.length];
       if (i >= 2) seg.classList.add('is-dark');
       seg.title = `${sr.label} · ${ranges[i].label} (${ranges[i].from}–${ranges[i].to}) — ${n} คน`;
-      seg.append(el('b', null, String(n)));
+      // ช่องกว้างพอก็ใส่ชื่อช่วงลงไปเลย จะได้ไม่ต้องเทียบสีกับคำอธิบายข้างบน
+      if (w >= 22) seg.append(el('span', 'bk-tag', ranges[i].label));
+      seg.append(el('b', null, `${n} คน`));
       bar.append(seg);
     });
     row.append(bar);
@@ -711,8 +704,16 @@ export function buckets(host, cf, rows) {
   });
 
   host.append(box);
+  // ฐานที่บอกต้องเป็นจำนวนที่นับได้จริง ไม่ใช่จำนวนแถวทั้งหมด
+  // (บางคนไม่ได้ตอบข้อนี้ ถ้าเอาจำนวนแถวมาใช้ ตัวเลขในแถบจะบวกไม่ครบตามที่เขียนไว้)
+  const counted = Math.max(...(cf.series || []).map(sr =>
+    ranges.reduce((a, r) => a + rows.filter(x => {
+      const v = num(x[sr.column]); return v != null && v >= r.from && v <= r.to;
+    }).length, 0)), 0);
+  const missing = rows.length - counted;
   host.append(el('p', 'scale-note',
-    `ตัวเลขในแถบคือจำนวนคน · ความยาวแถบรวมกันคือผู้ตอบทั้งหมด ${rows.length} คน`));
+    `ตัวเลขในแถบคือจำนวนคน · รวมกันได้ ${counted} คน` +
+    (missing > 0 ? ` (อีก ${missing} คนไม่ได้ตอบข้อนี้)` : '')));
 }
 
 /* ---------- 14. People: หนึ่งไอคอน = หนึ่งคน ----------
@@ -730,26 +731,29 @@ export function people(host, cf, rows) {
 
   const total = groups.reduce((s, g) => s + g.n, 0) || 1;
 
-  const grid = el('div', 'ppl');
+  /* แยกเป็นกลุ่มละบล็อก พร้อมหัวข้อของตัวเอง
+     ถ้าเอาไอคอนทุกกลุ่มมาต่อกันเป็นแถวเดียว ต้องเพ่งแยกสีเองว่ากลุ่มไหนจบตรงไหน */
+  const box = el('div', 'ppl-groups');
   groups.forEach(g => {
+    const block = el('div', 'ppl-group');
+    const head = el('div', 'ppl-item');
+    const dot = el('i', 'dot'); dot.style.background = g.color;
+    head.append(dot, el('span', 'ppl-name', g.label),
+      el('b', null, `${g.n} คน`), el('span', 'ppl-pct', pct(g.n, total) + '%'));
+    block.append(head);
+
+    const grid = el('div', 'ppl');
+    if (!g.n) grid.append(el('span', 'ppl-none', 'ไม่มีใครอยู่กลุ่มนี้'));
     for (let i = 0; i < g.n; i++) {
       const one = el('i', 'ms ppl-one', 'person');
       one.style.color = g.color;
       one.title = g.label;
       grid.append(one);
     }
+    block.append(grid);
+    box.append(block);
   });
-  host.append(grid);
-
-  const list = el('div', 'ppl-legend');
-  groups.forEach(g => {
-    const row = el('div', 'ppl-item');
-    const dot = el('i', 'dot'); dot.style.background = g.color;
-    row.append(dot, el('span', 'ppl-name', g.label),
-      el('b', null, `${g.n} คน`), el('span', 'ppl-pct', pct(g.n, total) + '%'));
-    list.append(row);
-  });
-  host.append(list);
+  host.append(box);
 }
 
 Object.assign(CHARTS, { waffle, gauge, heatmap, bubbles, stacked, paired, chips, buckets, people });

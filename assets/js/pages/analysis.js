@@ -5,7 +5,7 @@
  * (match ใช้การค้นหาคำบางส่วน ไม่ต้องตรงทั้งประโยค)
    แนวคิดของข้อเสนอแนะอ้างอิงงานวิจัยในโฟลเดอร์ เอกสาร/ แต่ไม่ได้แสดงชื่อทฤษฎีให้ผู้ใช้เห็น */
 
-import { Q, COL } from './columns.js?v=122';
+import { Q, COL } from './columns.js?v=124';
 
 export const ANALYSIS = {
   worldCol: COL.countA,
