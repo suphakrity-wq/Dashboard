@@ -64,7 +64,10 @@
    ตัดหลอดเป็นสี่เหลี่ยมมุมมนเรียงต่อกัน 1 บล็อก = 1 หน่วย (1 ข่าว / 1 คน)
    นับด้วยตาได้เลยว่าค่าเท่าไร ไม่ต้องอ่านตัวเลขข้าง ๆ
    บล็อกสร้างจาก segmentBar() ใน ui/dom.js — ที่นี่คุมแค่หน้าตา */
-.is-seg{display:flex;gap:var(--seg-gap,3px);background:none;box-shadow:none;overflow:visible}
+/* transition:none จำเป็น — รางมี transition ของ background อยู่ (0.32s)
+   พอเปลี่ยนเป็นแบบแบ่งช่อง พื้นรางจะค่อย ๆ จางหาย เห็นเป็นแท่งยาวแวบหนึ่งข้างหลังช่อง */
+.is-seg{display:flex;gap:var(--seg-gap,3px);background:none;box-shadow:none;overflow:visible;
+  transition:none}
 /* ความปลอดภัยของการมองเห็น: บล็อกต้อง "เห็นได้" โดยไม่พึ่งอนิเมชันเลย
    - opacity ฐานเป็น 1 เสมอ
    - ไม่ใช้ animation-fill-mode และไม่หน่วงทีละบล็อก
