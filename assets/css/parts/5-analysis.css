@@ -18,12 +18,18 @@
 .vd-track{height:14px;border-radius:var(--r-pill);background:rgba(255,255,255,.14);overflow:hidden}
 .vd-track i{display:block;height:100%;width:0;border-radius:var(--r-pill);background:rgba(255,255,255,.85);
   transition:width var(--t-slow) var(--ease)}
-.vd-bar:first-child .vd-track i{background:var(--gray-on-dark)}
-.vd-bar:last-child .vd-track i{background:var(--purple-2)}
-/* หลอดแบบแบ่งช่องบนพื้นเข้ม — ช่องที่ยังไม่ถึงค่าต้องเป็นสีขาวโปร่ง ไม่ใช่เทาอ่อนแบบพื้นขาว
-   ไม่งั้นช่องว่างจะสว่างกว่าตัวการ์ดจนแย่งสายตา */
+/* สีของหลอดต่อเนื่อง — ใช้เฉพาะตอนที่ยังไม่ได้แบ่งช่อง
+   ต้องมี :not(.is-seg) เสมอ ไม่งั้นกฎนี้ (เจาะจงกว่า) จะทาสีทับ "ทุกช่อง"
+   รวมช่องที่ยังไม่ถึงค่าด้วย หลอดเลยดูเต็มตลอด */
+.vd-bar:first-child .vd-track:not(.is-seg) i{background:var(--gray-on-dark)}
+.vd-bar:last-child  .vd-track:not(.is-seg) i{background:var(--purple-2)}
+
+/* หลอดแบบแบ่งช่องบนพื้นเข้ม — ช่องที่ยังไม่ถึงค่าเป็นขาวโปร่ง ไม่ใช่เทาอ่อนแบบพื้นขาว
+   ไม่งั้นช่องว่างจะสว่างกว่าตัวการ์ดจนแย่งสายตา
+   ส่วนช่องที่ถึงค่าแล้วใช้สีจาก --c ที่ JS ใส่มา (ต้องเจาะจงเท่ากันจึงจะทับกฎบนได้) */
 .verdict .is-seg > .seg-blk{background:rgba(255,255,255,.16)}
-.verdict:hover .is-seg > .seg-blk:not(.is-on){background:rgba(255,255,255,.16)}
+.verdict .is-seg > .seg-blk.is-on{background:var(--c)}
+.verdict .is-seg > .seg-blk > .seg-part{background:var(--c)}
 .vd-bar b{font-size:var(--t-lg);font-weight:900;font-variant-numeric:tabular-nums;text-align:right}
 .vd-warn{margin-top:24px;font-size:var(--t-xs);opacity:.75;border-top:1px solid rgba(255,255,255,.16);padding-top:14px}
 
