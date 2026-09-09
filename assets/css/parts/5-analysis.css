@@ -235,3 +235,28 @@
 
 /* บรรทัดสรุปที่ต่อท้ายรายการ เดา vs เจอ ต้องมีระยะห่างจากข้อสุดท้าย */
 .slide-check + .slide-lead{margin-top:18px;margin-bottom:0}
+
+/* ---- โหมดเต็มจอสำหรับพรีเซ็นต์ ----
+   ตัว .deck เองเป็น element ที่ขอเต็มจอ จึงต้องตั้งพื้นหลังและระยะขอบใหม่ทั้งหมด
+   (ในโหมดเต็มจอ กล่องนี้ไม่ได้อยู่ในเลย์เอาต์ของหน้าอีกต่อไป) */
+.deck-full{min-width:auto;padding-inline:12px}
+.deck-full .ms{font-size:var(--ico-md);display:block}
+
+.deck.is-full{position:fixed;inset:0;z-index:80;background:var(--canvas);
+  padding:22px clamp(16px, 3vw, 40px);gap:18px;justify-content:center;
+  padding-bottom:max(22px, env(safe-area-inset-bottom))}
+html:has(.deck.is-full){overflow:hidden}   /* กันหน้าข้างหลังเลื่อนตามตอนนำเสนอ */
+
+.deck.is-full .deck-stage{flex:1;min-height:0;padding:clamp(24px, 6vh, 64px) clamp(24px, 7vw, 96px);
+  overflow:auto;border-radius:var(--r-xl);align-content:center}   /* จอสูง ๆ ไม่ให้เนื้อหาลอยอยู่ข้างบน */
+.deck.is-full .slide h3{font-size:clamp(26px, 4.2vw, 58px)}
+.deck.is-full .slide-list li,
+.deck.is-full .slide-check li,
+.deck.is-full .slide-lead{font-size:clamp(15px, 1.7vw, 26px)}
+.deck.is-full .slide-list{gap:clamp(10px, 1.4vh, 18px)}
+.deck.is-full .slide-check{gap:clamp(12px, 1.8vh, 22px)}
+.deck.is-full .slide-quote{font-size:clamp(17px, 2.1vw, 32px)}
+.deck.is-full .slide-big b{font-size:clamp(46px, 8vw, 120px)}
+.deck.is-full .slide-sub{font-size:clamp(12px, 1.15vw, 18px)}
+.deck.is-full .slide-tag{font-size:clamp(11px, 1.1vw, 17px)}
+.deck.is-full .slide-check li::before{width:clamp(22px, 1.9vw, 30px);height:clamp(22px, 1.9vw, 30px)}

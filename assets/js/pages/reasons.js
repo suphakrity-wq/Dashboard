@@ -1,6 +1,6 @@
 /* หน้า 3 — เหตุผลเบื้องหลัง: อะไรทำให้กดดู และอะไรทำให้เลื่อนผ่าน */
 
-import { Q, C } from './columns.js?v=85';
+import { Q, C } from './columns.js?v=91';
 
 export default {
   id: "reasons",

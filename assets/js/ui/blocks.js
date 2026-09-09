@@ -8,17 +8,17 @@
  * ห้าม: ใส่สูตรคำนวณในไฟล์นี้ — ให้เรียกจาก core/ แทน
  */
 
-import { $, el, growBar, segmentBars } from './dom.js?v=85';
-import { fmt, round1, pct } from '../core/format.js?v=85';
-import { splitValues, isNumericColumn } from '../core/compute.js?v=85';
-import { store } from '../core/store.js?v=85';
-import { verdict as calcVerdict, causes as calcCauses, pulls as calcPulls } from '../core/insight.js?v=85';
-import { recommend } from '../core/recommend.js?v=85';
-import { analyzeText } from '../core/textAnalysis.js?v=85';
-import { wilsonInterval } from '../core/stats.js?v=85';
-import { SOURCES, CONTEXT_FACTS, compareBenchmarks } from '../core/benchmarks.js?v=85';
-import { aggregate, groupBy as groupRows } from '../core/compute.js?v=85';
-import { CHARTS } from './charts.js?v=85';
+import { $, el, growBar, segmentBars } from './dom.js?v=91';
+import { fmt, round1, pct } from '../core/format.js?v=91';
+import { splitValues, isNumericColumn } from '../core/compute.js?v=91';
+import { store } from '../core/store.js?v=91';
+import { verdict as calcVerdict, causes as calcCauses, pulls as calcPulls } from '../core/insight.js?v=91';
+import { recommend } from '../core/recommend.js?v=91';
+import { analyzeText } from '../core/textAnalysis.js?v=91';
+import { wilsonInterval } from '../core/stats.js?v=91';
+import { SOURCES, CONTEXT_FACTS, compareBenchmarks } from '../core/benchmarks.js?v=91';
+import { aggregate, groupBy as groupRows } from '../core/compute.js?v=91';
+import { CHARTS } from './charts.js?v=91';
 
 let rerender = () => {};
 export const onRerender = fn => { rerender = fn; };
@@ -801,9 +801,11 @@ function slides(host, b, rows, cfg) {
   const next = el('button', 'btn btn-ghost', '→');
   const dots = el('div', 'deck-dots');
   const count = el('span', 'deck-count');
-  prev.type = next.type = 'button';
+  const full = el('button', 'btn btn-ghost deck-full');
+  prev.type = next.type = full.type = 'button';
   prev.title = 'สไลด์ก่อนหน้า (ปุ่มลูกศรซ้าย)';
   next.title = 'สไลด์ถัดไป (ปุ่มลูกศรขวา)';
+  full.append(el('i', 'ms', 'fullscreen'));
 
   let at = 0;
   const show = i => {
@@ -822,18 +824,57 @@ function slides(host, b, rows, cfg) {
   prev.onclick = () => show(at - 1);
   next.onclick = () => show(at + 1);
 
-  // ลูกศรซ้าย/ขวาเลื่อนสไลด์ — ผูกกับหน้านี้เท่านั้น ออกจากหน้าแล้วถอดออก
+  /* ---- เต็มจอ ----
+     ทำสองชั้น: กางกล่องให้เต็มหน้าต่างด้วย CSS เสมอ (ได้ผลทุกเบราว์เซอร์ รวมถึง iPhone
+     ที่ขอเต็มจอกับ element ไม่ได้) แล้วค่อยขอ Fullscreen API เพิ่มเพื่อซ่อนแถบเบราว์เซอร์
+     ถ้าขอไม่ได้ก็ไม่เป็นไร ผู้ใช้ยังได้จอเต็มเหมือนเดิม */
+  const nativeOn = () => (document.fullscreenElement || document.webkitFullscreenElement) === wrap;
+  const syncFull = on => {
+    wrap.classList.toggle('is-full', on);   // ล็อกการเลื่อนหน้าด้วย CSS :has() จะได้ไม่มีสถานะค้าง
+    full.title = on ? 'ออกจากเต็มจอ (Esc หรือกด F)' : 'นำเสนอเต็มจอ (กด F)';
+    full.firstChild.textContent = on ? 'fullscreen_exit' : 'fullscreen';
+  };
+  const enter = () => {
+    syncFull(true);
+    const req = wrap.requestFullscreen || wrap.webkitRequestFullscreen;
+    if (req) Promise.resolve(req.call(wrap)).catch(() => {});   // ถูกปฏิเสธก็ปล่อยผ่าน
+  };
+  const leave = () => {
+    syncFull(false);
+    if (nativeOn()) (document.exitFullscreen || document.webkitExitFullscreen).call(document);
+  };
+  const toggleFull = () => (wrap.classList.contains('is-full') ? leave() : enter());
+  full.onclick = toggleFull;
+
+  // ผู้ใช้กด Esc เอง เบราว์เซอร์จะออกจาก native fullscreen ให้ ต้องถอดคลาสตาม
+  const onFullChange = () => {
+    if (!document.body.contains(stage)) {
+      document.removeEventListener('fullscreenchange', onFullChange);
+      document.removeEventListener('webkitfullscreenchange', onFullChange);
+      return;
+    }
+    if (!nativeOn()) syncFull(false);
+  };
+  document.addEventListener('fullscreenchange', onFullChange);
+  document.addEventListener('webkitfullscreenchange', onFullChange);
+
+  // ลูกศรซ้าย/ขวาเลื่อนสไลด์ · F เข้า-ออกเต็มจอ — ผูกกับหน้านี้เท่านั้น ออกจากหน้าแล้วถอดออก
   const onKey = e => {
     if (!document.body.contains(stage)) { document.removeEventListener('keydown', onKey); return; }
+    const t = e.target;   // อาจเป็น document ได้ ต้องเช็คก่อนเรียก closest
+    if (t && t.closest && t.closest('input, select, textarea')) return;
     if (e.key === 'ArrowLeft') show(at - 1);
     if (e.key === 'ArrowRight') show(at + 1);
+    if (e.key === 'f' || e.key === 'F') toggleFull();
+    if (e.key === 'Escape' && wrap.classList.contains('is-full')) leave();
   };
   document.addEventListener('keydown', onKey);
 
-  nav.append(prev, dots, next, count);
+  nav.append(prev, dots, next, count, full);
   wrap.append(stage, nav);
   sec.append(wrap);
   show(0);
+  syncFull(false);
 }
 
 export const BLOCKS = { charts, verdict, causes, pull, table, notes, textThemes, benchmarks, conclusion, pageDigest, slides };

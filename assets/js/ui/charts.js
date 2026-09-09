@@ -8,10 +8,10 @@
  * ข้อตกลง: ดึงข้อมูลผ่าน groupBy/crossTab จาก core/compute.js เท่านั้น
  */
 
-import { el, growBar, segmentBars } from './dom.js?v=85';
-import { fmt, round1, pct } from '../core/format.js?v=85';
-import { num, groupBy, crossTab, avgOf, pickGroupColumn, distinctValues, compareGroups } from '../core/compute.js?v=85';
-import { welchTTest } from '../core/stats.js?v=85';
+import { el, growBar, segmentBars } from './dom.js?v=91';
+import { fmt, round1, pct } from '../core/format.js?v=91';
+import { num, groupBy, crossTab, avgOf, pickGroupColumn, distinctValues, compareGroups } from '../core/compute.js?v=91';
+import { welchTTest } from '../core/stats.js?v=91';
 
 /* สีของหลอดสื่อ "สถานะ" ไม่ใช่ชื่อชุดข้อมูล:
    ฝั่งที่มีค่ามากกว่า = ม่วง (สีเด่นของงานนี้) อีกฝั่ง = เทาเข้ม
