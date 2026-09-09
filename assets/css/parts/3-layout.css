@@ -214,10 +214,13 @@
   .side-brand b{font-size:var(--t-sm)}
   .side-brand span{display:none}
 
-  /* เมนูเลื่อนแนวนอนแทนการตกบรรทัด จะได้ไม่กินความสูง */
-  .nav{flex-direction:row;flex:1 1 100%;min-width:0;gap:6px;overflow-x:auto;padding-bottom:2px;
-    scrollbar-width:none}
-  .nav-item{padding:7px 12px;flex:0 0 auto}
+  /* เมนูตกบรรทัดได้ ห้ามให้เลื่อนแนวนอน
+     ของเดิมใช้ overflow-x:auto พอมี 7 หน้า หมวดท้าย ๆ เลยหลุดออกนอกจอ
+     โดยไม่มีอะไรบอกว่าต้องปัด — ผู้ใช้หาไม่เจอทั้งที่เมนูควรเห็นครบ */
+  .nav{flex-direction:row;flex:1 1 100%;min-width:0;gap:6px;flex-wrap:wrap;overflow:visible}
+  .nav-item{padding:7px 12px;flex:0 1 auto;min-width:0}
+  .nav-item .nav-txt{min-width:0}
+  .nav-txt b{overflow:hidden;text-overflow:ellipsis}
   .nav-ico{width:26px;height:26px;border-radius:var(--r-sm)}
   .nav-ico .ms{font-size:var(--ico-sm)}
   .nav-txt b{font-size:var(--t-xs);white-space:nowrap}

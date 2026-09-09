@@ -10,16 +10,17 @@ export function el(tag, cls, text) {
 }
 
 /** ตัวเลขวิ่งขึ้นตอนโหลด */
-export function countUp(node, target, dur = 600) {
+export function countUp(node, target, { digits = 1, dur = 600 } = {}) {
   const tn = document.createTextNode(target == null ? '–' : '0');
   node.prepend(tn);
   if (target == null) return;
+  const nf = new Intl.NumberFormat('th-TH', { maximumFractionDigits: digits });
+  const unit = Math.pow(10, digits);
   const t0 = performance.now();
   const step = now => {
     const p = Math.min(1, (now - t0) / dur);
     const eased = 1 - Math.pow(1 - p, 3);
-    tn.nodeValue = new Intl.NumberFormat('th-TH', { maximumFractionDigits: 2 })
-      .format(Math.round(target * eased * 100) / 100);
+    tn.nodeValue = nf.format(Math.round(target * eased * unit) / unit);
     if (p < 1) requestAnimationFrame(step);
   };
   requestAnimationFrame(step);

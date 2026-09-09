@@ -1,11 +1,11 @@
 /* [ui] เปลือกของแอป: เมนูซ้าย, แถบเครื่องมือ, แถบสรุปด้านบน, สถานะการโหลด */
 
-import { $, el, countUp } from './dom.js?v=100';
-import { aggregate } from '../core/compute.js?v=100';
-import { wilsonInterval } from '../core/stats.js?v=100';
-import { store } from '../core/store.js?v=100';
-import { sparkline } from './charts.js?v=100';
-import { auditSummary } from '../core/quality.js?v=100';
+import { $, el, countUp } from './dom.js?v=102';
+import { aggregate } from '../core/compute.js?v=102';
+import { wilsonInterval } from '../core/stats.js?v=102';
+import { store } from '../core/store.js?v=102';
+import { sparkline } from './charts.js?v=102';
+import { auditSummary } from '../core/quality.js?v=102';
 
 /* ---- ปุ่มเปิด/ปิดเมนูบนจอโทรศัพท์ ----
    จอคอมกับแท็บเล็ตเมนูโชว์อยู่แล้ว ปุ่มนี้ถูกซ่อนด้วย CSS
@@ -114,7 +114,9 @@ export function renderSummary(page, rows) {
 
     const value = el('div', 'stat-value');
     if (k.text) { value.textContent = k.text; value.classList.add('is-text'); }
-    else countUp(value, aggregate(rows, k.column, k.agg, k));
+    // เปอร์เซ็นต์ปัดเป็นจำนวนเต็ม ค่าอื่นทศนิยม 1 ตำแหน่ง
+    // (ของเดิมใช้ 2 ตำแหน่งกับทุกค่า เลยได้ "47.62%" และ "3.16 ข่าว" ซึ่งไม่ตรงกับที่การ์ดอื่นแสดง)
+    else countUp(value, aggregate(rows, k.column, k.agg, k), { digits: k.unit === '%' ? 0 : 1 });
     if (k.unit) value.append(el('span', 'unit', k.unit));
     card.append(value);
 
