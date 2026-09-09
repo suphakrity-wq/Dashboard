@@ -8,10 +8,10 @@
  * ข้อตกลง: ดึงข้อมูลผ่าน groupBy/crossTab จาก core/compute.js เท่านั้น
  */
 
-import { el, growBar, segmentBars } from './dom.js?v=117';
-import { fmt, round1, pct } from '../core/format.js?v=117';
-import { num, groupBy, crossTab, avgOf, pickGroupColumn, distinctValues, compareGroups } from '../core/compute.js?v=117';
-import { welchTTest } from '../core/stats.js?v=117';
+import { el, growBar, segmentBars } from './dom.js?v=120';
+import { fmt, round1, pct } from '../core/format.js?v=120';
+import { num, groupBy, crossTab, avgOf, pickGroupColumn, distinctValues, compareGroups } from '../core/compute.js?v=120';
+import { welchTTest } from '../core/stats.js?v=120';
 
 /* สีของหลอดสื่อ "สถานะ" ไม่ใช่ชื่อชุดข้อมูล:
    ฝั่งที่มีค่ามากกว่า = ม่วง (สีเด่นของงานนี้) อีกฝั่ง = เทาเข้ม
@@ -724,28 +724,47 @@ export function diverging(host, cf, rows) {
     .sort((x, y) => y.d - x.d);
   if (!pairs.length) { host.append(el('p', 'hint', 'ยังไม่มีข้อมูลพอจะวาด')); return; }
 
-  const span = Math.max(1, ...pairs.map(p => Math.abs(p.d)));
   const up = pairs.filter(p => p.d > 0).length;
   const down = pairs.filter(p => p.d < 0).length;
   const same = pairs.length - up - down;
 
+  /* วางเส้นศูนย์ตามข้อมูลจริง ไม่ตรึงไว้กลางการ์ด
+     ถ้าทุกคนไปทางเดียวกัน (เช่นบวกหมด) เส้นศูนย์จะไปอยู่ริมซ้าย
+     แท่งจึงได้ใช้ความกว้างเต็มการ์ด ไม่เหลือครึ่งซ้ายว่างเปล่า */
+  const maxPos = Math.max(0, ...pairs.map(p => p.d));
+  const maxNeg = Math.max(0, ...pairs.map(p => -p.d));
+  const span = (maxPos + maxNeg) || 1;
+  const zero = maxNeg / span;                       // ตำแหน่งเส้นศูนย์ 0–1
+
   const head = el('div', 'div-head');
-  head.append(el('span', null, `${cf.labelA}มากกว่า`), el('span', 'div-zero', '0'),
-              el('span', null, `${cf.labelB}มากกว่า`));
+  if (maxNeg > 0) head.append(el('span', null, `${cf.labelA}มากกว่า`));
+  const zeroTag = el('span', 'div-zero', '0');
+  zeroTag.style.left = (zero * 100) + '%';
+  head.append(zeroTag);
+  if (maxPos > 0) head.append(el('span', 'div-h-b', `${cf.labelB}มากกว่า`));
 
   const chart = el('div', 'diverge');
+  chart.style.setProperty('--zero', (zero * 100) + '%');
   pairs.forEach((p, i) => {
     const row = el('div', 'div-row');
     const bar = el('i', p.d > 0 ? 'is-b' : p.d < 0 ? 'is-a' : 'is-zero');
-    bar.style.width = (Math.abs(p.d) / span * 50) + '%';
-    bar.style[p.d >= 0 ? 'marginLeft' : 'marginRight'] = '50%';
-    if (p.d < 0) bar.style.marginLeft = (50 - Math.abs(p.d) / span * 50) + '%';
-    bar.title = `คนที่ ${i + 1} — ${cf.labelA} ${p.a} · ${cf.labelB} ${p.b} · ต่างกัน ${round1(Math.abs(p.d))}`;
+    const w = Math.abs(p.d) / span * 100;
+    bar.style.width = w + '%';
+    bar.style.left = (p.d >= 0 ? zero * 100 : zero * 100 - w) + '%';
+    bar.title = `คนที่ ${i + 1} — ${cf.labelA} ${p.a} · ${cf.labelB} ${p.b} · ` +
+                `ต่างกัน ${round1(Math.abs(p.d))} ${cf.unit || 'ข่าว'}`;
     row.append(bar);
     chart.append(row);
   });
 
-  host.append(head, chart);
+  // แถบบอกสเกลใต้กราฟ: ต่างกันมากที่สุดกี่หน่วย
+  const axis = el('div', 'div-axis');
+  if (maxNeg > 0) { const s = el('span', null, round1(maxNeg) + ''); s.style.left = '0'; axis.append(s); }
+  const z = el('span', 'is-zero', '0'); z.style.left = (zero * 100) + '%'; axis.append(z);
+  if (maxPos > 0) { const s = el('span', 'is-end', round1(maxPos) + ' ' + (cf.unit || 'ข่าว')); axis.append(s); }
+  chart.after ? host.append(chart, axis) : host.append(chart);
+
+  host.insertBefore(head, chart);
   host.append(el('p', 'scale-note',
     `หนึ่งแท่ง = ผู้ตอบหนึ่งคน (เรียงจากต่างมากไปน้อย) · ` +
     `${cf.labelB}มากกว่า ${up} คน · ${cf.labelA}มากกว่า ${down} คน · เท่ากัน ${same} คน`));

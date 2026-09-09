@@ -1,6 +1,6 @@
 /* หน้า 4 — พฤติกรรมการเข้าถึง: คนเจอข่าวได้อย่างไร */
 
-import { Q, COL, C } from './columns.js?v=117';
+import { Q, COL, C } from './columns.js?v=120';
 
 export default {
   id: "behavior",
@@ -57,7 +57,8 @@ export default {
           hint: "ถ้า “บังเอิญเลื่อนเจอ” สูง แปลว่าแอปเป็นคนเลือกข่าวให้ ไม่ใช่เราเลือกเอง" },
 
         { type: "stacked", title: "ข่าวประเภทไหนดึงดูดใจมากกว่า", note: "แบ่งจากคำตอบทั้งหมด 100%",
-          x: Q.appeal, agg: "count", sort: "value", colors: C.ramp }
+          x: Q.appeal, agg: "count", sort: "value", colors: C.ramp,
+          hint: "แถบยาวสุดคือคำตอบที่คนเลือกมากที่สุด · รวมกันทั้งแถบเท่ากับผู้ตอบทั้งหมด" }
       ] },
 
     { type: "charts",

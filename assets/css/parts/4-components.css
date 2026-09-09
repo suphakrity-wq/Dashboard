@@ -553,19 +553,39 @@ td.is-fixed{color:var(--lime-ink);background:var(--lime-soft)}
   font-variant-numeric:tabular-nums;background:var(--hair);border-radius:var(--r-pill);padding:2px 0}
 
 /* ---------- แท่งผลต่างรายคน (diverging) ----------
-   เส้นกลางคือศูนย์ แท่งไปทางไหน แปลว่าฝั่งนั้นรู้จักมากกว่า */
-.div-head{display:flex;justify-content:space-between;align-items:center;
-  margin:var(--sp-2) 0 8px;font-size:var(--t-xs);font-weight:700;color:var(--ink-2)}
-.div-zero{color:var(--muted);font-weight:600}
+   เส้นศูนย์ไม่ได้ตรึงกลางการ์ด แต่วางตามข้อมูลจริง (ตัวแปร --zero)
+   ถ้าทุกคนไปทางเดียวกัน แท่งจะได้ใช้ความกว้างเต็มการ์ด */
+.div-head{position:relative;display:flex;justify-content:space-between;align-items:center;
+  margin:var(--sp-2) 0 8px;font-size:var(--t-xs);font-weight:700;color:var(--ink-2);min-height:1.4em}
+.div-h-b{margin-left:auto;text-align:right}
+.div-zero{position:absolute;transform:translateX(-50%);color:var(--muted);font-weight:600}
 .diverge{position:relative;display:flex;flex-direction:column;gap:3px;padding:10px 0}
-.diverge::before{content:"";position:absolute;left:50%;top:0;bottom:0;width:1px;background:var(--line)}
-.div-row{display:block;height:11px}
-.div-row i{display:block;height:100%;border-radius:var(--r-pill);
+.diverge::before{content:"";position:absolute;left:var(--zero,50%);top:0;bottom:0;
+  width:1px;background:var(--line)}
+.div-row{position:relative;display:block;height:11px}
+.div-row i{position:absolute;top:0;bottom:0;display:block;border-radius:var(--r-pill);
   transition:width var(--t-slow) var(--ease)}
 .div-row i.is-b{background:var(--purple)}
 .div-row i.is-a{background:var(--graphite)}
 .div-row i.is-zero{background:var(--track);min-width:4px}
 .div-row:hover i{filter:brightness(1.12)}
+.div-axis{position:relative;height:1.4em;margin-top:6px;
+  font-size:var(--t-xs);color:var(--muted);font-variant-numeric:tabular-nums}
+.div-axis span{position:absolute;top:0}
+.div-axis span.is-zero{transform:translateX(-50%)}
+.div-axis span.is-end{right:0}
+
+/* ---- คอลัมน์สถานะตัวกรองในตารางข้อมูลดิบ ---- */
+.th-flag{white-space:nowrap}
+.td-flag{white-space:nowrap;display:flex;gap:5px;align-items:center}
+.flag-chip{display:inline-block;padding:2px 9px;border-radius:var(--r-pill);
+  font-size:var(--t-xs);font-weight:700;line-height:1.5;white-space:nowrap}
+.flag-chip.is-ok{background:var(--hair);color:var(--muted)}
+.flag-chip.is-drop{background:var(--red-soft);color:var(--red)}
+.flag-chip.is-fix{background:var(--lime-soft);color:var(--lime-ink)}
+/* ช่องที่ถูกตัด: ขีดฆ่าให้เห็นว่ามีข้อมูลอยู่แต่ไม่ถูกนับ */
+td.is-dropped{color:var(--red);text-decoration:line-through;text-decoration-thickness:1px}
+td.is-fixed{color:var(--lime-ink);background:var(--lime-soft)}
 
 /* ---- คอลัมน์สถานะตัวกรองในตารางข้อมูลดิบ ---- */
 .th-flag{white-space:nowrap}
@@ -595,4 +615,4 @@ td.is-fixed{color:var(--lime-ink);background:var(--lime-soft)}
 .hint + .chart-base{margin-top:6px;border-top:none;padding-top:0}
 
 /* เส้นคั่นส่วนของโดนัท — สีเดียวกับพื้นการ์ด จึงดูเหมือนช่องว่างแต่ค่าไม่เพี้ยน */
-.donut-cut{stroke:var(--surface);stroke-width:1.6;stroke-linecap:butt}
+.donut-cut{stroke:var(--surface);stroke-width:.55;stroke-linecap:butt}
