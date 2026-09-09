@@ -63,6 +63,12 @@
 .nav-toggle .ms{font-size:var(--ico-lg)}
 
 /* ป้ายเตือนว่ากำลังดูข้อมูลจำลอง (เปิดด้วย ?demo=<id>) */
+/* ช่องเลือกแหล่งข้อมูล (ฟอร์มจริง / ชุดทดสอบ) — อยู่ท้ายแถบเมนู เห็นตลอด */
+.src-pick{display:flex;flex-direction:column;gap:5px;margin-bottom:8px}
+.src-pick > span{font-size:var(--t-xs);color:var(--muted);font-weight:600}
+.src-pick .input{width:100%;font-size:var(--t-xs);padding:7px 30px 7px 11px;
+  background-position:right 10px center}
+
 .demo-flag{display:block;background:var(--lime);color:var(--lime-ink);font-size:var(--t-xs);font-weight:700;
   text-align:center;padding:5px 10px;border-radius:var(--r-sm);margin-bottom:4px}
 .demo-pick{width:100%;margin-bottom:8px;font-size:var(--t-xs)}

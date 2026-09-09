@@ -181,3 +181,44 @@
   .vd-name{grid-column:1/-1;font-size:var(--t-xs)}
   .vd-bar b{font-size:var(--t-md)}
 }
+
+/* ---- สไลด์นำเสนอ ----
+   แสดงทีละสไลด์ สลับด้วยคลาส .on (ไม่ใช้ display:none เพื่อให้ transition ทำงาน) */
+.deck{display:flex;flex-direction:column;gap:var(--sp-3)}
+.deck-stage{position:relative;background:var(--ink);color:var(--on-dark);
+  border-radius:var(--r-xl);padding:44px 46px;min-height:420px;box-shadow:var(--sh-3);
+  display:grid}
+.slide{grid-area:1/1;opacity:0;visibility:hidden;transform:translateY(8px);
+  transition:opacity var(--t-base) var(--ease), transform var(--t-base) var(--ease)}
+.slide.on{opacity:1;visibility:visible;transform:none}
+.slide-tag{display:inline-block;font-size:var(--t-xs);font-weight:700;letter-spacing:.06em;
+  color:var(--purple-on-dark);margin-bottom:14px}
+.slide h3{font-size:var(--t-2xl);font-weight:900;line-height:1.15;letter-spacing:-.02em;margin-bottom:18px}
+.slide-lead{font-size:var(--t-md);opacity:.8;margin-bottom:16px;line-height:1.5}
+.slide-list{display:flex;flex-direction:column;gap:12px;margin:0;padding-left:20px}
+.slide-list li{font-size:var(--t-md);line-height:1.55;opacity:.92}
+.slide-list li b{font-weight:700}
+.slide-sub{font-size:var(--t-xs);opacity:.62}
+.slide-quote{margin-top:18px;font-size:var(--t-lg);line-height:1.5;font-weight:500;
+  border-left:3px solid var(--purple-on-dark);padding-left:16px;opacity:.9}
+.slide-big{margin:6px 0 18px;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.slide-big b{font-size:var(--t-3xl);font-weight:900;line-height:1;letter-spacing:-.03em;
+  color:var(--lime-on-dark);font-variant-numeric:tabular-nums}
+.slide-big span{font-size:var(--t-md);opacity:.7}
+.slide-big p{flex:1 1 100%;font-size:var(--t-sm);opacity:.7;margin-top:4px}
+
+.deck-nav{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.deck-nav .btn{min-width:52px;font-size:var(--t-md);line-height:1}
+.deck-dots{display:flex;gap:8px;flex:1;flex-wrap:wrap}
+.deck-dots button{width:11px;height:11px;padding:0;border:none;border-radius:var(--r-pill);
+  background:var(--track);cursor:pointer;transition:background var(--t-fast) ease,transform var(--t-fast) ease}
+.deck-dots button:hover{background:var(--purple-3);transform:scale(1.2)}
+.deck-dots button.on{background:var(--purple)}
+.deck-count{font-size:var(--t-xs);color:var(--muted);font-variant-numeric:tabular-nums}
+
+@media (max-width:760px){
+  .deck-stage{padding:26px 20px;min-height:0;border-radius:var(--r-lg)}
+  .slide h3{font-size:var(--t-xl)}
+  .slide-list li,.slide-lead{font-size:var(--t-sm)}
+  .slide-quote{font-size:var(--t-md)}
+}

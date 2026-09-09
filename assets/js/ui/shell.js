@@ -1,10 +1,10 @@
 /* [ui] เปลือกของแอป: เมนูซ้าย, แถบเครื่องมือ, แถบสรุปด้านบน, สถานะการโหลด */
 
-import { $, el, countUp } from './dom.js?v=77';
-import { aggregate } from '../core/compute.js?v=77';
-import { wilsonInterval } from '../core/stats.js?v=77';
-import { store } from '../core/store.js?v=77';
-import { sparkline } from './charts.js?v=77';
+import { $, el, countUp } from './dom.js?v=79';
+import { aggregate } from '../core/compute.js?v=79';
+import { wilsonInterval } from '../core/stats.js?v=79';
+import { store } from '../core/store.js?v=79';
+import { sparkline } from './charts.js?v=79';
 
 /* ---- ปุ่มเปิด/ปิดเมนูบนจอโทรศัพท์ ----
    จอคอมกับแท็บเล็ตเมนูโชว์อยู่แล้ว ปุ่มนี้ถูกซ่อนด้วย CSS
@@ -138,18 +138,38 @@ export function renderSummary(page, rows) {
 }
 
 /** ป้ายโหมดทดลอง + ตัวเลือกชุดข้อมูลจำลอง */
-export function markDemo(fixture, fixtures = []) {
+export function markDemo(fixture) {
   const flag = document.querySelector('#demo-flag');
   if (!flag) return;
   flag.hidden = false;
-  flag.textContent = 'โหมดทดลอง · ' + (fixture?.label || 'ข้อมูลจำลอง');
+  flag.textContent = 'กำลังดูข้อมูลทดสอบ · ' + (fixture?.label || 'ข้อมูลจำลอง');
   flag.title = fixture?.note || '';
+}
 
-  const picker = el('select', 'input demo-pick');
-  fixtures.forEach(f => picker.append(new Option(f.label, f.id)));
-  picker.value = fixture?.id || fixtures[0]?.id;
-  picker.onchange = () => { location.search = '?demo=' + picker.value; };
-  flag.after(picker);
+/** ช่องเลือกแหล่งข้อมูล — ฟอร์มจริง หรือชุดทดสอบ (แสดงตลอด ไม่ใช่เฉพาะโหมดทดลอง)
+    เลือกแล้วโหลดหน้าใหม่ด้วย ?demo=<id> ค่าว่าง = กลับไปใช้ชีตจริง */
+export function renderSourcePicker(fixtures = [], currentId = null) {
+  const pick = $('#source-pick');
+  if (!pick) return;
+  pick.innerHTML = '';
+
+  const real = document.createElement('optgroup');
+  real.label = 'ข้อมูลจริง';
+  real.append(new Option('ฟอร์มจริง (Google Sheet)', ''));
+
+  const test = document.createElement('optgroup');
+  test.label = 'ข้อมูลทดสอบ';
+  fixtures.forEach(f => {
+    const o = new Option(f.label, f.id);
+    o.title = f.note || '';
+    test.append(o);
+  });
+
+  pick.append(real, test);
+  pick.value = currentId || '';
+  pick.onchange = () => {
+    location.search = pick.value ? '?demo=' + pick.value : '';
+  };
 }
 
 /** ข้อความสถานะ + รายการแหล่งข้อมูล */

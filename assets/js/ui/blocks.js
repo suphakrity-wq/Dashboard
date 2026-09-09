@@ -8,17 +8,17 @@
  * ห้าม: ใส่สูตรคำนวณในไฟล์นี้ — ให้เรียกจาก core/ แทน
  */
 
-import { $, el, growBar, segmentBars } from './dom.js?v=77';
-import { fmt, round1, pct } from '../core/format.js?v=77';
-import { splitValues, isNumericColumn } from '../core/compute.js?v=77';
-import { store } from '../core/store.js?v=77';
-import { verdict as calcVerdict, causes as calcCauses, pulls as calcPulls } from '../core/insight.js?v=77';
-import { recommend } from '../core/recommend.js?v=77';
-import { analyzeText } from '../core/textAnalysis.js?v=77';
-import { wilsonInterval } from '../core/stats.js?v=77';
-import { SOURCES, CONTEXT_FACTS, compareBenchmarks } from '../core/benchmarks.js?v=77';
-import { aggregate, groupBy as groupRows } from '../core/compute.js?v=77';
-import { CHARTS } from './charts.js?v=77';
+import { $, el, growBar, segmentBars } from './dom.js?v=79';
+import { fmt, round1, pct } from '../core/format.js?v=79';
+import { splitValues, isNumericColumn } from '../core/compute.js?v=79';
+import { store } from '../core/store.js?v=79';
+import { verdict as calcVerdict, causes as calcCauses, pulls as calcPulls } from '../core/insight.js?v=79';
+import { recommend } from '../core/recommend.js?v=79';
+import { analyzeText } from '../core/textAnalysis.js?v=79';
+import { wilsonInterval } from '../core/stats.js?v=79';
+import { SOURCES, CONTEXT_FACTS, compareBenchmarks } from '../core/benchmarks.js?v=79';
+import { aggregate, groupBy as groupRows } from '../core/compute.js?v=79';
+import { CHARTS } from './charts.js?v=79';
 
 let rerender = () => {};
 export const onRerender = fn => { rerender = fn; };
@@ -602,4 +602,159 @@ function pageDigest(host, b, rows, cfg) {
   sec.append(grid);
 }
 
-export const BLOCKS = { charts, verdict, causes, pull, table, notes, textThemes, benchmarks, conclusion, pageDigest };
+
+/* ---------- สไลด์นำเสนอ ----------
+   เนื้อหาทุกสไลด์ดึงจากข้อมูลจริงที่กำลังแสดงอยู่ ไม่ได้พิมพ์ตัวเลขค้างไว้
+   เปลี่ยนชุดข้อมูล (ฟอร์มจริง / ชุดทดสอบ) แล้วสไลด์เปลี่ยนตามทันที
+   แก้ลำดับ/หัวข้อสไลด์: แก้อาร์เรย์ deck ด้านล่างที่เดียว */
+function slides(host, b, rows, cfg) {
+  const A = cfg.analysis || {};
+  const sec = section(host, b);
+
+  const v = calcVerdict(rows, A);
+  const cz = calcCauses(rows, A, { top: 3 });
+  const pl = calcPulls(rows, A, { top: 3 });
+  const tx = analyzeText(rows, b.textColumn || A.openTextCol);
+  const rec = recommend(rows, A, { top: 3, textColumn: b.textColumn }).actions;
+
+  const list = (items, cls = 'slide-list') => {
+    const ul = el('ul', cls);
+    items.filter(Boolean).forEach(t => {
+      const li = el('li');
+      li.innerHTML = t;
+      ul.append(li);
+    });
+    return ul;
+  };
+  const big = (value, unit, note) => {
+    const box = el('div', 'slide-big');
+    box.append(el('b', null, String(value)));
+    if (unit) box.append(el('span', null, unit));
+    if (note) box.append(el('p', null, note));
+    return box;
+  };
+
+  const deck = [
+    { tag: 'หัวข้อ', title: b.topic || 'ทำไมคนไทยชอบเสพสื่อดราม่า แต่ไม่เสพข่าวโลก?',
+      build: s => {
+        s.append(el('p', 'slide-lead', b.subtitle || 'งานสำรวจพฤติกรรมการเสพข่าวของคนไทย'));
+        s.append(list([
+          `เก็บข้อมูลจากผู้ตอบ <b>${fmt(v.n)} คน</b>`,
+          'วัดด้วยการให้เลือกข่าวที่รู้จักจริง ฝั่งละ 10 ข่าว',
+          'ตรวจคำตอบด้วยสถิติ ไม่ใช่ความรู้สึก'
+        ]));
+      } },
+
+    { tag: 'คำถาม', title: 'คำถามวิจัย',
+      build: s => {
+        s.append(el('p', 'slide-quote', '“คนไทยชอบเสพสื่อดราม่า แต่ไม่เสพข่าวโลก จริงหรือไม่?”'));
+        s.append(list([
+          'ถ้าจริง — ต้องรู้ว่าเพราะอะไร และแก้ตรงไหน',
+          'ถ้าไม่จริง — ก็ต้องเลิกเชื่อตามความรู้สึก'
+        ]));
+      } },
+
+    { tag: 'วิธีวัด', title: 'วัดอย่างไรให้เชื่อได้',
+      build: s => s.append(list([
+        'ผู้ตอบหนึ่งคนให้สองค่า: รู้จักข่าวโลกกี่ข่าว / ข่าวดราม่ากี่ข่าว',
+        'เป็นข้อมูลจับคู่ จึงใช้ <b>paired t-test</b> เทียบผลต่างรายคน',
+        'ตรวจซ้ำด้วย <b>Wilcoxon signed-rank</b> เผื่อข้อมูลไม่แจกแจงปกติ',
+        'รายงานขนาดผลต่าง (Cohen’s dz) และช่วงความเชื่อมั่น 95% ทุกครั้ง'
+      ])) },
+
+    { tag: 'ผลลัพธ์', title: 'คำตอบคือ ' + v.answer,
+      build: s => {
+        s.append(big(
+          (v.stats && v.stats.meanDiff > 0 ? '+' : '') + (v.stats ? round1(v.stats.meanDiff) : '–'),
+          'ข่าว/คน', 'ข่าวดราม่ารู้จักมากกว่าข่าวโลกเท่านี้ต่อคน'));
+        s.append(list([
+          `ข่าวโลก <b>${fmt(round1(v.world))}</b> ข่าว · ข่าวดราม่า <b>${fmt(round1(v.drama))}</b> ข่าว`,
+          v.stats ? `p = ${v.stats.p < 0.001 ? '<0.001' : v.stats.p.toFixed(3)} · ขนาดผลต่าง ${v.stats.effect}` : null,
+          v.stats ? `ช่วงความเชื่อมั่น 95%: ${round1(v.stats.ci[0])} ถึง ${round1(v.stats.ci[1])} ข่าว/คน` : null
+        ]));
+      } },
+
+    { tag: 'สาเหตุ', title: 'ทำไมคนไม่ดูข่าวโลก',
+      build: s => s.append(list(cz.map((c, i) =>
+        `<b>${i + 1}. ${c.label}</b> — ${c.share}% ของผู้ตอบ`))) },
+
+    { tag: 'แรงดึง', title: 'ข่าวดราม่าชนะด้วยอะไร',
+      build: s => s.append(list(pl.map(p => `<b>${p.label}</b> — ${p.share}%`))) },
+
+    { tag: 'เสียงจริง', title: 'สิ่งที่ผู้ตอบเขียนเอง',
+      build: s => {
+        s.append(el('p', 'slide-lead',
+          `วิเคราะห์ข้อความ ${fmt(tx.total)} ข้อความ · จัดหมวดได้ ${tx.coverage}%`));
+        s.append(list(tx.themes.filter(t => t.count).slice(0, 4)
+          .map(t => `<b>${t.label}</b> — ${t.share}%`)));
+        const q = tx.themes.find(t => t.samples && t.samples.length);
+        if (q) s.append(el('p', 'slide-quote', '“' + q.samples[0] + '”'));
+      } },
+
+    { tag: 'ข้อเสนอ', title: 'ทำอะไรก่อน',
+      build: s => s.append(list(rec.map((a, i) =>
+        `<b>${i + 1}. ${a.do}</b><br><span class="slide-sub">แก้ที่ ${a.why} · ${a.share}% ของผู้ตอบ` +
+        (a.sourceShort ? ` · อ้างอิง ${a.sourceShort}` : '') + '</span>'))) },
+
+    { tag: 'ข้อจำกัด', title: 'ข้อจำกัดของงานนี้',
+      build: s => s.append(list([
+        v.warn ? v.warn : `ผู้ตอบ ${fmt(v.n)} คน ถึงเกณฑ์ ${v.minSample} คนที่ตั้งไว้แล้ว`,
+        'กลุ่มตัวอย่างเป็นนักศึกษาช่วงอายุใกล้กัน ยังไม่แทนคนไทยทั้งประเทศ',
+        'ข่าวที่ใช้วัดเป็นชุดที่ยกมาให้เลือก ไม่ใช่ข่าวทั้งหมดที่มีอยู่จริง',
+        'ทุกตัวเลขในสไลด์นี้คำนวณสดจากข้อมูลที่กำลังแสดงอยู่'
+      ])) }
+  ];
+
+  /* ---- วาดกอง slide + ปุ่มควบคุม ---- */
+  const wrap = el('div', 'deck');
+  const stage = el('div', 'deck-stage');
+
+  deck.forEach((d, i) => {
+    const slide = el('article', 'slide' + (i === 0 ? ' on' : ''));
+    slide.append(el('span', 'slide-tag', `${i + 1}/${deck.length} · ${d.tag}`));
+    slide.append(el('h3', null, d.title));
+    d.build(slide);
+    stage.append(slide);
+  });
+
+  const nav = el('div', 'deck-nav');
+  const prev = el('button', 'btn btn-ghost', '←');
+  const next = el('button', 'btn btn-ghost', '→');
+  const dots = el('div', 'deck-dots');
+  const count = el('span', 'deck-count');
+  prev.type = next.type = 'button';
+  prev.title = 'สไลด์ก่อนหน้า (ปุ่มลูกศรซ้าย)';
+  next.title = 'สไลด์ถัดไป (ปุ่มลูกศรขวา)';
+
+  let at = 0;
+  const show = i => {
+    at = (i + deck.length) % deck.length;
+    stage.querySelectorAll('.slide').forEach((s, k) => s.classList.toggle('on', k === at));
+    dots.querySelectorAll('button').forEach((d, k) => d.classList.toggle('on', k === at));
+    count.textContent = `${at + 1} / ${deck.length}`;
+  };
+  deck.forEach((d, i) => {
+    const dot = el('button', i === 0 ? 'on' : '');
+    dot.type = 'button';
+    dot.title = d.title;
+    dot.onclick = () => show(i);
+    dots.append(dot);
+  });
+  prev.onclick = () => show(at - 1);
+  next.onclick = () => show(at + 1);
+
+  // ลูกศรซ้าย/ขวาเลื่อนสไลด์ — ผูกกับหน้านี้เท่านั้น ออกจากหน้าแล้วถอดออก
+  const onKey = e => {
+    if (!document.body.contains(stage)) { document.removeEventListener('keydown', onKey); return; }
+    if (e.key === 'ArrowLeft') show(at - 1);
+    if (e.key === 'ArrowRight') show(at + 1);
+  };
+  document.addEventListener('keydown', onKey);
+
+  nav.append(prev, dots, next, count);
+  wrap.append(stage, nav);
+  sec.append(wrap);
+  show(0);
+}
+
+export const BLOCKS = { charts, verdict, causes, pull, table, notes, textThemes, benchmarks, conclusion, pageDigest, slides };
