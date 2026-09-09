@@ -1,8 +1,8 @@
 /* [core] เก็บสถานะของข้อมูลและตัวกรอง + แจ้งเตือนเมื่อมีการเปลี่ยนแปลง
    ฝั่งหน้าตาไม่ต้องรู้ว่าโหลดมาจากไหน แค่ subscribe แล้วอ่าน visibleRows() */
 
-import { loadAll, readCache, writeCache, listSources } from './source.js?v=79';
-import { addComputedColumns } from './compute.js?v=79';
+import { loadAll, readCache, writeCache, listSources } from './source.js?v=80';
+import { addComputedColumns } from './compute.js?v=80';
 
 export const store = {
   rows: [],        // ข้อมูลดิบทุกแถว (รวมทุกแหล่ง)

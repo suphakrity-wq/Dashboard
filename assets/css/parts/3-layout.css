@@ -64,10 +64,23 @@
 
 /* ป้ายเตือนว่ากำลังดูข้อมูลจำลอง (เปิดด้วย ?demo=<id>) */
 /* ช่องเลือกแหล่งข้อมูล (ฟอร์มจริง / ชุดทดสอบ) — อยู่ท้ายแถบเมนู เห็นตลอด */
-.src-pick{display:flex;flex-direction:column;gap:5px;margin-bottom:8px}
-.src-pick > span{font-size:var(--t-xs);color:var(--muted);font-weight:600}
+.src-pick{display:flex;flex-direction:column;gap:6px;margin-bottom:8px}
+.src-pick-lbl{font-size:var(--t-xs);color:var(--muted);font-weight:600}
 .src-pick .input{width:100%;font-size:var(--t-xs);padding:7px 30px 7px 11px;
   background-position:right 10px center}
+
+/* ปุ่มสลับแหล่งข้อมูล 2 ปุ่มแยกกัน */
+.src-btns{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.src-btn{display:flex;align-items:center;justify-content:center;gap:5px;min-width:0;
+  padding:8px 6px;border:1px solid var(--line);border-radius:var(--r-md);
+  background:var(--surface);color:var(--muted);cursor:pointer;
+  font-size:var(--t-xs);font-weight:600;font-family:inherit;
+  transition:background var(--t-fast) ease,color var(--t-fast) ease,border-color var(--t-fast) ease}
+.src-btn b{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.src-btn .ms{font-size:var(--ico-sm);flex-shrink:0}
+.src-btn:hover{background:var(--hair);color:var(--ink)}
+.src-btn.on{background:var(--accent);border-color:var(--accent);color:var(--on-dark)}
+.src-btn.on:hover{background:var(--accent)}
 
 .demo-flag{display:block;background:var(--lime);color:var(--lime-ink);font-size:var(--t-xs);font-weight:700;
   text-align:center;padding:5px 10px;border-radius:var(--r-sm);margin-bottom:4px}
@@ -298,4 +311,10 @@
    (มี title + aria-label กำกับไว้แล้ว จึงยังรู้ว่าปุ่มไหนคืออะไร) */
 @media (max-width:330px){
   .tab-text{display:none}
+}
+
+/* ---- ปุ่มแหล่งข้อมูลตอนแถบล่างเรียงเป็นแนวนอน (แท็บเล็ต/มือถือ) ---- */
+@media (max-width:1000px){
+  .side-foot .src-pick{flex:1 1 240px;margin-bottom:0}   /* แถบล่างเป็นแนวนอนแล้ว */
+  .side-foot .src-pick-lbl{display:none}   /* แนวนอนที่แคบ ตัวปุ่มบอกความหมายอยู่แล้ว */
 }

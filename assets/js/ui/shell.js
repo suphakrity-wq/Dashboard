@@ -1,10 +1,10 @@
 /* [ui] เปลือกของแอป: เมนูซ้าย, แถบเครื่องมือ, แถบสรุปด้านบน, สถานะการโหลด */
 
-import { $, el, countUp } from './dom.js?v=79';
-import { aggregate } from '../core/compute.js?v=79';
-import { wilsonInterval } from '../core/stats.js?v=79';
-import { store } from '../core/store.js?v=79';
-import { sparkline } from './charts.js?v=79';
+import { $, el, countUp } from './dom.js?v=80';
+import { aggregate } from '../core/compute.js?v=80';
+import { wilsonInterval } from '../core/stats.js?v=80';
+import { store } from '../core/store.js?v=80';
+import { sparkline } from './charts.js?v=80';
 
 /* ---- ปุ่มเปิด/ปิดเมนูบนจอโทรศัพท์ ----
    จอคอมกับแท็บเล็ตเมนูโชว์อยู่แล้ว ปุ่มนี้ถูกซ่อนด้วย CSS
@@ -146,30 +146,37 @@ export function markDemo(fixture) {
   flag.title = fixture?.note || '';
 }
 
-/** ช่องเลือกแหล่งข้อมูล — ฟอร์มจริง หรือชุดทดสอบ (แสดงตลอด ไม่ใช่เฉพาะโหมดทดลอง)
-    เลือกแล้วโหลดหน้าใหม่ด้วย ?demo=<id> ค่าว่าง = กลับไปใช้ชีตจริง */
+/** เลือกแหล่งข้อมูล — 2 ปุ่มแยกกัน: ฟอร์มจริง / ข้อมูลทดลอง (อยู่เหนือปุ่มรีเฟรช)
+    กดแล้วโหลดหน้าใหม่ด้วย ?demo=<id> ; ไม่มีพารามิเตอร์ = ใช้ชีตจริง
+    ช่องเลือกชุดทดลองจะโผล่เฉพาะตอนอยู่โหมดทดลอง (ไม่งั้นรกเปล่า ๆ) */
 export function renderSourcePicker(fixtures = [], currentId = null) {
-  const pick = $('#source-pick');
-  if (!pick) return;
+  const real = $('#src-real'), test = $('#src-test'), pick = $('#source-pick');
+  if (!real || !test || !pick) return;
+  const onTest = !!currentId;
+
+  real.classList.toggle('on', !onTest);
+  test.classList.toggle('on', onTest);
+  real.setAttribute('aria-pressed', String(!onTest));
+  test.setAttribute('aria-pressed', String(onTest));
+  real.title = 'อ่านคำตอบล่าสุดจาก Google Sheet ของฟอร์มจริง';
+  test.title = 'ใช้ชุดข้อมูลที่สร้างขึ้นเองเพื่อทดสอบระบบ ไม่กระทบข้อมูลจริง';
+
+  real.onclick = () => { if (onTest) location.search = ''; };
+  test.onclick = () => {
+    if (!onTest && fixtures[0]) location.search = '?demo=' + fixtures[0].id;
+  };
+
+  pick.hidden = !onTest;
+  if (!onTest) return;
+
   pick.innerHTML = '';
-
-  const real = document.createElement('optgroup');
-  real.label = 'ข้อมูลจริง';
-  real.append(new Option('ฟอร์มจริง (Google Sheet)', ''));
-
-  const test = document.createElement('optgroup');
-  test.label = 'ข้อมูลทดสอบ';
   fixtures.forEach(f => {
     const o = new Option(f.label, f.id);
     o.title = f.note || '';
-    test.append(o);
+    pick.append(o);
   });
-
-  pick.append(real, test);
-  pick.value = currentId || '';
-  pick.onchange = () => {
-    location.search = pick.value ? '?demo=' + pick.value : '';
-  };
+  pick.value = currentId;
+  pick.onchange = () => { location.search = '?demo=' + pick.value; };
 }
 
 /** ข้อความสถานะ + รายการแหล่งข้อมูล */
