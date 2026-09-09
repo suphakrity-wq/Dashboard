@@ -86,9 +86,9 @@ function drawBlocks(track, value, per, n, color, gap, unitName, animate) {
       part.style.width = Math.round(left * 100) + '%';
       cell.append(part);
     }
-    // อนิเมชันเฉพาะตอนวาดครั้งแรก ตอนย่อ/ขยายหน้าต่างไม่ต้องกะพริบใหม่ทุกครั้ง
-    if (animate) cell.style.animationDelay = Math.min(i, 12) * 22 + 'ms';
-    else cell.style.animation = 'none';
+    // อนิเมชันเฉพาะตอนวาดครั้งแรก ตอนย่อ/ขยายหน้าต่างไม่ต้องเล่นใหม่ทุกครั้ง
+    // ไม่หน่วงทีละบล็อก เพราะบล็อกต้องมองเห็นได้แม้อนิเมชันไม่ทำงาน (ดู .seg-blk ใน CSS)
+    if (!animate) cell.style.animation = 'none';
     track.append(cell);
   }
 }
