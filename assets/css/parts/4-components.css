@@ -67,7 +67,7 @@
 /* transition:none จำเป็น — รางมี transition ของ background อยู่ (0.32s)
    พอเปลี่ยนเป็นแบบแบ่งช่อง พื้นรางจะค่อย ๆ จางหาย เห็นเป็นแท่งยาวแวบหนึ่งข้างหลังช่อง */
 .is-seg{display:flex;gap:var(--seg-gap,3px);background:none;box-shadow:none;overflow:visible;
-  transition:none}
+  transition:none;animation:segSweep .5s var(--ease)}
 /* ความปลอดภัยของการมองเห็น: บล็อกต้อง "เห็นได้" โดยไม่พึ่งอนิเมชันเลย
    - opacity ฐานเป็น 1 เสมอ
    - ไม่ใช้ animation-fill-mode และไม่หน่วงทีละบล็อก
@@ -77,7 +77,7 @@
    อนิเมชันจึงเป็นแค่ "ของแถม" ไม่ใช่เงื่อนไขของการมองเห็น */
 /* ทุกช่องเป็นแคปซูลมนทั้งสองด้าน ใช้ --r-pill จึงมนเต็มเสมอไม่ว่าหลอดจะสูงเท่าไร */
 .is-seg > .seg-blk{flex:1 1 0;width:auto;min-width:0;height:100%;border-radius:var(--r-pill);
-  background:var(--track);opacity:1;animation:segIn .34s var(--ease);transform-origin:left center;
+  background:var(--track);opacity:1;
   transition:background var(--t-fast) ease}
 /* บล็อกที่ถึงค่าแล้ว — สีมาจากตัวแปร --c ที่ JS ใส่ให้รายบล็อก */
 .is-seg > .seg-blk.is-on{background:var(--c)}
@@ -90,8 +90,10 @@
    วงกลมมีจุดกึ่งกลางอยู่ที่ค่าจริงพอดี ค่าที่อ่านได้จึงไม่เพี้ยน */
 .is-seg > .seg-blk > .seg-part.is-tip::after{content:'';position:absolute;top:0;bottom:0;left:0;
   aspect-ratio:1;background:var(--c);border-radius:var(--r-pill)}
-/* ยืดจากซ้ายไปขวา (transform-origin:left) ให้อ่านเป็น 'ค่าไล่ขึ้น' ไม่ใช่ 'ช่องผุดขึ้นมา' */
-@keyframes segIn{from{opacity:.25;transform:scaleX(.2)}to{opacity:1;transform:none}}
+/* หลอดทั้งอันปรากฏจากซ้ายไปขวาเป็นชิ้นเดียว ไม่ใช่แต่ละบล็อกเด้งขึ้นเอง
+   ใส่ที่ .is-seg (ตัวหลอด) ไม่ใช่ที่บล็อก และไม่ใช้ fill-mode
+   ค่าปกติของ clip-path จึงเป็น 'ไม่ตัดอะไรเลย' — ถ้าอนิเมชันไม่ทำงาน หลอดก็ยังเห็นครบ */
+@keyframes segSweep{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0 0 0 0)}}
 
 /* ---- สีบอกสถานะ ไม่ใช่ชื่อชุดข้อมูล ----
    ม่วง = ฝั่งที่นำ · เทาเข้ม = อีกฝั่ง · เทาจาง = ช่องที่ยังไม่ถึงค่า
@@ -247,7 +249,7 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;padding-right:2
 .heat-row{font-size:var(--t-sm);color:var(--ink);display:flex;align-items:center;
   padding:0 14px 0 0;border-top:1px solid var(--hair);min-height:46px;
   overflow:hidden;text-overflow:ellipsis;white-space:nowrap;transition:color var(--t-fast) ease}
-.heat-cell{display:grid;place-items:center;min-height:46px;border-top:1px solid var(--hair);
+.heat-cell{display:grid;place-items:center;line-height:1;min-height:46px;border-top:1px solid var(--hair);
   font-size:var(--t-sm);font-weight:700;color:var(--ink-2);font-variant-numeric:tabular-nums;
   position:relative}
 .heat-cell::before{content:"";position:absolute;inset:5px 4px;border-radius:var(--r-sm);
@@ -264,7 +266,7 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;padding-right:2
 /* ---- Bubbles ---- */
 .bubbles{display:flex;flex-wrap:wrap;gap:22px;align-items:flex-end;justify-content:center;padding:8px 0}
 .bubble-item{display:flex;flex-direction:column;align-items:center;gap:9px;max-width:120px;min-width:0}
-.bubble{border-radius:var(--r-pill);display:grid;place-items:center;color:#fff;
+.bubble{border-radius:var(--r-pill);display:grid;place-items:center;line-height:1;color:#fff;
   transition:transform var(--t-base) var(--ease), box-shadow var(--t-base) ease}
 .bubble.is-light{color:var(--ink)}
 .bubble:hover{transform:translateY(-4px) scale(1.03);box-shadow:0 14px 30px -16px rgba(0,0,0,.5)}
@@ -637,3 +639,11 @@ td.is-fixed{color:var(--lime-ink);background:var(--lime-soft)}
 /* ฐานของกราฟ — บอกว่ากราฟใบนี้คำนวณจากคนกี่คน อ่านการ์ดเดียวจบ */
 .chart-base{margin-top:10px;font-size:var(--t-xs);color:var(--muted)}
 .hint + .chart-base{margin-top:6px;border-top:none;padding-top:0}
+
+/* ---- กฎกลาง: กล่องเล็กที่ใส่ตัวเลข/ไอคอน ต้องจัดกึ่งกลางจริง ๆ ----
+   display:grid + place-items:center จัด "กล่องบรรทัด" ให้กึ่งกลาง
+   แต่ฟอนต์ไทยมีส่วนบน-ล่างของบรรทัดไม่เท่ากัน ตัวอักษรจึงเบ้ลงล่างราว 1-2px
+   ต้องบังคับ line-height:1 ให้กล่องบรรทัดเท่าความสูงตัวอักษรพอดี */
+.cause-no, .pull-no, .theme-no, .digest-ico, .nav-ico, .side-mark, .bubble, .heat-cell,
+.odd-n, .rank-top-tag, .flag-chip, .split-head .dot, .bk-seg b, .stack i b,
+.deck-dots button, .nav-toggle, .src-btn .ms, .deck-full .ms{line-height:1}

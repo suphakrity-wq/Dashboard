@@ -27,9 +27,12 @@
 /* ---- หัวแถบ: โลโก้ + ชื่อเว็บ ---- */
 .side-brand{display:flex;align-items:center;gap:12px;padding:0 8px}
 .side-mark{width:42px;height:42px;border-radius:var(--r-md);background:var(--hair);color:var(--ink);
-  display:grid;place-items:center;flex-shrink:0}
+  display:grid;place-items:center;line-height:1;flex-shrink:0}
 .side-brand b{display:block;font-size:var(--t-md);font-weight:700;line-height:1.25}
-.side-brand span{display:block;line-height:1.25}
+/* เจาะจงเฉพาะบรรทัดคำโปรย ไม่ให้ไปโดน .side-mark ซึ่งเป็น <span> เหมือนกัน
+   (ของเดิม .side-brand span ชนะ .side-mark ทำให้ display:grid ไม่ทำงาน
+    ไอคอนในกล่องโลโก้เลยไปกองอยู่มุมซ้ายบนแทนที่จะอยู่กึ่งกลาง) */
+.side-brand > div span{display:block;line-height:1.25}
 
 /* ---- รายการหมวด ---- */
 .nav{display:flex;flex-direction:column;gap:2px;flex:1}
@@ -40,7 +43,7 @@
 .nav-item:hover{background:var(--hair)}
 .nav-item.on{background:var(--ink);color:#fff}
 .nav-ico{width:32px;height:32px;border-radius:var(--r-sm);background:var(--hair);color:var(--ink-2);
-  display:grid;place-items:center;flex-shrink:0;
+  display:grid;place-items:center;line-height:1;flex-shrink:0;
   transition:background var(--t-base) var(--ease), color var(--t-fast) ease}
 .nav-item.on .nav-ico{background:rgba(255,255,255,.16);color:#fff}
 .nav-txt{display:flex;flex-direction:column;min-width:0;line-height:1.25}
@@ -212,7 +215,7 @@
   .side-brand{gap:9px;padding:0}
   .side-mark{width:34px;height:34px;border-radius:var(--r-sm)}
   .side-brand b{font-size:var(--t-sm)}
-  .side-brand span{display:none}
+  .side-brand > div span{display:none}   /* ซ่อนเฉพาะคำโปรย ไม่ใช่กล่องโลโก้ */
 
   /* เมนูตกบรรทัดได้ ห้ามให้เลื่อนแนวนอน
      ของเดิมใช้ overflow-x:auto พอมี 7 หน้า หมวดท้าย ๆ เลยหลุดออกนอกจอ

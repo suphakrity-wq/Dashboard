@@ -70,6 +70,10 @@ function drawSolid(track, value, max, color) {
 /** วาดหลอดแบบแบ่งบล็อก: n บล็อก บล็อกละ per หน่วย */
 function drawBlocks(track, value, per, n, color, gap, unitName, animate) {
   track.classList.add('is-seg');
+  /* อนิเมชันอยู่ที่ "หลอดทั้งอัน" ไม่ใช่ทีละบล็อก
+     หลอดจึงค่อย ๆ ปรากฏจากซ้ายไปขวาเป็นชิ้นเดียว ไม่ใช่บล็อกเด้งขึ้นพร้อมกันทีละช่อง
+     ตอนย่อ/ขยายหน้าต่างไม่ต้องเล่นใหม่ (animate = false) */
+  track.style.animation = animate ? '' : 'none';
   track.style.setProperty('--seg-gap', gap + 'px');
   if (per > 1) track.title = `1 ช่อง = ${per} ${unitName}`.trim();
   else track.removeAttribute('title');
@@ -87,9 +91,6 @@ function drawBlocks(track, value, per, n, color, gap, unitName, animate) {
       part.style.width = Math.round(left * 100) + '%';
       cell.append(part);
     }
-    // อนิเมชันเฉพาะตอนวาดครั้งแรก ตอนย่อ/ขยายหน้าต่างไม่ต้องเล่นใหม่ทุกครั้ง
-    // ไม่หน่วงทีละบล็อก เพราะบล็อกต้องมองเห็นได้แม้อนิเมชันไม่ทำงาน (ดู .seg-blk ใน CSS)
-    if (!animate) cell.style.animation = 'none';
     track.append(cell);
   }
 }
