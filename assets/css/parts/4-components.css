@@ -72,25 +72,18 @@
    เบราว์เซอร์จะยังไม่เริ่มอนิเมชัน ถ้าฐานเป็น opacity:0 + fill:backwards
    บล็อกจะค้างมองไม่เห็นจนกว่าจะกลับมาดูแท็บนั้น — เคยเป็นบั๊กมาแล้ว 2 แบบ
    อนิเมชันจึงเป็นแค่ "ของแถม" ไม่ใช่เงื่อนไขของการมองเห็น */
-.is-seg > .seg-blk{flex:1 1 0;width:auto;min-width:0;height:100%;border-radius:var(--r-xs);background:var(--track);
-  opacity:1;animation:segIn .34s var(--ease);
+/* ทุกช่องเป็นแคปซูลมนทั้งสองด้าน ใช้ --r-pill จึงมนเต็มเสมอไม่ว่าหลอดจะสูงเท่าไร */
+.is-seg > .seg-blk{flex:1 1 0;width:auto;min-width:0;height:100%;border-radius:var(--r-pill);
+  background:var(--track);opacity:1;animation:segIn .34s var(--ease);
   transition:background var(--t-fast) ease}
 /* บล็อกที่ถึงค่าแล้ว — สีมาจากตัวแปร --c ที่ JS ใส่ให้รายบล็อก */
 .is-seg > .seg-blk.is-on{background:var(--c)}
-/* บล็อกที่มีเศษ เช่น 4.5 — เติมบางส่วนแล้วมนมุมเหมือนบล็อกเต็ม */
-/* ปลายทั้งสองข้างของ "ทั้งหลอด" มนเต็ม ส่วนรอยต่อระหว่างช่องมนเล็กน้อยพอ
-   (เขียนไว้เผื่อความสูงหลอดเปลี่ยน จะได้ยังมนเต็มเสมอ ไม่ต้องแก้ตัวเลขตาม) */
-.is-seg > .seg-blk:first-child{border-top-left-radius:var(--r-pill);border-bottom-left-radius:var(--r-pill)}
-.is-seg > .seg-blk:last-child{border-top-right-radius:var(--r-pill);border-bottom-right-radius:var(--r-pill)}
-.is-seg > .seg-blk:first-child > .seg-part{
-  border-top-left-radius:var(--r-pill);border-bottom-left-radius:var(--r-pill)}
-
-/* ตัวเติมเศษ: มนเฉพาะด้านซ้าย ด้านขวาตัดตรงเพื่อให้กลืนไปกับช่องเดียวกัน
+/* ตัวเติมเศษ: มนซ้ายเต็ม ด้านขวาตัดตรงให้กลืนไปกับช่องเดียวกัน
    ถ้ามนทั้งสองด้าน จะเห็นเป็น "หลอดเล็กซ้อนอยู่ในหลอด" อีกอันหนึ่ง */
 .is-seg > .seg-blk > .seg-part{display:block;height:100%;background:var(--c);
-  border-radius:var(--r-xs) 0 0 var(--r-xs)}
+  border-radius:var(--r-pill) 0 0 var(--r-pill)}
 /* เศษที่เกือบเต็มช่อง ให้มนขวาตามช่องไปด้วย ไม่งั้นปลายจะดูตัดแปลก ๆ */
-.is-seg > .seg-blk > .seg-part.is-full{border-radius:var(--r-xs)}
+.is-seg > .seg-blk > .seg-part.is-full{border-radius:var(--r-pill)}
 @keyframes segIn{from{opacity:.25;transform:scaleX(.55)}to{opacity:1;transform:none}}
 
 /* ---- สีบอกสถานะ ไม่ใช่ชื่อชุดข้อมูล ----
