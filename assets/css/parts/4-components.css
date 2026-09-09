@@ -78,12 +78,11 @@
   transition:background var(--t-fast) ease}
 /* บล็อกที่ถึงค่าแล้ว — สีมาจากตัวแปร --c ที่ JS ใส่ให้รายบล็อก */
 .is-seg > .seg-blk.is-on{background:var(--c)}
-/* ตัวเติมเศษ: มนซ้ายเต็ม ด้านขวาตัดตรงให้กลืนไปกับช่องเดียวกัน
-   ถ้ามนทั้งสองด้าน จะเห็นเป็น "หลอดเล็กซ้อนอยู่ในหลอด" อีกอันหนึ่ง */
+/* ตัวเติมเศษ: มนเต็มทั้งสองด้านเหมือนช่องปกติ
+   (ตอนที่รางยังมีพื้นอยู่ข้างหลัง การมนสองด้านทำให้ดูเป็นหลอดซ้อนหลอด
+    พอเอาพื้นรางออกแล้วก็ไม่มีปัญหานั้นอีก) */
 .is-seg > .seg-blk > .seg-part{display:block;height:100%;background:var(--c);
-  border-radius:var(--r-pill) 0 0 var(--r-pill)}
-/* เศษที่เกือบเต็มช่อง ให้มนขวาตามช่องไปด้วย ไม่งั้นปลายจะดูตัดแปลก ๆ */
-.is-seg > .seg-blk > .seg-part.is-full{border-radius:var(--r-pill)}
+  border-radius:var(--r-pill)}
 @keyframes segIn{from{opacity:.25;transform:scaleX(.55)}to{opacity:1;transform:none}}
 
 /* ---- สีบอกสถานะ ไม่ใช่ชื่อชุดข้อมูล ----
