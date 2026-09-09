@@ -1,6 +1,6 @@
 /* หน้า 1 — สรุปผล: คำตอบของคำถามวิจัย + สาเหตุหลัก */
 
-import { Q, COL, C } from './columns.js?v=146';
+import { Q, COL, C } from './columns.js?v=147';
 
 export default {
   id: "summary",

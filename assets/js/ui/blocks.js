@@ -8,18 +8,18 @@
  * ห้าม: ใส่สูตรคำนวณในไฟล์นี้ — ให้เรียกจาก core/ แทน
  */
 
-import { $, el, growBar, segmentBars } from './dom.js?v=146';
-import { fmt, round1, pct } from '../core/format.js?v=146';
-import { splitValues, isNumericColumn } from '../core/compute.js?v=146';
-import { store } from '../core/store.js?v=146';
-import { verdict as calcVerdict, causes as calcCauses, pulls as calcPulls } from '../core/insight.js?v=146';
-import { recommend } from '../core/recommend.js?v=146';
-import { analyzeText } from '../core/textAnalysis.js?v=146';
-import { auditRows } from '../core/quality.js?v=146';
-import { wilsonInterval } from '../core/stats.js?v=146';
-import { SOURCES, CONTEXT_FACTS, compareBenchmarks } from '../core/benchmarks.js?v=146';
-import { aggregate, groupBy as groupRows } from '../core/compute.js?v=146';
-import { CHARTS } from './charts.js?v=146';
+import { $, el, growBar, segmentBars } from './dom.js?v=147';
+import { fmt, round1, pct } from '../core/format.js?v=147';
+import { splitValues, isNumericColumn } from '../core/compute.js?v=147';
+import { store } from '../core/store.js?v=147';
+import { verdict as calcVerdict, causes as calcCauses, pulls as calcPulls } from '../core/insight.js?v=147';
+import { recommend } from '../core/recommend.js?v=147';
+import { analyzeText } from '../core/textAnalysis.js?v=147';
+import { auditRows } from '../core/quality.js?v=147';
+import { wilsonInterval } from '../core/stats.js?v=147';
+import { SOURCES, CONTEXT_FACTS, compareBenchmarks } from '../core/benchmarks.js?v=147';
+import { aggregate, groupBy as groupRows } from '../core/compute.js?v=147';
+import { CHARTS } from './charts.js?v=147';
 
 let rerender = () => {};
 export const onRerender = fn => { rerender = fn; };
@@ -205,6 +205,9 @@ function table(host, b, rows, cfg = {}) {
      ตรวจจาก store.rows เสมอ จะได้เห็นครบทั้งตอนเปิดและปิดตัวกรอง */
   const audit = auditRows(store.rows, cfg.analysis || {});
   const problemsOf = r => audit.get(r) || null;
+  /* ลำดับถาวรตามที่ส่งฟอร์มเข้ามา — ไม่เปลี่ยนตามการกรองหรือการแบ่งหน้า
+     ใช้อ้างอิงได้ว่า "ฟอร์มลำดับที่เท่าไรตอบผิดพลาด" */
+  const orderOf = r => store.rows.indexOf(r) + 1;
 
   const cols = (b.columns?.length ? b.columns : store.columns);
   const size = b.pageSize || 20;
@@ -246,12 +249,19 @@ function table(host, b, rows, cfg = {}) {
   only.onclick = () => { store.onlyFlagged = !store.onlyFlagged; store.page = 0; rerender(); };
   tools.append(search, only, info);
 
+  // รายชื่อลำดับที่ใช้ไม่ได้ทั้งหมด อ้างอิงกลับไปที่ฟอร์มต้นทางได้เลย
+  const badList = store.rows.map((r, k) => problemsOf(r) ? k + 1 : null).filter(Boolean);
+  const badLine = badList.length
+    ? el('p', 'bad-list', `ฟอร์มที่ตอบผิดพลาด ${badList.length} ชุด — ลำดับที่ ${badList.join(', ')}`)
+    : null;
+
   /* --- ตาราง --- */
   const scroll = el('div', 'table-scroll');
   const tbl = el('table');
   const thead = el('thead');
   const headRow = el('tr');
   headRow.append(el('th', 'th-toggle'));
+  headRow.append(el('th', 'th-no', 'ลำดับ'));
   headRow.append(el('th', 'th-flag', 'ตัวกรอง'));
   cols.forEach(c => headRow.append(el('th', isNumericColumn(store.rows, c) ? 'num' : '', c)));
   thead.append(headRow);
@@ -260,6 +270,7 @@ function table(host, b, rows, cfg = {}) {
   slice.forEach((r, i) => {
     const tr = el('tr', 'row-main');
     tr.append(el('td', 'td-toggle', '›'));
+    tr.append(el('td', 'td-no', String(orderOf(r))));
 
     const problems = problemsOf(r);
     const st = el('td', 'td-flag');
@@ -287,8 +298,8 @@ function table(host, b, rows, cfg = {}) {
     const detail = el('tr', 'row-detail' + (problems ? ' is-bad' : ''));
     detail.hidden = true;
     const cell = el('td');
-    cell.colSpan = cols.length + 2;
-    cell.append(recordDetail(r, i + store.page * size + 1, problems));
+    cell.colSpan = cols.length + 3;
+    cell.append(recordDetail(r, orderOf(r), problems, store.rows.length));
     detail.append(cell);
 
     tr.onclick = () => {
@@ -314,14 +325,17 @@ function table(host, b, rows, cfg = {}) {
   pager.append(prev, next);
   foot.append(el('span', 'muted small', 'คลิกที่แถวเพื่อดูคำตอบทั้งหมดของคนนั้น'), pager);
 
-  card.append(tools, scroll, foot);
+  card.append(tools);
+  if (badLine) card.append(badLine);
+  card.append(scroll, foot);
   sec.append(card);
 }
 
 /** รายละเอียดของผู้ตอบหนึ่งคน — ทุกคำถาม ข้อความเต็ม คำตอบหลายข้อแยกเป็นชิป */
-function recordDetail(row, no, problems = null) {
+function recordDetail(row, no, problems = null, total = 0) {
   const box = el('div', 'record' + (problems ? ' is-bad' : ''));
-  box.append(el('div', 'record-no', 'ผู้ตอบคนที่ ' + no));
+  box.append(el('div', 'record-no',
+    `ฟอร์มลำดับที่ ${no}${total ? ' จากทั้งหมด ' + fmt(total) + ' ชุด' : ''}`));
 
   /* คำตอบชุดที่ใช้ไม่ได้: บอกเหตุผลไว้บนสุด แล้วไฮไลต์ช่องที่เป็นต้นเหตุ
      จะได้เห็นทันทีว่าอะไรทำให้ทั้งชุดถูกคัดออก */

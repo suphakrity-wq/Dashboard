@@ -673,3 +673,11 @@ tr.is-excluded > td:not(.td-flag):not(.td-toggle){opacity:.55}
 .record-tag{display:inline-block;margin-bottom:6px;padding:2px 9px;border-radius:var(--r-pill);
   background:var(--red);color:#fff;font-size:var(--t-xs);font-weight:700;line-height:1.5}
 .chip.is-cause{background:var(--red);color:#fff;font-weight:700}
+
+/* ลำดับของฟอร์มตามที่ส่งเข้ามา — ใช้อ้างอิงกลับไปที่ต้นทางได้ */
+.th-no,.td-no{width:56px;text-align:center;font-variant-numeric:tabular-nums;
+  color:var(--muted);font-weight:700}
+tr.is-excluded .td-no{color:var(--red)}
+.bad-list{margin:0 0 4px;padding:10px 14px;border-radius:var(--r-md);
+  background:var(--red-soft);color:var(--red);font-size:var(--t-xs);
+  font-weight:600;line-height:1.5;word-break:break-word}
