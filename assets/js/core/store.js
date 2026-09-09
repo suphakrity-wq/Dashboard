@@ -1,9 +1,9 @@
 /* [core] เก็บสถานะของข้อมูลและตัวกรอง + แจ้งเตือนเมื่อมีการเปลี่ยนแปลง
    ฝั่งหน้าตาไม่ต้องรู้ว่าโหลดมาจากไหน แค่ subscribe แล้วอ่าน visibleRows() */
 
-import { loadAll, readCache, writeCache, listSources } from './source.js?v=105';
-import { addComputedColumns } from './compute.js?v=105';
-import { cleanRows } from './quality.js?v=105';
+import { loadAll, readCache, writeCache, listSources } from './source.js?v=109';
+import { addComputedColumns } from './compute.js?v=109';
+import { scrubRows } from './quality.js?v=109';
 
 export const store = {
   rows: [],        // ข้อมูลดิบทุกแถว (รวมทุกแหล่ง)
@@ -16,7 +16,8 @@ export const store = {
 
   // สถานะการกรอง (ฝั่ง UI เปลี่ยนค่าพวกนี้)
   tab: 0,
-  hideOdd: false,   // ซ่อนคำตอบผิดปกติหรือไม่ (ปุ่มบนหัวเพจ)
+  hideOdd: false,      // เปิดการกรองคำตอบหรือไม่ (ปุ่มบนหัวเพจ)
+  onlyFlagged: false,  // หน้าข้อมูลดิบ: ดูเฉพาะแถวที่ติดตัวกรอง
   filters: {},
   search: '',
   page: 0
@@ -82,8 +83,9 @@ export async function refresh(cfg, { useCache = true } = {}) {
 export function visibleRows(cfg) {
   let rows = store.rows;
 
-  // ตัดคำตอบที่ดูไม่น่าใช่คำตอบจริงออกก่อนตัวกรองอื่น (ผู้ใช้กดเปิด/ปิดได้เอง)
-  if (store.hideOdd) rows = cleanRows(rows, cfg.analysis || {});
+  // ทำความสะอาดคำตอบก่อนตัวกรองอื่น: แก้คำพิมพ์ผิด + ตัดเฉพาะช่องที่ใช้ไม่ได้
+  // (ไม่ตัดทั้งคน — คำตอบข้ออื่นของคนนั้นยังนับตามปกติ) ผู้ใช้กดเปิด/ปิดได้เอง
+  if (store.hideOdd) rows = scrubRows(rows, cfg.analysis || {});
 
   const tab = (cfg.tabs || [])[store.tab];
   if (tab?.column && tab.value != null) {

@@ -9,21 +9,15 @@ export function el(tag, cls, text) {
   return node;
 }
 
-/** ตัวเลขวิ่งขึ้นตอนโหลด */
-export function countUp(node, target, { digits = 1, dur = 600 } = {}) {
-  const tn = document.createTextNode(target == null ? '–' : '0');
-  node.prepend(tn);
-  if (target == null) return;
-  const nf = new Intl.NumberFormat('th-TH', { maximumFractionDigits: digits });
-  const unit = Math.pow(10, digits);
-  const t0 = performance.now();
-  const step = now => {
-    const p = Math.min(1, (now - t0) / dur);
-    const eased = 1 - Math.pow(1 - p, 3);
-    tn.nodeValue = nf.format(Math.round(target * eased * unit) / unit);
-    if (p < 1) requestAnimationFrame(step);
-  };
-  requestAnimationFrame(step);
+/** ใส่ตัวเลขลงในการ์ดสรุป
+    เดิมทำเป็นตัวเลขวิ่งขึ้น แต่ระหว่างวิ่งเลขจะเปลี่ยนไปมาจนอ่านไม่ทัน
+    และดูเหมือนสุ่มเลข จึงแสดงค่าจริงทันที แล้วให้ค่อย ๆ ปรากฏแทน */
+export function countUp(node, target, { digits = 1 } = {}) {
+  const text = target == null
+    ? '–'
+    : new Intl.NumberFormat('th-TH', { maximumFractionDigits: digits }).format(target);
+  node.prepend(document.createTextNode(text));
+  node.classList.add('num-in');
 }
 
 /** ตั้งความกว้างของหลอดวัดค่าแบบมีอนิเมชัน */

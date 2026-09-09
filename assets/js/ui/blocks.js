@@ -8,17 +8,18 @@
  * ห้าม: ใส่สูตรคำนวณในไฟล์นี้ — ให้เรียกจาก core/ แทน
  */
 
-import { $, el, growBar, segmentBars } from './dom.js?v=105';
-import { fmt, round1, pct } from '../core/format.js?v=105';
-import { splitValues, isNumericColumn } from '../core/compute.js?v=105';
-import { store } from '../core/store.js?v=105';
-import { verdict as calcVerdict, causes as calcCauses, pulls as calcPulls } from '../core/insight.js?v=105';
-import { recommend } from '../core/recommend.js?v=105';
-import { analyzeText } from '../core/textAnalysis.js?v=105';
-import { wilsonInterval } from '../core/stats.js?v=105';
-import { SOURCES, CONTEXT_FACTS, compareBenchmarks } from '../core/benchmarks.js?v=105';
-import { aggregate, groupBy as groupRows } from '../core/compute.js?v=105';
-import { CHARTS } from './charts.js?v=105';
+import { $, el, growBar, segmentBars } from './dom.js?v=109';
+import { fmt, round1, pct } from '../core/format.js?v=109';
+import { splitValues, isNumericColumn } from '../core/compute.js?v=109';
+import { store } from '../core/store.js?v=109';
+import { verdict as calcVerdict, causes as calcCauses, pulls as calcPulls } from '../core/insight.js?v=109';
+import { recommend } from '../core/recommend.js?v=109';
+import { analyzeText } from '../core/textAnalysis.js?v=109';
+import { auditCells } from '../core/quality.js?v=109';
+import { wilsonInterval } from '../core/stats.js?v=109';
+import { SOURCES, CONTEXT_FACTS, compareBenchmarks } from '../core/benchmarks.js?v=109';
+import { aggregate, groupBy as groupRows } from '../core/compute.js?v=109';
+import { CHARTS } from './charts.js?v=109';
 
 let rerender = () => {};
 export const onRerender = fn => { rerender = fn; };
@@ -192,15 +193,30 @@ function pull(host, b, rows, cfg) {
 
 /* ---------- ตารางข้อมูลดิบ ---------- */
 /* คลิกที่แถวเพื่อกางรายละเอียดของคนนั้นแบบเต็ม ๆ ทุกคำถาม ไม่มีตัดข้อความ */
-function table(host, b, rows) {
+function table(host, b, rows, cfg = {}) {
   const sec = section(host, b);
   const card = el('article', 'card');
 
+  /* ผลตรวจคุณภาพของแต่ละช่อง — แสดงให้เห็นว่าแถวไหนติดตัวกรองเพราะอะไร
+     แถวที่ผ่านการกรองมาแล้วจะพก __quality มาด้วย ส่วนตอนปิดตัวกรองต้องตรวจเอง */
+  const audit = auditCells(store.rows, cfg.analysis || {});
+  const qualityOf = r => r.__quality ||
+    { fixes: audit.fixes.get(r), drops: audit.drops.get(r) };
+
   const cols = (b.columns?.length ? b.columns : store.columns);
   const size = b.pageSize || 20;
-  const pageCount = Math.max(1, Math.ceil(rows.length / size));
+  const pageCount = Math.max(1, Math.ceil((store.onlyFlagged
+    ? rows.filter(r => { const x = qualityOf(r); return (x.drops && x.drops.size) || (x.fixes && x.fixes.size); }).length
+    : rows.length) / size));
   store.page = Math.min(store.page, pageCount - 1);
-  const slice = rows.slice(store.page * size, store.page * size + size);
+  let view = rows;
+  if (store.onlyFlagged) {
+    const q = r => { const x = qualityOf(r); return (x.drops && x.drops.size) || (x.fixes && x.fixes.size); };
+    view = rows.filter(q);
+  }
+  const pages2 = Math.max(1, Math.ceil(view.length / size));
+  store.page = Math.min(store.page, pages2 - 1);
+  const slice = view.slice(store.page * size, store.page * size + size);
 
   /* --- แถบเครื่องมือ --- */
   const tools = el('div', 'table-tools');
@@ -216,8 +232,20 @@ function table(host, b, rows) {
     if (next) { next.focus(); next.setSelectionRange(next.value.length, next.value.length); }
   });
   const info = el('span', 'table-info',
-    `${fmt(rows.length)} แถว · ${cols.length} คอลัมน์ · หน้า ${store.page + 1}/${pageCount}`);
-  tools.append(search, info);
+    `${fmt(view.length)} แถว · ${cols.length} คอลัมน์ · หน้า ${store.page + 1}/${pageCount}`);
+
+  // ปุ่มดูเฉพาะแถวที่ติดตัวกรอง — นับจากข้อมูลทั้งชุด ไม่ใช่เฉพาะหน้านี้
+  const flagged = rows.filter(r => {
+    const x = qualityOf(r); return (x.drops && x.drops.size) || (x.fixes && x.fixes.size);
+  }).length;
+  const only = el('button', 'odd-btn' + (store.onlyFlagged ? ' on' : ''));
+  only.type = 'button';
+  only.hidden = !flagged;
+  only.innerHTML = `<i class="ms">rule</i><span class="odd-txt">เฉพาะแถวที่ติดตัวกรอง</span>` +
+                   `<span class="odd-n">${flagged}</span>`;
+  only.title = 'แสดงเฉพาะคนที่มีช่องถูกตัดหรือถูกแก้คำ';
+  only.onclick = () => { store.onlyFlagged = !store.onlyFlagged; store.page = 0; rerender(); };
+  tools.append(search, only, info);
 
   /* --- ตาราง --- */
   const scroll = el('div', 'table-scroll');
@@ -225,6 +253,7 @@ function table(host, b, rows) {
   const thead = el('thead');
   const headRow = el('tr');
   headRow.append(el('th', 'th-toggle'));
+  headRow.append(el('th', 'th-flag', 'ตัวกรอง'));
   cols.forEach(c => headRow.append(el('th', isNumericColumn(store.rows, c) ? 'num' : '', c)));
   thead.append(headRow);
 
@@ -232,9 +261,30 @@ function table(host, b, rows) {
   slice.forEach((r, i) => {
     const tr = el('tr', 'row-main');
     tr.append(el('td', 'td-toggle', '›'));
+
+    const q = qualityOf(r);
+    const st = el('td', 'td-flag');
+    if (q.drops && q.drops.size) {
+      const chip = el('span', 'flag-chip is-drop', `ตัด ${q.drops.size}`);
+      chip.title = [...q.drops.values()].join('\n');
+      st.append(chip);
+    }
+    if (q.fixes && q.fixes.size) {
+      const chip = el('span', 'flag-chip is-fix', `แก้คำ ${q.fixes.size}`);
+      chip.title = [...q.fixes.entries()].map(([c, v]) => `${c} → ${v}`).join('\n');
+      st.append(chip);
+    }
+    if (!st.children.length) st.append(el('span', 'flag-chip is-ok', 'ปกติ'));
+    tr.append(st);
+
     cols.forEach(c => {
-      const td = el('td', isNumericColumn(store.rows, c) ? 'num' : '', r[c] ?? '');
-      td.title = r[c] ?? '';
+      const dropped = q.drops && q.drops.get(c);
+      const fixed = q.fixes && q.fixes.get(c);
+      const td = el('td', (isNumericColumn(store.rows, c) ? 'num' : '') +
+        (dropped ? ' is-dropped' : fixed ? ' is-fixed' : ''), r[c] ?? '');
+      td.title = dropped ? 'ไม่ถูกนับ — ' + dropped
+        : fixed ? 'ระบบแก้คำให้เป็น: ' + fixed
+        : (r[c] ?? '');
       tr.append(td);
     });
 
@@ -242,7 +292,7 @@ function table(host, b, rows) {
     const detail = el('tr', 'row-detail');
     detail.hidden = true;
     const cell = el('td');
-    cell.colSpan = cols.length + 1;
+    cell.colSpan = cols.length + 2;
     cell.append(recordDetail(r, i + store.page * size + 1));
     detail.append(cell);
 

@@ -8,10 +8,10 @@
  * ข้อตกลง: ดึงข้อมูลผ่าน groupBy/crossTab จาก core/compute.js เท่านั้น
  */
 
-import { el, growBar, segmentBars } from './dom.js?v=105';
-import { fmt, round1, pct } from '../core/format.js?v=105';
-import { num, groupBy, crossTab, avgOf, pickGroupColumn, distinctValues, compareGroups } from '../core/compute.js?v=105';
-import { welchTTest } from '../core/stats.js?v=105';
+import { el, growBar, segmentBars } from './dom.js?v=109';
+import { fmt, round1, pct } from '../core/format.js?v=109';
+import { num, groupBy, crossTab, avgOf, pickGroupColumn, distinctValues, compareGroups } from '../core/compute.js?v=109';
+import { welchTTest } from '../core/stats.js?v=109';
 
 /* สีของหลอดสื่อ "สถานะ" ไม่ใช่ชื่อชุดข้อมูล:
    ฝั่งที่มีค่ามากกว่า = ม่วง (สีเด่นของงานนี้) อีกฝั่ง = เทาเข้ม
@@ -179,18 +179,25 @@ export function donut(host, cf, rows) {
   svg.setAttribute('viewBox', '0 0 42 42');
   svg.setAttribute('class', 'donut');
 
-  /* วงเต็มไม่มีรอยต่อ: ปลายตัดตรง (butt) และไม่หักช่องไฟออกจากความยาวส่วนโค้ง
-     ของเดิมหักออก 0.6 + ปลายมน ทำให้วงขาดเป็นช่วง ๆ และส่วนเล็ก ๆ ลอยเป็นเม็ดยา */
+  /* ปลายส่วนโค้งมนโดยที่ค่าไม่เพี้ยน:
+     ปลายมนยื่นออกจากเส้นข้างละครึ่งของความหนา (4.5) จึงหักความยาวเส้นออก 9
+     แล้วเลื่อนจุดเริ่ม 4.5 — พื้นที่ที่ถูกทาสีจึงเท่ากับส่วนโค้งเดิมพอดี
+     ส่วนที่สั้นกว่าความหนาเส้นจะทำแบบนี้ไม่ได้ (ปลายมนจะยาวเกินตัวส่วนโค้ง)
+     ส่วนเล็กพวกนั้นจึงใช้ปลายตัดตรงไว้เหมือนเดิม — ค่าถูกต้องสำคัญกว่าความมน */
   const R = 15.9155, C = 2 * Math.PI * R;
+  const W = 9, CAP = W / 2;
   let acc = 0;
   values.forEach((v, i) => {
+    const len = v / total * C;
+    const round = len > W + 1;
     const arc = document.createElementNS(NS, 'circle');
     arc.setAttribute('cx', 21); arc.setAttribute('cy', 21); arc.setAttribute('r', R);
     arc.setAttribute('fill', 'none');
     arc.setAttribute('stroke', palette[i % palette.length]);
-    arc.setAttribute('stroke-width', 9);
-    arc.setAttribute('stroke-dasharray', `${(v / total * C).toFixed(3)} ${C}`);
-    arc.setAttribute('stroke-dashoffset', (C / 4 - acc).toFixed(3));
+    arc.setAttribute('stroke-width', W);
+    if (round) arc.setAttribute('stroke-linecap', 'round');
+    arc.setAttribute('stroke-dasharray', `${(round ? len - W : len).toFixed(3)} ${C}`);
+    arc.setAttribute('stroke-dashoffset', (C / 4 - acc - (round ? CAP : 0)).toFixed(3));
     arc.setAttribute('transform', 'rotate(-90 21 21)');
     const t = document.createElementNS(NS, 'title');
     t.textContent = `${labels[i]} — ${pct(v, total)}%`;

@@ -77,7 +77,7 @@
    อนิเมชันจึงเป็นแค่ "ของแถม" ไม่ใช่เงื่อนไขของการมองเห็น */
 /* ทุกช่องเป็นแคปซูลมนทั้งสองด้าน ใช้ --r-pill จึงมนเต็มเสมอไม่ว่าหลอดจะสูงเท่าไร */
 .is-seg > .seg-blk{flex:1 1 0;width:auto;min-width:0;height:100%;border-radius:var(--r-pill);
-  background:var(--track);opacity:1;animation:segIn .34s var(--ease);
+  background:var(--track);opacity:1;animation:segIn .34s var(--ease);transform-origin:left center;
   transition:background var(--t-fast) ease}
 /* บล็อกที่ถึงค่าแล้ว — สีมาจากตัวแปร --c ที่ JS ใส่ให้รายบล็อก */
 .is-seg > .seg-blk.is-on{background:var(--c)}
@@ -88,9 +88,10 @@
   border-radius:var(--r-pill)}
 /* เศษที่บางกว่าความสูงหลอด วาดหัวมนในตัวเองไม่ได้ จึงติดวงกลมให้ตรงปลาย
    วงกลมมีจุดกึ่งกลางอยู่ที่ค่าจริงพอดี ค่าที่อ่านได้จึงไม่เพี้ยน */
-.is-seg > .seg-blk > .seg-part.is-tip::after{content:'';position:absolute;top:0;bottom:0;right:0;
-  aspect-ratio:1;transform:translateX(50%);background:var(--c);border-radius:var(--r-pill)}
-@keyframes segIn{from{opacity:.25;transform:scaleX(.55)}to{opacity:1;transform:none}}
+.is-seg > .seg-blk > .seg-part.is-tip::after{content:'';position:absolute;top:0;bottom:0;left:0;
+  aspect-ratio:1;background:var(--c);border-radius:var(--r-pill)}
+/* ยืดจากซ้ายไปขวา (transform-origin:left) ให้อ่านเป็น 'ค่าไล่ขึ้น' ไม่ใช่ 'ช่องผุดขึ้นมา' */
+@keyframes segIn{from{opacity:.25;transform:scaleX(.2)}to{opacity:1;transform:none}}
 
 /* ---- สีบอกสถานะ ไม่ใช่ชื่อชุดข้อมูล ----
    ม่วง = ฝั่งที่นำ · เทาเข้ม = อีกฝั่ง · เทาจาง = ช่องที่ยังไม่ถึงค่า
@@ -258,7 +259,7 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;padding-right:2
 .heat-line:hover .heat-row{color:var(--purple)}
 .heat-scale{display:flex;align-items:center;gap:9px;margin-top:var(--sp-3);
   font-size:var(--t-xs);color:var(--muted)}
-.heat-scale i{width:26px;height:12px;border-radius:var(--r-xs);display:block}
+.heat-scale i{width:26px;height:12px;border-radius:var(--r-pill);display:block}
 
 /* ---- Bubbles ---- */
 .bubbles{display:flex;flex-wrap:wrap;gap:22px;align-items:flex-end;justify-content:center;padding:8px 0}
@@ -274,7 +275,7 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;padding-right:2
 /* แถบสัดส่วน: เว้นช่องไฟระหว่างสีให้เห็นขอบเขตชัด (เดิมใช้เส้นขาว 1px แทบมองไม่เห็น)
    ต้องปิดพื้นและเส้นขอบในของราง เพราะแต่ละสีมีขอบมนของตัวเองแล้ว */
 .stack{display:flex;height:34px;gap:6px;background:none;box-shadow:none;overflow:visible}
-.stack i{display:block;height:100%;width:0;border-radius:var(--r-sm);min-width:8px;
+.stack i{display:block;height:100%;width:0;border-radius:var(--r-pill);min-width:8px;
   transition:width var(--t-slow) var(--ease)}
 .stack-legend{display:flex;flex-direction:column;gap:9px;margin-top:var(--sp-3)}
 .stack-item{display:flex;align-items:center;gap:10px;font-size:var(--t-sm);min-width:0}
@@ -502,9 +503,10 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;padding-right:2
   font:inherit;font-size:var(--t-xs);font-weight:600;white-space:nowrap;
   transition:background var(--t-fast) ease,color var(--t-fast) ease,border-color var(--t-fast) ease}
 .odd-btn .ms{font-size:var(--ico-sm)}
-.odd-btn .odd-n{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 6px;
+.odd-btn .odd-n{display:inline-flex;align-items:center;justify-content:center;
+  min-width:1.55em;height:1.55em;padding:0 .4em;box-sizing:border-box;
   border-radius:var(--r-pill);background:var(--hair);color:var(--ink);
-  font-size:var(--t-xs);font-weight:800;font-variant-numeric:tabular-nums}
+  font-size:.92em;line-height:1;font-weight:800;font-variant-numeric:tabular-nums}
 .odd-btn:hover{background:var(--hair);color:var(--ink)}
 .odd-btn.on{background:var(--ink);border-color:var(--ink);color:var(--on-dark)}
 .odd-btn.on .odd-n{background:var(--lime);color:var(--lime-ink)}
@@ -514,3 +516,19 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;padding-right:2
 .scale-note{margin:10px 0 0;font-size:var(--t-xs);color:var(--muted);line-height:1.4}
 .verdict .scale-note{color:var(--on-dark-muted)}
 .slide-fig .scale-note{margin-top:8px}
+
+/* ตัวเลขสรุป: ปรากฏขึ้นเบา ๆ แทนการวิ่งไล่เลข (อ่านค่าได้ทันทีตั้งแต่วินาทีแรก) */
+.num-in{animation:numIn .3s var(--ease)}
+@keyframes numIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+
+/* ---- คอลัมน์สถานะตัวกรองในตารางข้อมูลดิบ ---- */
+.th-flag{white-space:nowrap}
+.td-flag{white-space:nowrap;display:flex;gap:5px;align-items:center}
+.flag-chip{display:inline-block;padding:2px 9px;border-radius:var(--r-pill);
+  font-size:var(--t-xs);font-weight:700;line-height:1.5;white-space:nowrap}
+.flag-chip.is-ok{background:var(--hair);color:var(--muted)}
+.flag-chip.is-drop{background:var(--red-soft);color:var(--red)}
+.flag-chip.is-fix{background:var(--lime-soft);color:var(--lime-ink)}
+/* ช่องที่ถูกตัด: ขีดฆ่าให้เห็นว่ามีข้อมูลอยู่แต่ไม่ถูกนับ */
+td.is-dropped{color:var(--red);text-decoration:line-through;text-decoration-thickness:1px}
+td.is-fixed{color:var(--lime-ink);background:var(--lime-soft)}

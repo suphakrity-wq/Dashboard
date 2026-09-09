@@ -1,12 +1,12 @@
 /* จุดเริ่มต้นของแอป — ต่อ core (ข้อมูล/คำนวณ) เข้ากับ ui (หน้าตา)
    core/  = ตรรกะล้วน ไม่มี DOM   |   ui/ = วาดหน้าจอ   |   pages/ = นิยามเนื้อหาแต่ละหน้า */
 
-import { $ } from './ui/dom.js?v=105';
-import { store, refresh, visibleRows, subscribe } from './core/store.js?v=105';
-import { BLOCKS, onRerender } from './ui/blocks.js?v=105';
-import { renderNav, renderTabs, renderFilters, renderSummary, renderStatus, markDemo, setupNav, renderSourcePicker, renderOddToggle, restoreOddChoice } from './ui/shell.js?v=105';
-import { PAGES, COMPUTED, TABS, FILTERS, ANALYSIS } from './pages/index.js?v=105';
-import { FIXTURES, findFixture } from '../../test-data/fixtures.js?v=105';
+import { $ } from './ui/dom.js?v=109';
+import { store, refresh, visibleRows, subscribe } from './core/store.js?v=109';
+import { BLOCKS, onRerender } from './ui/blocks.js?v=109';
+import { renderNav, renderTabs, renderFilters, renderSummary, renderStatus, markDemo, setupNav, renderSourcePicker, renderOddToggle, restoreOddChoice } from './ui/shell.js?v=109';
+import { PAGES, COMPUTED, TABS, FILTERS, ANALYSIS } from './pages/index.js?v=109';
+import { FIXTURES, findFixture } from '../../test-data/fixtures.js?v=109';
 
 /* config.js = ตั้งค่าที่ผู้ใช้แก้บ่อย ส่วนเนื้อหาหน้าอยู่ใน pages/ */
 const CFG = {
