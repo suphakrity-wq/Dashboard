@@ -555,3 +555,13 @@ td.is-fixed{color:var(--lime-ink);background:var(--lime-soft)}
 .slope-mean{stroke:var(--ink);stroke-width:3.5;stroke-linecap:round}
 .slope-label{font-size:11px;font-weight:700;fill:var(--ink)}
 .slope-val{font-size:11px;font-weight:800;fill:var(--ink);font-variant-numeric:tabular-nums}
+
+/* อ่านกราฟง่ายขึ้น: บอกหน่วยและสัดส่วนไว้ในกราฟเลย ไม่ต้องเดาว่าตัวเลขคืออะไร */
+.bubble-share{display:block;margin-top:2px;font-size:var(--t-xs);color:var(--muted);
+  font-variant-numeric:tabular-nums}
+.cloud-chip .cloud-pct{font-size:var(--t-xs);opacity:.72;font-variant-numeric:tabular-nums}
+
+/* บรรทัด "วิธีอ่าน" ให้เห็นชัดว่าเป็นคำแนะนำการอ่าน ไม่ใช่ข้อมูล */
+.hint{display:flex;gap:8px;align-items:flex-start}
+.hint::before{content:"อ่านยังไง";flex:0 0 auto;font-weight:800;color:var(--purple);
+  background:var(--purple-soft);border-radius:var(--r-pill);padding:1px 9px;line-height:1.5}

@@ -1,6 +1,6 @@
 /* หน้า 3 — เหตุผลเบื้องหลัง: อะไรทำให้กดดู และอะไรทำให้เลื่อนผ่าน */
 
-import { Q, C } from './columns.js?v=111';
+import { Q, C } from './columns.js?v=113';
 
 export default {
   id: "reasons",
@@ -21,7 +21,7 @@ export default {
   blocks: [
     { type: "charts",
       title: "เหตุผลที่ทำให้ “กดดู”",
-      desc: "เหตุผลข้อเดียวกัน ฝั่งไหนถูกเลือกมากกว่า — เรียงจากข้อที่ต่างกันมากที่สุด",
+      desc: "เหตุผลข้อเดียวกัน ฝั่งไหนคนเลือกมากกว่า เรียงจากข้อที่ต่างกันมากสุด",
       charts: [
         { type: "paired", wide: true, level: 1, accent: C.drama,
           title: "ทำไมถึงกดดู: ข่าวโลก vs ข่าวดราม่า",
@@ -29,12 +29,12 @@ export default {
           columnA: Q.whyA, columnB: Q.whyB,
           labelA: "ข่าวโลก", labelB: "ข่าวดราม่า",
           colorA: C.world, colorB: C.drama, top: 8, unit: "คน",
-          hint: "ข้อที่ป้ายเขียนว่า “ข่าวดราม่านำ” มาก ๆ คือจุดแข็งที่ข่าวโลกยังไม่มี" }
+          hint: "ข้อที่ข่าวดราม่านำห่าง ๆ คือสิ่งที่ข่าวโลกยังทำไม่ได้" }
       ] },
 
     { type: "charts",
       title: "เหตุผลที่ทำให้ “เลื่อนผ่าน”",
-      desc: "กำแพงของแต่ละฝั่ง เทียบกันข้อต่อข้อ",
+      desc: "อุปสรรคของแต่ละฝั่ง เทียบกันทีละข้อ",
       charts: [
         { type: "paired", wide: true,
           title: "ทำไมถึงไม่กดดู: ข่าวโลก vs ข่าวดราม่า",
@@ -42,7 +42,7 @@ export default {
           columnA: Q.whyNotA, columnB: Q.whyNotB,
           labelA: "ข่าวโลก", labelB: "ข่าวดราม่า",
           colorA: C.world, colorB: C.drama, top: 8, unit: "คน",
-          hint: "ข้อที่ป้ายเขียนว่า “ข่าวโลกนำ” คือกำแพงเฉพาะของข่าวโลกที่ต้องแก้ก่อน" }
+          hint: "ข้อที่ข่าวโลกนำ คือปัญหาที่เกิดกับข่าวโลกโดยเฉพาะ ต้องแก้ก่อน" }
       ] },
 
     { type: "causes",
