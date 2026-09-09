@@ -8,18 +8,18 @@
  * ห้าม: ใส่สูตรคำนวณในไฟล์นี้ — ให้เรียกจาก core/ แทน
  */
 
-import { $, el, growBar, segmentBars } from './dom.js?v=142';
-import { fmt, round1, pct } from '../core/format.js?v=142';
-import { splitValues, isNumericColumn } from '../core/compute.js?v=142';
-import { store } from '../core/store.js?v=142';
-import { verdict as calcVerdict, causes as calcCauses, pulls as calcPulls } from '../core/insight.js?v=142';
-import { recommend } from '../core/recommend.js?v=142';
-import { analyzeText } from '../core/textAnalysis.js?v=142';
-import { auditRows } from '../core/quality.js?v=142';
-import { wilsonInterval } from '../core/stats.js?v=142';
-import { SOURCES, CONTEXT_FACTS, compareBenchmarks } from '../core/benchmarks.js?v=142';
-import { aggregate, groupBy as groupRows } from '../core/compute.js?v=142';
-import { CHARTS } from './charts.js?v=142';
+import { $, el, growBar, segmentBars } from './dom.js?v=146';
+import { fmt, round1, pct } from '../core/format.js?v=146';
+import { splitValues, isNumericColumn } from '../core/compute.js?v=146';
+import { store } from '../core/store.js?v=146';
+import { verdict as calcVerdict, causes as calcCauses, pulls as calcPulls } from '../core/insight.js?v=146';
+import { recommend } from '../core/recommend.js?v=146';
+import { analyzeText } from '../core/textAnalysis.js?v=146';
+import { auditRows } from '../core/quality.js?v=146';
+import { wilsonInterval } from '../core/stats.js?v=146';
+import { SOURCES, CONTEXT_FACTS, compareBenchmarks } from '../core/benchmarks.js?v=146';
+import { aggregate, groupBy as groupRows } from '../core/compute.js?v=146';
+import { CHARTS } from './charts.js?v=146';
 
 let rerender = () => {};
 export const onRerender = fn => { rerender = fn; };
@@ -284,11 +284,11 @@ function table(host, b, rows, cfg = {}) {
     });
 
     // แถวรายละเอียด — ซ่อนไว้ กางเมื่อคลิก
-    const detail = el('tr', 'row-detail');
+    const detail = el('tr', 'row-detail' + (problems ? ' is-bad' : ''));
     detail.hidden = true;
     const cell = el('td');
     cell.colSpan = cols.length + 2;
-    cell.append(recordDetail(r, i + store.page * size + 1));
+    cell.append(recordDetail(r, i + store.page * size + 1, problems));
     detail.append(cell);
 
     tr.onclick = () => {
@@ -319,22 +319,37 @@ function table(host, b, rows, cfg = {}) {
 }
 
 /** รายละเอียดของผู้ตอบหนึ่งคน — ทุกคำถาม ข้อความเต็ม คำตอบหลายข้อแยกเป็นชิป */
-function recordDetail(row, no) {
-  const box = el('div', 'record');
+function recordDetail(row, no, problems = null) {
+  const box = el('div', 'record' + (problems ? ' is-bad' : ''));
   box.append(el('div', 'record-no', 'ผู้ตอบคนที่ ' + no));
+
+  /* คำตอบชุดที่ใช้ไม่ได้: บอกเหตุผลไว้บนสุด แล้วไฮไลต์ช่องที่เป็นต้นเหตุ
+     จะได้เห็นทันทีว่าอะไรทำให้ทั้งชุดถูกคัดออก */
+  if (problems) {
+    const warn = el('div', 'record-warn');
+    warn.append(el('b', null, 'คำตอบชุดนี้ไม่ถูกนำมาคำนวณ'));
+    const ul = el('ul');
+    problems.forEach(p => ul.append(el('li', null, p)));
+    warn.append(ul);
+    box.append(warn);
+  }
+  const isCause = raw => problems && problems.some(p => raw && p.includes(raw.slice(0, 24)));
 
   const list = el('div', 'record-list');
   store.columns.forEach(col => {
     const raw = String(row[col] ?? '').trim();
     if (!raw) return;
 
-    const item = el('div', 'record-item');
+    const bad = isCause(raw) || splitValues(raw, true).some(v => isCause(v.trim()));
+    const item = el('div', 'record-item' + (bad ? ' is-cause' : ''));
     item.append(el('div', 'record-q', col));
+    if (bad) item.append(el('span', 'record-tag', 'ตรงนี้คือปัญหา'));
 
     const parts = splitValues(raw, true).filter(v => v && v !== 'ไม่ระบุ');
     if (parts.length > 1) {
       const chips = el('div', 'chips');
-      parts.forEach(p => chips.append(el('span', 'chip', p)));
+      // ชี้ให้ตรงชิ้นที่เป็นปัญหา ไม่ใช่แค่บอกว่าการ์ดนี้มีปัญหา
+      parts.forEach(p => chips.append(el('span', 'chip' + (isCause(p.trim()) ? ' is-cause' : ''), p)));
       item.append(chips);
     } else {
       item.append(el('p', 'record-a', raw));

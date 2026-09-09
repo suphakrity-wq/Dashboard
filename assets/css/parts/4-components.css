@@ -654,3 +654,22 @@ td.is-fixed{color:var(--lime-ink);background:var(--lime-soft)}
 
 /* แถวที่ถูกคัดออกทั้งชุด — จางลงให้เห็นว่าไม่ถูกนับ แต่ยังอ่านได้ */
 tr.is-excluded > td:not(.td-flag):not(.td-toggle){opacity:.55}
+
+/* ---- กางดูคำตอบที่ใช้ไม่ได้ ----
+   ทำสีแดงเฉพาะ "ส่วนที่มีปัญหา" เท่านั้น พื้นหลังคงเดิม
+   จะได้กวาดตาหาต้นเหตุเจอทันที โดยไม่ทำให้ทั้งแผงอ่านยาก */
+.record.is-bad .record-no{color:var(--red)}
+
+.record-warn{background:var(--surface);border:1px solid var(--red);border-radius:var(--r-md);
+  padding:12px 16px;margin-bottom:16px;color:var(--red)}
+.record-warn b{display:block;font-size:var(--t-sm);font-weight:800;margin-bottom:6px}
+.record-warn ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:4px}
+.record-warn li{font-size:var(--t-xs);line-height:1.5;color:var(--ink-2)}
+
+/* ช่องที่เป็นต้นเหตุ */
+.record-item.is-cause{border-color:var(--red);border-width:2px;position:relative}
+.record-item.is-cause .record-q{color:var(--red);font-weight:700}
+.record-item.is-cause .record-a{color:var(--red);font-weight:600}
+.record-tag{display:inline-block;margin-bottom:6px;padding:2px 9px;border-radius:var(--r-pill);
+  background:var(--red);color:#fff;font-size:var(--t-xs);font-weight:700;line-height:1.5}
+.chip.is-cause{background:var(--red);color:#fff;font-weight:700}
