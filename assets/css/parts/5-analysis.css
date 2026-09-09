@@ -199,6 +199,16 @@
 .slide-list li{font-size:var(--t-md);line-height:1.55;opacity:.92}
 .slide-list li b{font-weight:700}
 .slide-sub{font-size:var(--t-xs);opacity:.62}
+
+/* เดาไว้ vs เจอจริง — เครื่องหมายหน้าข้อบอกผลทันทีโดยไม่ต้องพึ่งสี */
+.slide-check{display:flex;flex-direction:column;gap:14px;margin:0;padding:0;list-style:none}
+.slide-check li{position:relative;padding-left:34px;font-size:var(--t-md);line-height:1.5}
+.slide-check li > .slide-sub{display:block;margin-top:4px}
+.slide-check li::before{content:'?';position:absolute;left:0;top:1px;
+  width:24px;height:24px;border-radius:var(--r-pill);display:grid;place-items:center;
+  font-size:var(--t-xs);font-weight:800;background:rgba(255,255,255,.16);color:inherit}
+.slide-check li.is-yes::before{content:'✓';background:var(--lime);color:var(--lime-ink)}
+.slide-check li.is-no::before{content:'✕';background:#fff;color:var(--ink)}
 .slide-quote{margin-top:18px;font-size:var(--t-lg);line-height:1.5;font-weight:500;
   border-left:3px solid var(--purple-on-dark);padding-left:16px;opacity:.9}
 .slide-big{margin:6px 0 18px;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
@@ -219,6 +229,9 @@
 @media (max-width:760px){
   .deck-stage{padding:26px 20px;min-height:0;border-radius:var(--r-lg)}
   .slide h3{font-size:var(--t-xl)}
-  .slide-list li,.slide-lead{font-size:var(--t-sm)}
+  .slide-list li,.slide-lead,.slide-check li{font-size:var(--t-sm)}
   .slide-quote{font-size:var(--t-md)}
 }
+
+/* บรรทัดสรุปที่ต่อท้ายรายการ เดา vs เจอ ต้องมีระยะห่างจากข้อสุดท้าย */
+.slide-check + .slide-lead{margin-top:18px;margin-bottom:0}
