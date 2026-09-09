@@ -260,3 +260,35 @@ html:has(.deck.is-full){overflow:hidden}   /* กันหน้าข้าง�
 .deck.is-full .slide-sub{font-size:clamp(12px, 1.15vw, 18px)}
 .deck.is-full .slide-tag{font-size:clamp(11px, 1.1vw, 17px)}
 .deck.is-full .slide-check li::before{width:clamp(22px, 1.9vw, 30px);height:clamp(22px, 1.9vw, 30px)}
+
+/* ---- สไลด์แบบมีภาพประกอบ ----
+   ซ้าย = ข้อความ ขวา = แผงขาวที่ใส่กราฟ (กราฟทุกตัวออกแบบมาสำหรับพื้นขาว)
+   จอแคบกว่า 900px ให้ซ้อนลงมาเป็นแถวเดียว ข้อความอยู่บน กราฟอยู่ล่าง */
+.slide-cols{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+  gap:clamp(20px, 2.6vw, 40px);align-items:start}
+.slide-text{min-width:0}
+.slide-fig{min-width:0;background:var(--surface);color:var(--ink);
+  border-radius:var(--r-lg);padding:clamp(14px, 1.6vw, 22px)}
+.slide-fig .fig-note{margin-top:12px;font-size:var(--t-xs);color:var(--muted);line-height:1.5}
+
+/* เทียบสองฝั่งแบบย่อในสไลด์ */
+.fig-vs{display:flex;flex-direction:column;gap:16px}
+.fig-vs-head{display:flex;justify-content:space-between;align-items:baseline;gap:10px;
+  font-size:var(--t-sm);margin-bottom:8px}
+.fig-vs-head b{font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap}
+.fig-vs-track{height:14px;border-radius:var(--r-pill);background:var(--track);overflow:hidden}
+.fig-vs-track.is-seg{background:none;overflow:visible}
+.fig-vs-track > i{display:block;height:100%;border-radius:var(--r-pill);background:var(--c)}
+.fig-bars{display:flex;flex-direction:column;gap:14px}
+
+/* ตารางสรุปว่าวัดอะไรบ้าง */
+.fig-spec{display:flex;flex-direction:column;gap:0}
+.fig-spec-row{display:grid;grid-template-columns:1.1fr 1.5fr .9fr;gap:10px;
+  padding:10px 0;border-bottom:1px solid var(--line);font-size:var(--t-xs);line-height:1.45}
+.fig-spec-row:last-child{border-bottom:none}
+.fig-spec-row.is-head{font-weight:700;color:var(--muted);border-bottom:1px solid var(--ink)}
+.fig-spec-row .is-key{font-weight:700;color:var(--ink)}
+
+@media (max-width:900px){
+  .slide-cols{grid-template-columns:1fr;gap:20px}
+}

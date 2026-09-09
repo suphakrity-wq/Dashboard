@@ -1,7 +1,7 @@
 /* หน้า 6 — ข้อสรุปและข้อเสนอ
    รวมหลักฐาน 3 ชั้น: คำตอบแบบเลือกตอบ + คำตอบปลายเปิด + งานวิจัยภายนอก */
 
-import { Q, COL } from './columns.js?v=91';
+import { Q, COL } from './columns.js?v=92';
 
 export default {
   id: "conclusion",

@@ -1,9 +1,9 @@
 /* [core] ตรรกะการวิเคราะห์ — คืนค่าเป็น "ข้อมูล" ล้วน ไม่มี HTML
    ฝั่งหน้าตาเอาผลลัพธ์ไปวาดเอง จะเปลี่ยนหน้าตาโดยไม่กระทบตรรกะได้ */
 
-import { avgOf, groupBy, num } from './compute.js?v=91';
-import { pct } from './format.js?v=91';
-import { pairedTTest, wilcoxonSignedRank, effectSizeLabel, requiredN } from './stats.js?v=91';
+import { avgOf, groupBy, num } from './compute.js?v=92';
+import { pct } from './format.js?v=92';
+import { pairedTTest, wilcoxonSignedRank, effectSizeLabel, requiredN } from './stats.js?v=92';
 
 /**
  * ตัดสินคำถามวิจัยด้วยการทดสอบทางสถิติ ไม่ใช่เกณฑ์ที่ตั้งเอง

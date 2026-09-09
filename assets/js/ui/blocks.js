@@ -8,17 +8,17 @@
  * ห้าม: ใส่สูตรคำนวณในไฟล์นี้ — ให้เรียกจาก core/ แทน
  */
 
-import { $, el, growBar, segmentBars } from './dom.js?v=91';
-import { fmt, round1, pct } from '../core/format.js?v=91';
-import { splitValues, isNumericColumn } from '../core/compute.js?v=91';
-import { store } from '../core/store.js?v=91';
-import { verdict as calcVerdict, causes as calcCauses, pulls as calcPulls } from '../core/insight.js?v=91';
-import { recommend } from '../core/recommend.js?v=91';
-import { analyzeText } from '../core/textAnalysis.js?v=91';
-import { wilsonInterval } from '../core/stats.js?v=91';
-import { SOURCES, CONTEXT_FACTS, compareBenchmarks } from '../core/benchmarks.js?v=91';
-import { aggregate, groupBy as groupRows } from '../core/compute.js?v=91';
-import { CHARTS } from './charts.js?v=91';
+import { $, el, growBar, segmentBars } from './dom.js?v=92';
+import { fmt, round1, pct } from '../core/format.js?v=92';
+import { splitValues, isNumericColumn } from '../core/compute.js?v=92';
+import { store } from '../core/store.js?v=92';
+import { verdict as calcVerdict, causes as calcCauses, pulls as calcPulls } from '../core/insight.js?v=92';
+import { recommend } from '../core/recommend.js?v=92';
+import { analyzeText } from '../core/textAnalysis.js?v=92';
+import { wilsonInterval } from '../core/stats.js?v=92';
+import { SOURCES, CONTEXT_FACTS, compareBenchmarks } from '../core/benchmarks.js?v=92';
+import { aggregate, groupBy as groupRows } from '../core/compute.js?v=92';
+import { CHARTS } from './charts.js?v=92';
 
 let rerender = () => {};
 export const onRerender = fn => { rerender = fn; };
@@ -634,7 +634,92 @@ function slides(host, b, rows, cfg) {
     return box;
   };
 
-  // สัดส่วนคำตอบหนึ่งตัวเลือกในคอลัมน์เดียว (ใช้เช็คสมมติฐานข้อ 2)
+  /* ---- ภาพประกอบสไลด์ ----
+     กราฟทุกตัวถูกออกแบบมาสำหรับพื้นขาว จึงวางไว้ในแผงขาว (.slide-fig) บนสไลด์พื้นเข้ม
+     ไม่ต้องทำกราฟชุดใหม่สำหรับพื้นเข้ม และสีทุกสีตรงกับที่เห็นในหน้าอื่นของแดชบอร์ด */
+  const figRank = (col, top, unit) => host2 =>
+    CHARTS.rank(host2, { x: col, multi: true, agg: 'count', sort: 'value', top,
+                         showPercent: true, valueUnit: unit || 'คน',
+                         color: 'var(--purple)' }, rows);
+
+  const figDonut = col => host2 =>
+    CHARTS.donut(host2, { x: col, agg: 'count', sort: 'value', colors: undefined }, rows);
+
+  // เทียบสองฝั่งแบบกระชับ: ตัวเลขใหญ่ + หลอดแบ่งช่องชุดเดียวกับทั้งเว็บ
+  const figVersus = host2 => {
+    const box = el('div', 'fig-vs');
+    const max = Math.ceil(Math.max(v.world || 0, v.drama || 0, 1));
+    const segs = [];
+    [['ข่าวโลก', v.world, 'var(--graphite)'],
+     ['ข่าวดราม่า', v.drama, 'var(--purple)']].forEach(([label, value, color]) => {
+      const row = el('div', 'fig-vs-row');
+      const head = el('div', 'fig-vs-head');
+      head.append(el('span', null, label), el('b', null, fmt(round1(value)) + ' ข่าว'));
+      const track = el('div', 'fig-vs-track');
+      const fill = el('i');
+      fill.style.setProperty('--c', color);
+      track.append(fill);
+      row.append(head, track);
+      box.append(row);
+      segs.push({ track, value, color });
+      growBar(fill, (value / max) * 100);
+    });
+    host2.append(box);
+    segmentBars(segs, max, 'ข่าว');
+    if (v.stats) {
+      host2.append(el('p', 'fig-note',
+        `ต่างกัน ${round1(Math.abs(v.stats.meanDiff))} ข่าวต่อคน · ` +
+        `ช่วงความเชื่อมั่น 95% ${round1(v.stats.ci[0])} ถึง ${round1(v.stats.ci[1])}`));
+    }
+  };
+
+  // ตารางสรุปว่าวัดอะไร ด้วยอะไร ได้ค่าออกมาเป็นอะไร
+  const figSpec = host2 => {
+    const spec = [
+      ['ข่าวโลกที่รู้จัก', 'ให้เลือกจากข่าวจริง 10 ข่าว', '0–10 ข่าว'],
+      ['ข่าวดราม่าที่รู้จัก', 'ให้เลือกจากข่าวจริง 10 ข่าว', '0–10 ข่าว'],
+      ['เหตุผลที่ไม่เลือกข่าวโลก', 'เลือกได้ 3 ข้อจากตัวเลือกที่กำหนด', 'สัดส่วนผู้ตอบ'],
+      ['เหตุผลที่เลือกข่าวดราม่า', 'เลือกได้ 3 ข้อจากตัวเลือกที่กำหนด', 'สัดส่วนผู้ตอบ'],
+      ['วิธีที่เจอข่าว', 'บังเอิญเลื่อนเจอ หรือตั้งใจหาเอง', 'สัดส่วนผู้ตอบ'],
+      ['เหตุผลในคำพูดตัวเอง', 'ช่องพิมพ์อิสระ ไม่มีตัวเลือกให้', 'จัดกลุ่มตามคำสำคัญ']
+    ];
+    const table = el('div', 'fig-spec');
+    const head = el('div', 'fig-spec-row is-head');
+    ['วัดอะไร', 'วัดอย่างไร', 'ได้ค่าเป็น'].forEach(t => head.append(el('span', null, t)));
+    table.append(head);
+    spec.forEach(cells => {
+      const row = el('div', 'fig-spec-row');
+      cells.forEach((t, k) => row.append(el('span', k === 0 ? 'is-key' : '', t)));
+      table.append(row);
+    });
+    host2.append(table);
+  };
+
+  // ธีมจากคำตอบปลายเปิด — หลอดสั้น ๆ พร้อมสัดส่วน
+  const figThemes = host2 => {
+    const top = tx.themes.filter(t => t.count).slice(0, 5);
+    if (!top.length) { host2.append(el('p', 'fig-note', 'ยังไม่มีคำตอบปลายเปิด')); return; }
+    const max = Math.max(...top.map(t => t.count), 1);
+    const box = el('div', 'fig-bars');
+    top.forEach(t => {
+      const row = el('div', 'fig-bar-row');
+      const head = el('div', 'fig-vs-head');
+      head.append(el('span', null, t.label), el('b', null, t.share + '%'));
+      const track = el('div', 'fig-vs-track');
+      const fill = el('i');
+      fill.style.setProperty('--c', 'var(--purple)');
+      track.append(fill);
+      growBar(fill, (t.count / max) * 100);
+      track.append(fill);
+      row.append(head, track);
+      box.append(row);
+    });
+    host2.append(box);
+    const q = tx.themes.find(t => t.samples && t.samples.length);
+    if (q) host2.append(el('p', 'fig-note', '“' + q.samples[0] + '”'));
+  };
+
+  // เดาไว้ vs เจอจริง — ตัดสินจากข้อมูลที่กำลังแสดงอยู่ ไม่ได้พิมพ์ค้างไว้
   const shareOf = (col, needle) => {
     if (!col) return null;
     const g = groupRows(rows, { x: col, agg: 'count', sort: 'value' });
@@ -646,140 +731,160 @@ function slides(host, b, rows, cfg) {
     const c = calcCauses(rows, A, { top: 20 }).find(x => x.label.includes(key));
     return c ? c.share : null;
   };
-  const pullShare = key => {
-    const t = tx.themes.find(x => x.id === key);
-    return t ? t.share : null;
-  };
-
-  // เดาไว้ vs เจอจริง — ตัดสินจากข้อมูลที่กำลังแสดงอยู่ ไม่ได้พิมพ์ค้างไว้
   const near = causeShare('ไกลตัว');
-  const close = pullShare('self');
   const checks = [
-    { claim: 'ดราม่าใกล้ตัวกว่า คนจึงรู้จักมากกว่า',
+    { claim: 'คนรู้จักข่าวดราม่ามากกว่าข่าวโลกจริง',
       got: v.stats
-        ? `${v.stats.meanDiff > 0 ? 'ข่าวดราม่านำ' : 'ข่าวโลกนำ'} ${round1(Math.abs(v.stats.meanDiff))} ข่าว/คน` +
+        ? `${v.stats.meanDiff > 0 ? 'ข่าวดราม่านำ' : 'ข่าวโลกนำ'} ${round1(Math.abs(v.stats.meanDiff))} ข่าวต่อคน` +
           ` (p ${v.stats.p < 0.001 ? '< 0.001' : '= ' + v.stats.p.toFixed(3)})`
         : 'ข้อมูลยังไม่พอตัดสิน',
       ok: v.stats ? v.stats.meanDiff > 0 && v.stats.p < 0.05 : null },
-    { claim: 'ฟีดเป็นคนเลือกข่าวให้ ไม่ใช่คนตั้งใจหาเอง',
+    { claim: 'คนส่วนใหญ่ไม่ได้เลือกข่าวเอง แต่ฟีดเลือกให้',
       got: accident == null ? 'ยังไม่มีข้อมูลว่าเจอข่าวอย่างไร' : `เจอข่าวโดยบังเอิญ ${accident}% ของผู้ตอบ`,
       ok: accident == null ? null : accident >= 50 },
-    { claim: 'ข่าวโลกถูกข้ามเพราะรู้สึกไกลตัว ยังไม่กระทบตอนนี้',
+    { claim: 'ข่าวโลกถูกข้ามเพราะรู้สึกว่าไม่เกี่ยวกับตัวเอง',
       got: near == null ? 'ยังไม่มีใครตอบเหตุผลนี้' : `“รู้สึกไกลตัว” ถูกเลือก ${near}% ของผู้ตอบ`,
       ok: near == null ? null : near >= 30 }
   ];
 
   const deck = [
-    { tag: 'หัวข้อ', title: b.topic || 'คนไทยชอบเสพสื่อดราม่า แต่ไม่เสพข่าวโลก จริงหรือไม่?',
+    { tag: 'หัวข้อ', title: b.topic || 'คนไทยเสพดราม่ามากกว่าข่าวโลกจริงหรือไม่',
       build: s => {
-        s.append(el('p', 'slide-lead', b.subtitle || 'หาหลักฐานว่าสิ่งที่เราคิดไว้ จริงหรือเปล่า'));
+        s.append(el('p', 'slide-lead', b.subtitle || 'รายงานผลสำรวจพฤติกรรมการเสพข่าว'));
         s.append(list([
-          `เก็บคำตอบจากผู้ตอบจริง <b>${fmt(v.n)} คน</b>`,
-          'วัดด้วยการให้เลือกข่าวที่รู้จักจริง ฝั่งละ 10 ข่าว',
-          'ตัดสินด้วยสถิติ ไม่ใช่ความรู้สึก',
-          '<span class="slide-sub">ขั้นตอน: ตั้งคำถาม → หาข้อมูล → ระบุปัญหา</span>'
+          `เก็บข้อมูลจากผู้ตอบ <b>${fmt(v.n)} คน</b>`,
+          'วัดจากข่าวจริงฝั่งละ 10 ข่าว ไม่ได้ถามความรู้สึก',
+          'ทุกข้อสรุปมีตัวเลขและวิธีคำนวณกำกับ'
         ]));
+        s.append(el('p', 'slide-sub', 'ลำดับการนำเสนอ: คำถาม → สิ่งที่คาดไว้ → วิธีวัด → ผลที่ได้ → สิ่งที่ต้องทำต่อ'));
       } },
 
-    { tag: 'QUESTION · คำถาม', title: 'เราอยากรู้อะไร',
+    { tag: 'คำถาม', title: 'คำถามของงานนี้',
       build: s => {
         s.append(el('p', 'slide-quote', '“คนไทยชอบเสพสื่อดราม่า แต่ไม่เสพข่าวโลก จริงหรือไม่?”'));
         s.append(list([
-          'เป็นคำถาม ยังไม่ใช่คำตอบ — ห้ามใส่คำตอบไว้ในคำถามเอง',
-          'ถ้าจริง ต้องรู้ต่อว่าเพราะอะไร และติดตรงไหน',
-          'ถ้าไม่จริง ก็ต้องเลิกเชื่อตามที่รู้สึก'
+          'เป็นความเชื่อที่ได้ยินกันบ่อย แต่ยังไม่เคยมีตัวเลขยืนยัน',
+          'ถ้าจริง — ต้องรู้ต่อว่าติดตรงไหน จะได้แก้ถูกจุด',
+          'ถ้าไม่จริง — ก็ไม่ควรตัดสินใจบนความเชื่อนั้นอีก'
         ]));
       } },
 
-    { tag: 'ASSUMPTION · สมมติฐาน', title: 'ตอนนี้เราคิดว่าคำตอบคืออะไร',
+    { tag: 'สิ่งที่คาดไว้', title: 'สมมติฐานก่อนเก็บข้อมูล',
       build: s => {
-        s.append(el('p', 'slide-lead', 'สามข้อนี้คือสิ่งที่เดาไว้ก่อนเก็บข้อมูล ยังไม่ใช่ข้อค้นพบ'));
+        s.append(el('p', 'slide-lead', 'ตั้งไว้สามข้อ เพื่อให้ตรวจสอบได้ทีละข้อว่าถูกหรือผิด'));
         s.append(list([
-          '<b>1 · ดราม่าใกล้ตัว</b> เป็นเรื่องที่ใครก็เข้าถึงได้ และอาจเกิดกับตัวเอง คนจึงจำได้มากกว่า',
-          '<b>2 · สื่อดันเรื่องที่เรียกความสนใจ</b> คนเลยเจอดราม่าโดยไม่ได้ตั้งใจหา',
-          '<b>3 · ข่าวโลกไกลตัวและใหญ่เกินไป</b> รู้สึกว่ายังไม่กระทบตอนนี้ จึงถูกข้าม'
+          '<b>1 · ดราม่าเป็นเรื่องใกล้ตัว</b> ใครก็เข้าถึงได้ และรู้สึกว่าอาจเกิดกับตัวเอง คนจึงจำได้มากกว่า',
+          '<b>2 · แพลตฟอร์มดันเรื่องที่เรียกความสนใจ</b> คนจึงเจอดราม่าโดยไม่ได้ตั้งใจหา',
+          '<b>3 · ข่าวโลกรู้สึกไกลตัวและใหญ่เกินไป</b> เหมือนยังไม่กระทบตอนนี้ จึงถูกเลื่อนผ่าน'
         ]));
       } },
 
-    { tag: 'METHODS · วิธีหา', title: 'หาหลักฐานด้วยวิธีไหน',
+    { tag: 'วิธีวัด', title: 'วัดอะไรบ้าง และวัดอย่างไร',
+      fig: figSpec,
       build: s => {
-        s.append(el('p', 'slide-lead', 'ไม่ต้องครบทุกวิธี แต่ต้องเลือกวิธีที่ตอบคำถามนี้ได้'));
+        s.append(el('p', 'slide-lead', 'ใช้แบบสอบถามชุดเดียว ถามจากสิ่งที่เกิดขึ้นจริง ไม่ถามว่า “ถ้า…จะทำไหม”'));
         s.append(list([
-          '<b>ASK</b> — แบบสอบถาม ถามจากพฤติกรรมที่เกิดขึ้นจริง ไม่ถามว่า “ถ้า…จะทำไหม”',
-          '<b>SEARCH</b> — เทียบกับรายงานและงานวิจัยที่ตรวจย้อนกลับได้',
-          '<b>OBSERVE</b> — ดูว่าคนเจอข่าวจากช่องทางไหน บังเอิญหรือตั้งใจ',
-          '<span class="slide-sub">คำตอบปลายเปิดเก็บเป็นคำพูดของผู้ตอบเอง ไม่ตีความแทน</span>'
+          '<b>ตัวชี้วัดหลัก</b> ให้เลือกข่าวที่รู้จักจริงจากชุดข่าวโลก 10 ข่าว และชุดข่าวดราม่า 10 ข่าว',
+          '<b>คนเดียวกันตอบทั้งสองฝั่ง</b> จึงเทียบกันได้โดยตรง ความต่างระหว่างบุคคลถูกตัดออก',
+          '<b>ถามเหตุผลต่อทันที</b> ทั้งข้อที่เลือกและข้อที่ไม่เลือก',
+          '<b>เปิดช่องให้พิมพ์เอง</b> เพื่อจับเหตุผลที่ตัวเลือกสำเร็จรูปไม่ครอบคลุม'
         ]));
       } },
 
-    { tag: 'EVIDENCE · เกณฑ์', title: 'อะไรจะทำให้เชื่อ หรือหักล้างสมมติฐาน',
+    { tag: 'วิธีวัด', title: 'ตัดสินด้วยเกณฑ์อะไร',
       build: s => {
-        s.append(el('p', 'slide-lead', 'ตั้งเกณฑ์ไว้ก่อนดูผล จะได้ไม่เข้าข้างสิ่งที่เดาไว้'));
+        s.append(el('p', 'slide-lead', 'ตั้งเกณฑ์ไว้ตั้งแต่ก่อนเห็นผล เพื่อไม่ให้ตีความเข้าข้างสิ่งที่คาดไว้'));
         s.append(list([
-          `ต้องมีผู้ตอบอย่างน้อย <b>${v.minSample} คน</b> ถึงจะสรุป`,
-          'สองฝั่งต้องต่างกันอย่างมีนัยสำคัญ (p &lt; 0.05) ไม่ใช่ต่างกันนิดเดียว',
-          'ถ้าข่าวโลกเท่ากันหรือมากกว่า = สมมติฐานถูกหักล้าง',
-          'เหตุผลที่ผู้ตอบเลือกเอง ต้องชี้ไปทางเดียวกับที่เดาไว้'
+          `<b>ขนาดกลุ่มตัวอย่าง</b> ต้องมีอย่างน้อย ${v.minSample} คนจึงจะสรุป`,
+          '<b>ต่างกันจริงไหม</b> ใช้การทดสอบแบบจับคู่รายคน ต้องมีนัยสำคัญที่ p &lt; 0.05',
+          '<b>ตรวจซ้ำอีกวิธี</b> ด้วยการทดสอบที่ไม่อิงการแจกแจงปกติ ผลต้องไปทางเดียวกัน',
+          '<b>ต่างมากพอไหม</b> รายงานขนาดผลต่างและช่วงความเชื่อมั่น 95% ควบคู่เสมอ',
+          '<b>เงื่อนไขหักล้าง</b> ถ้าข่าวโลกเท่ากันหรือมากกว่า ถือว่าสมมติฐานไม่ผ่าน'
         ]));
       } },
 
-    { tag: 'FINDING · เจอจริง', title: 'คำตอบคือ ' + v.answer,
+    { tag: 'ผลที่ได้', title: 'ผลสรุป: ' + v.answer,
+      fig: figVersus,
       build: s => {
         s.append(big(
           (v.stats && v.stats.meanDiff > 0 ? '+' : '') + (v.stats ? round1(v.stats.meanDiff) : '–'),
-          'ข่าว/คน', 'ข่าวดราม่ารู้จักมากกว่าข่าวโลกเท่านี้ต่อคน'));
+          'ข่าวต่อคน', 'ส่วนต่างเฉลี่ยระหว่างสองฝั่ง'));
         s.append(list([
-          `ข่าวโลก <b>${fmt(round1(v.world))}</b> ข่าว · ข่าวดราม่า <b>${fmt(round1(v.drama))}</b> ข่าว`,
-          v.stats ? `p = ${v.stats.p < 0.001 ? '<0.001' : v.stats.p.toFixed(3)} · ขนาดผลต่าง ${v.stats.effect}` : null,
-          v.stats ? `ช่วงความเชื่อมั่น 95%: ${round1(v.stats.ci[0])} ถึง ${round1(v.stats.ci[1])} ข่าว/คน` : null
+          `เฉลี่ยแล้วรู้จักข่าวโลก <b>${fmt(round1(v.world))}</b> ข่าว เทียบกับข่าวดราม่า <b>${fmt(round1(v.drama))}</b> ข่าว`,
+          v.stats ? `นัยสำคัญ p = ${v.stats.p < 0.001 ? '<0.001' : v.stats.p.toFixed(3)} · ขนาดผลต่างระดับ${v.stats.effect}` : null,
+          v.stats ? 'ผลจากการทดสอบอีกวิธีไปทางเดียวกัน' : null
         ]));
       } },
 
-    { tag: 'FINDING · สาเหตุ', title: 'ทำไมคนไม่ดูข่าวโลก',
-      build: s => s.append(list(cz.map((c, i) =>
-        `<b>${i + 1}. ${c.label}</b> — ${c.share}% ของผู้ตอบ`))) },
-
-    { tag: 'FINDING · แรงดึง', title: 'ข่าวดราม่าชนะด้วยอะไร',
-      build: s => s.append(list(pl.map(p => `<b>${p.label}</b> — ${p.share}%`))) },
-
-    { tag: 'ASK · เสียงจริง', title: 'สิ่งที่ผู้ตอบเขียนเอง',
+    { tag: 'ผลที่ได้', title: 'ทำไมข่าวโลกถึงถูกข้าม',
+      fig: figRank(A.whyNotWorldCol, 4),
       build: s => {
-        s.append(el('p', 'slide-lead',
-          `วิเคราะห์ข้อความ ${fmt(tx.total)} ข้อความ · จัดหมวดได้ ${tx.coverage}%`));
-        s.append(list(tx.themes.filter(t => t.count).slice(0, 4)
-          .map(t => `<b>${t.label}</b> — ${t.share}%`)));
-        const q = tx.themes.find(t => t.samples && t.samples.length);
-        if (q) s.append(el('p', 'slide-quote', '“' + q.samples[0] + '”'));
+        s.append(el('p', 'slide-lead', 'เหตุผลที่ผู้ตอบเลือกเอง เรียงจากที่ถูกเลือกมากที่สุด'));
+        s.append(list(cz.map((c, i) => `<b>${i + 1}. ${c.label}</b> — ${c.share}% ของผู้ตอบ`)));
+        if (cz[0]) s.append(el('p', 'slide-sub', 'ข้อแรกคือจุดที่คุ้มที่สุดที่จะแก้ก่อน'));
       } },
 
-    { tag: 'SURPRISE · เดา vs เจอ', title: 'สิ่งที่เดาไว้ ตรงกับที่เจอไหม',
+    { tag: 'ผลที่ได้', title: 'ข่าวดราม่าได้เปรียบตรงไหน',
+      fig: figRank(A.whyDramaCol, 4),
+      build: s => {
+        s.append(el('p', 'slide-lead', 'องค์ประกอบที่ทำให้คนหยุดดู ซึ่งข่าวโลกมักไม่มี'));
+        s.append(list(pl.map(p => `<b>${p.label}</b> — ${p.share}% ของผู้ตอบ`)));
+      } },
+
+    { tag: 'ผลที่ได้', title: 'คนเจอข่าวได้อย่างไร',
+      fig: figDonut(A.howFoundCol),
+      build: s => {
+        s.append(el('p', 'slide-lead', 'จุดนี้ชี้ว่าควรไปวางข่าวไว้ตรงไหน'));
+        s.append(list([
+          accident != null
+            ? `<b>${accident}% เจอข่าวโดยบังเอิญ</b> ระหว่างใช้โซเชียล ไม่ได้ตั้งใจหา`
+            : 'ยังไม่มีข้อมูลว่าผู้ตอบเจอข่าวอย่างไร',
+          'แปลว่าฟีดเป็นคนเลือกข่าวให้ ไม่ใช่ผู้ใช้เลือกเอง',
+          'การรอให้คนเข้ามาหาข่าวเองจึงได้ผลน้อยกว่าการไปอยู่ในฟีด'
+        ]));
+      } },
+
+    { tag: 'ผลที่ได้', title: 'เหตุผลในคำพูดของผู้ตอบเอง',
+      fig: figThemes,
+      build: s => {
+        s.append(el('p', 'slide-lead',
+          `จากคำตอบแบบพิมพ์เอง ${fmt(tx.total)} ข้อความ จัดกลุ่มได้ ${tx.coverage}%`));
+        s.append(list([
+          'ไม่ใช่ตัวเลือกสำเร็จรูป จึงเห็นเหตุผลที่แบบสอบถามไม่ได้เตรียมไว้',
+          'จัดกลุ่มด้วยคำสำคัญที่เปิดให้ตรวจสอบย้อนกลับได้ทุกข้อความ',
+          'ผลที่ได้ไปทางเดียวกับข้อที่ผู้ตอบเลือกจากตัวเลือก'
+        ]));
+      } },
+
+    { tag: 'ผลที่ได้', title: 'สมมติฐานผ่านหรือไม่',
       build: s => {
         const ul = el('ul', 'slide-check');
         checks.forEach((c, i) => {
           const li = el('li', c.ok === null ? 'is-unknown' : c.ok ? 'is-yes' : 'is-no');
           li.innerHTML = `<b>${i + 1} · ${c.claim}</b>` +
-            `<span class="slide-sub">${c.ok === null ? 'ยังตัดสินไม่ได้' : c.ok ? 'ข้อมูลสนับสนุน' : 'ข้อมูลไม่สนับสนุน'} — ${c.got}</span>`;
+            `<span class="slide-sub">${c.ok === null ? 'ยังตัดสินไม่ได้' : c.ok ? 'ผ่าน' : 'ไม่ผ่าน'} — ${c.got}</span>`;
           ul.append(li);
         });
         s.append(ul);
-        if (close != null)
-          s.append(el('p', 'slide-lead', `ผู้ตอบที่บอกเองว่าเลือกดูเพราะ “ใกล้ตัว/เกี่ยวกับตัวเอง” มี ${close}%`));
       } },
 
-    { tag: 'ข้อจำกัด', title: 'ข้อจำกัดของงานนี้',
-      build: s => s.append(list([
-        v.warn ? v.warn : `ผู้ตอบ ${fmt(v.n)} คน ถึงเกณฑ์ ${v.minSample} คนที่ตั้งไว้แล้ว`,
-        'กลุ่มตัวอย่างเป็นนักศึกษาช่วงอายุใกล้กัน ยังไม่แทนคนไทยทั้งประเทศ',
-        'ข่าวที่ใช้วัดเป็นชุดที่ยกมาให้เลือก ไม่ใช่ข่าวทั้งหมดที่มีอยู่จริง',
-        'ตอบด้วยตัวเอง อาจจำคลาดเคลื่อนได้ — ยังไม่ได้สังเกตพฤติกรรมจริง',
-        'ทุกตัวเลขในสไลด์นี้คำนวณสดจากข้อมูลที่กำลังแสดงอยู่'
-      ])) },
-
-    { tag: 'ขั้นต่อไป', title: 'จากหลักฐาน ไปเป็นปัญหาที่ต้องแก้',
+    { tag: 'ข้อควรระวัง', title: 'ขอบเขตของข้อสรุปนี้',
       build: s => {
-        s.append(el('p', 'slide-lead', 'ยังไม่ใช่การเสนอผลงาน แต่คือจุดที่ปัญหาเริ่มชัดพอจะลงมือ'));
+        s.append(el('p', 'slide-lead', 'บอกไว้ก่อนเพื่อไม่ให้นำผลไปใช้เกินกว่าที่ข้อมูลรองรับ'));
+        s.append(list([
+          v.warn ? v.warn : `ผู้ตอบ ${fmt(v.n)} คน ผ่านเกณฑ์ขั้นต่ำที่ตั้งไว้ ${v.minSample} คน`,
+          'กลุ่มตัวอย่างเป็นนักศึกษาช่วงอายุใกล้กัน ยังไม่ใช่ภาพของคนไทยทั้งประเทศ',
+          'ชุดข่าวที่ใช้วัดเป็นตัวแทนที่คัดมา ไม่ใช่ข่าวทั้งหมดที่มีอยู่จริง',
+          'เป็นการตอบด้วยตัวเอง จึงยังไม่ได้ยืนยันด้วยพฤติกรรมการใช้งานจริง',
+          'ตัวเลขทุกตัวคำนวณสดจากชุดข้อมูลที่กำลังเปิดอยู่ ตรวจย้อนกลับได้'
+        ]));
+      } },
+
+    { tag: 'ขั้นต่อไป', title: 'สิ่งที่ควรทำต่อ',
+      build: s => {
+        s.append(el('p', 'slide-lead', 'เรียงจากจำนวนคนที่ได้ประโยชน์มากที่สุดก่อน'));
         s.append(list(rec.map((a, i) =>
-          `<b>${i + 1}. ${a.do}</b><br><span class="slide-sub">แก้ที่ ${a.why} · ${a.share}% ของผู้ตอบ` +
+          `<b>${i + 1}. ${a.do}</b><br><span class="slide-sub">แก้ที่ ${a.why} · เกี่ยวข้องกับผู้ตอบ ${a.share}%` +
           (a.sourceShort ? ` · อ้างอิง ${a.sourceShort}` : '') + '</span>')));
       } }
   ];
@@ -792,7 +897,18 @@ function slides(host, b, rows, cfg) {
     const slide = el('article', 'slide' + (i === 0 ? ' on' : ''));
     slide.append(el('span', 'slide-tag', `${i + 1}/${deck.length} · ${d.tag}`));
     slide.append(el('h3', null, d.title));
-    d.build(slide);
+
+    // สไลด์ที่มีภาพประกอบแบ่งเป็นสองคอลัมน์ (จอแคบจะซ้อนลงมาเอง ดู 5-analysis.css)
+    const cols = el('div', d.fig ? 'slide-cols' : 'slide-one');
+    const text = el('div', 'slide-text');
+    d.build(text);
+    cols.append(text);
+    if (d.fig) {
+      const fig = el('div', 'slide-fig');
+      d.fig(fig);
+      cols.append(fig);
+    }
+    slide.append(cols);
     stage.append(slide);
   });
 
