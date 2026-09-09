@@ -8,10 +8,10 @@
  * ข้อตกลง: ดึงข้อมูลผ่าน groupBy/crossTab จาก core/compute.js เท่านั้น
  */
 
-import { el, growBar, segmentBars } from './dom.js?v=124';
-import { fmt, round1, pct } from '../core/format.js?v=124';
-import { num, groupBy, crossTab, avgOf, pickGroupColumn, distinctValues, compareGroups } from '../core/compute.js?v=124';
-import { welchTTest } from '../core/stats.js?v=124';
+import { el, growBar, segmentBars } from './dom.js?v=126';
+import { fmt, round1, pct } from '../core/format.js?v=126';
+import { num, groupBy, crossTab, avgOf, pickGroupColumn, distinctValues, compareGroups } from '../core/compute.js?v=126';
+import { welchTTest } from '../core/stats.js?v=126';
 
 /* สีของหลอดสื่อ "สถานะ" ไม่ใช่ชื่อชุดข้อมูล:
    ฝั่งที่มีค่ามากกว่า = ม่วง (สีเด่นของงานนี้) อีกฝั่ง = เทาเข้ม
@@ -447,7 +447,24 @@ export function heatmap(host, cf, rows) {
       'ยังแบ่งกลุ่มไม่ได้ เพราะผู้ตอบอยู่กลุ่มเดียวกันทั้งหมด — ดูอันดับข่าวด้านล่างแทนได้'));
     return;
   }
-  const { groups, labels, matrix, sizes, max } = crossTab(rows, { ...cf, group: groupCol });
+  const all = crossTab(rows, { ...cf, group: groupCol });
+  const { labels, sizes } = all;
+
+  /* กลุ่มที่มีคนน้อยเกินไปต้องตัดออก
+     เพราะ 1 ใน 2 คน = 50% ซึ่งดูหนักแน่นพอ ๆ กับ 20 ใน 40 คน ทั้งที่เชื่อถือไม่ได้เลย */
+  const minN = cf.minGroup ?? 5;
+  const keep = all.groups.filter(g => sizes[g] >= minN);
+  const dropped = all.groups.filter(g => sizes[g] < minN);
+  // ต้องมีอย่างน้อยสองกลุ่มที่ใหญ่พอถึงจะ "เทียบ" ได้ ตารางคอลัมน์เดียวไม่มีประโยชน์
+  if (keep.length < 2) {
+    host.append(el('p', 'hint',
+      `มีกลุ่มที่ผู้ตอบถึง ${minN} คนไม่ถึงสองกลุ่ม จึงยังเทียบข้ามกลุ่มไม่ได้ — ` +
+      `ดูอันดับข่าวด้านล่างซึ่งนับรวมทุกคนแทน`));
+    return;
+  }
+  const groups = keep;
+  const idx = keep.map(g => all.groups.indexOf(g));
+  const matrix = all.matrix.map(row => idx.map(k => row[k]));
 
   const table = el('div', 'heat');
   table.style.setProperty('--cols', groups.length);
@@ -494,6 +511,11 @@ export function heatmap(host, cf, rows) {
   });
   scale.append(el('span', null, `รู้จักมาก (สูงสุด ${maxPct}% ของกลุ่ม)`));
   host.append(scale);
+  if (dropped.length) {
+    host.append(el('p', 'scale-note',
+      `ไม่แสดง ${dropped.length} กลุ่มที่มีผู้ตอบน้อยกว่า ${minN} คน ` +
+      `(${dropped.map(g => `${g} ${sizes[g]} คน`).join(' · ')}) เพราะสัดส่วนจากคนไม่กี่คนเชื่อถือไม่ได้`));
+  }
 }
 
 /* ---------- 9. Bubble: วงกลมขนาดตามค่า ---------- */
@@ -655,70 +677,66 @@ export function chips(host, cf, rows) {
 }
 
 
-/* ---------- 13. Buckets: จัดค่าเป็นช่วงกว้าง ๆ แล้วเทียบกันเป็นแถบ ----------
-   แทนกราฟที่มี 11 แถว ซึ่งต้องกวาดตาอ่านทีละแถว
-   แบ่งเป็น "น้อย / กลาง / มาก" แค่ 3 ช่วง เทียบสองฝั่งได้ในบรรทัดเดียว */
-export function buckets(host, cf, rows) {
+/* ---------- 13. Grouped: เทียบสองชุดข้อมูลในแต่ละช่วง ----------
+   ทุกแท่งเริ่มจากเส้นเดียวกันทางซ้าย จึงเทียบความยาวได้ตรง ๆ
+   (แบบแถบซ้อนต้องเทียบชิ้นที่อยู่คนละตำแหน่ง ซึ่งตาคนทำได้ไม่ดี) */
+export function grouped(host, cf, rows) {
   if (!rows.length) { host.append(el('p', 'hint', 'ยังไม่มีคำตอบให้แบ่งช่วง')); return; }
   const ranges = cf.ranges || [
     { label: 'รู้จักน้อย', from: 0, to: 3 },
     { label: 'ปานกลาง',   from: 4, to: 6 },
     { label: 'รู้จักมาก', from: 7, to: 10 }
   ];
-  const shades = cf.shades || ['var(--sc-2)', 'var(--sc-3)', 'var(--sc-5)'];
+  const series = cf.series || [];
+  const countIn = (col, r) => rows.filter(x => {
+    const v = num(x[col]); return v != null && v >= r.from && v <= r.to;
+  }).length;
+
+  const data = ranges.map(r => ({ r, vals: series.map(sr => countIn(sr.column, r)) }));
+  const peak = Math.max(1, ...data.flatMap(d => d.vals));
 
   const legend = el('div', 'legend');
-  ranges.forEach((r, i) => {
+  series.forEach(sr => {
     const item = el('span');
-    const dot = el('i', 'dot'); dot.style.background = shades[i % shades.length];
-    item.append(dot, `${r.label} (${r.from}–${r.to} ${cf.unit || ''})`.trim());
+    const dot = el('i', 'dot'); dot.style.background = sr.color;
+    item.append(dot, sr.label);
     legend.append(item);
   });
   host.append(legend);
 
-  const box = el('div', 'buckets');
-  (cf.series || []).forEach(sr => {
-    const counts = ranges.map(r =>
-      rows.filter(x => { const v = num(x[sr.column]); return v != null && v >= r.from && v <= r.to; }).length);
-    const total = counts.reduce((a, b) => a + b, 0) || 1;
-
-    const row = el('div', 'bk-row');
-    row.append(el('span', 'bk-name', sr.label));
-
-    const bar = el('div', 'bk-bar');
-    counts.forEach((n, i) => {
-      if (!n) return;
-      const seg = el('span', 'bk-seg');
-      const w = n / total * 100;
-      seg.style.width = w + '%';
-      seg.style.background = shades[i % shades.length];
-      if (i >= 2) seg.classList.add('is-dark');
-      seg.title = `${sr.label} · ${ranges[i].label} (${ranges[i].from}–${ranges[i].to}) — ${n} คน`;
-      // ช่องกว้างพอก็ใส่ชื่อช่วงลงไปเลย จะได้ไม่ต้องเทียบสีกับคำอธิบายข้างบน
-      if (w >= 22) seg.append(el('span', 'bk-tag', ranges[i].label));
-      seg.append(el('b', null, `${n} คน`));
-      bar.append(seg);
+  const box = el('div', 'grp');
+  data.forEach(d => {
+    const block = el('div', 'grp-block');
+    block.append(el('div', 'grp-title',
+      `${d.r.label} (${d.r.from}–${d.r.to} ${cf.unit || ''})`.trim()));
+    series.forEach((sr, k) => {
+      const row = el('div', 'grp-row');
+      row.append(el('span', 'grp-name', sr.label));
+      const track = el('div', 'grp-track');
+      const fill = el('i');
+      fill.style.setProperty('--c', sr.color);
+      fill.title = `${sr.label} · ${d.r.label} — ${d.vals[k]} คน`;
+      track.append(fill);
+      growBar(fill, d.vals[k] / peak * 100);
+      row.append(track, el('b', null, `${d.vals[k]} คน`));
+      block.append(row);
     });
-    row.append(bar);
-    box.append(row);
+    box.append(block);
   });
-
   host.append(box);
-  // ฐานที่บอกต้องเป็นจำนวนที่นับได้จริง ไม่ใช่จำนวนแถวทั้งหมด
-  // (บางคนไม่ได้ตอบข้อนี้ ถ้าเอาจำนวนแถวมาใช้ ตัวเลขในแถบจะบวกไม่ครบตามที่เขียนไว้)
-  const counted = Math.max(...(cf.series || []).map(sr =>
-    ranges.reduce((a, r) => a + rows.filter(x => {
-      const v = num(x[sr.column]); return v != null && v >= r.from && v <= r.to;
-    }).length, 0)), 0);
+
+  const counted = Math.max(...series.map(sr =>
+    ranges.reduce((a, r) => a + countIn(sr.column, r), 0)));
   const missing = rows.length - counted;
   host.append(el('p', 'scale-note',
-    `ตัวเลขในแถบคือจำนวนคน · รวมกันได้ ${counted} คน` +
+    `แท่งยาวสุดในกราฟ = ${peak} คน · นับได้ ${counted} คน` +
     (missing > 0 ? ` (อีก ${missing} คนไม่ได้ตอบข้อนี้)` : '')));
 }
 
-/* ---------- 14. People: หนึ่งไอคอน = หนึ่งคน ----------
-   ไม่มีแกน ไม่มีสเกล นับหัวคนได้ตรง ๆ ใช้ตอบคำถามแบบ "กี่คนที่เป็นแบบไหน" */
-export function people(host, cf, rows) {
+/* ---------- 14. Split: แบ่งผู้ตอบเป็นกลุ่ม แล้วโชว์เป็นตัวเลขใหญ่ ----------
+   คำถามคือ "กี่คนอยู่ฝั่งไหน" คำตอบที่ตรงที่สุดคือตัวเลข ไม่ใช่รูป
+   มีแถบสัดส่วนกำกับไว้ให้เห็นน้ำหนักโดยไม่ต้องอ่านเลข */
+export function split(host, cf, rows) {
   if (!rows.length) { host.append(el('p', 'hint', 'ยังไม่มีผู้ตอบให้นับ')); return; }
   const groups = (cf.groups || []).map(g => ({ ...g, n: 0 }));
   rows.forEach(r => {
@@ -728,32 +746,33 @@ export function people(host, cf, rows) {
     const k = d > 0 ? 0 : d < 0 ? 1 : 2;
     if (groups[k]) groups[k].n++;
   });
-
   const total = groups.reduce((s, g) => s + g.n, 0) || 1;
 
-  /* แยกเป็นกลุ่มละบล็อก พร้อมหัวข้อของตัวเอง
-     ถ้าเอาไอคอนทุกกลุ่มมาต่อกันเป็นแถวเดียว ต้องเพ่งแยกสีเองว่ากลุ่มไหนจบตรงไหน */
-  const box = el('div', 'ppl-groups');
+  // แถบเดียวแบ่งสัดส่วน เห็นภาพรวมก่อนอ่านตัวเลข
+  const bar = el('div', 'split-bar');
   groups.forEach(g => {
-    const block = el('div', 'ppl-group');
-    const head = el('div', 'ppl-item');
-    const dot = el('i', 'dot'); dot.style.background = g.color;
-    head.append(dot, el('span', 'ppl-name', g.label),
-      el('b', null, `${g.n} คน`), el('span', 'ppl-pct', pct(g.n, total) + '%'));
-    block.append(head);
-
-    const grid = el('div', 'ppl');
-    if (!g.n) grid.append(el('span', 'ppl-none', 'ไม่มีใครอยู่กลุ่มนี้'));
-    for (let i = 0; i < g.n; i++) {
-      const one = el('i', 'ms ppl-one', 'person');
-      one.style.color = g.color;
-      one.title = g.label;
-      grid.append(one);
-    }
-    block.append(grid);
-    box.append(block);
+    if (!g.n) return;
+    const seg = el('i');
+    seg.style.background = g.color;
+    seg.style.width = (g.n / total * 100) + '%';
+    seg.title = `${g.label} — ${g.n} คน (${pct(g.n, total)}%)`;
+    bar.append(seg);
   });
-  host.append(box);
+  host.append(bar);
+
+  const grid = el('div', 'split-grid');
+  groups.forEach(g => {
+    const cell = el('div', 'split-cell');
+    const head = el('div', 'split-head');
+    const dot = el('i', 'dot'); dot.style.background = g.color;
+    head.append(dot, el('span', null, g.label));
+    const big = el('div', 'split-big');
+    big.append(el('b', null, fmt(g.n)), el('span', null, 'คน'));
+    cell.append(head, big, el('div', 'split-pct', pct(g.n, total) + '% ของผู้ตอบ'));
+    grid.append(cell);
+  });
+  host.append(grid);
+  host.append(el('p', 'scale-note', `นับจากผู้ตอบที่ตอบครบทั้งสองชุด ${total} คน`));
 }
 
-Object.assign(CHARTS, { waffle, gauge, heatmap, bubbles, stacked, paired, chips, buckets, people });
+Object.assign(CHARTS, { waffle, gauge, heatmap, bubbles, stacked, paired, chips, grouped, split });
