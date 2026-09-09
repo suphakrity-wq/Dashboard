@@ -1,9 +1,9 @@
 /* [core] เก็บสถานะของข้อมูลและตัวกรอง + แจ้งเตือนเมื่อมีการเปลี่ยนแปลง
    ฝั่งหน้าตาไม่ต้องรู้ว่าโหลดมาจากไหน แค่ subscribe แล้วอ่าน visibleRows() */
 
-import { loadAll, readCache, writeCache, listSources } from './source.js?v=113';
-import { addComputedColumns } from './compute.js?v=113';
-import { scrubRows } from './quality.js?v=113';
+import { loadAll, readCache, writeCache, listSources } from './source.js?v=115';
+import { addComputedColumns } from './compute.js?v=115';
+import { scrubRows } from './quality.js?v=115';
 
 export const store = {
   rows: [],        // ข้อมูลดิบทุกแถว (รวมทุกแหล่ง)

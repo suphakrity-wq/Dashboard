@@ -565,3 +565,7 @@ td.is-fixed{color:var(--lime-ink);background:var(--lime-soft)}
 .hint{display:flex;gap:8px;align-items:flex-start}
 .hint::before{content:"อ่านยังไง";flex:0 0 auto;font-weight:800;color:var(--purple);
   background:var(--purple-soft);border-radius:var(--r-pill);padding:1px 9px;line-height:1.5}
+
+/* ฐานของกราฟ — บอกว่ากราฟใบนี้คำนวณจากคนกี่คน อ่านการ์ดเดียวจบ */
+.chart-base{margin-top:10px;font-size:var(--t-xs);color:var(--muted)}
+.hint + .chart-base{margin-top:6px;border-top:none;padding-top:0}

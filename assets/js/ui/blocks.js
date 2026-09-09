@@ -8,18 +8,18 @@
  * ห้าม: ใส่สูตรคำนวณในไฟล์นี้ — ให้เรียกจาก core/ แทน
  */
 
-import { $, el, growBar, segmentBars } from './dom.js?v=113';
-import { fmt, round1, pct } from '../core/format.js?v=113';
-import { splitValues, isNumericColumn } from '../core/compute.js?v=113';
-import { store } from '../core/store.js?v=113';
-import { verdict as calcVerdict, causes as calcCauses, pulls as calcPulls } from '../core/insight.js?v=113';
-import { recommend } from '../core/recommend.js?v=113';
-import { analyzeText } from '../core/textAnalysis.js?v=113';
-import { auditCells } from '../core/quality.js?v=113';
-import { wilsonInterval } from '../core/stats.js?v=113';
-import { SOURCES, CONTEXT_FACTS, compareBenchmarks } from '../core/benchmarks.js?v=113';
-import { aggregate, groupBy as groupRows } from '../core/compute.js?v=113';
-import { CHARTS } from './charts.js?v=113';
+import { $, el, growBar, segmentBars } from './dom.js?v=115';
+import { fmt, round1, pct } from '../core/format.js?v=115';
+import { splitValues, isNumericColumn } from '../core/compute.js?v=115';
+import { store } from '../core/store.js?v=115';
+import { verdict as calcVerdict, causes as calcCauses, pulls as calcPulls } from '../core/insight.js?v=115';
+import { recommend } from '../core/recommend.js?v=115';
+import { analyzeText } from '../core/textAnalysis.js?v=115';
+import { auditCells } from '../core/quality.js?v=115';
+import { wilsonInterval } from '../core/stats.js?v=115';
+import { SOURCES, CONTEXT_FACTS, compareBenchmarks } from '../core/benchmarks.js?v=115';
+import { aggregate, groupBy as groupRows } from '../core/compute.js?v=115';
+import { CHARTS } from './charts.js?v=115';
 
 let rerender = () => {};
 export const onRerender = fn => { rerender = fn; };
@@ -59,6 +59,10 @@ function charts(host, b, rows) {
 
     draw(body, cf, rows);
     if (cf.hint) body.append(el('p', 'hint', cf.hint));
+    /* ทุกกราฟต้องบอกฐานของตัวเองเสมอ อ่านการ์ดใบเดียวก็รู้ว่ามาจากคนกี่คน
+       (ปิดเป็นรายกราฟได้ด้วย base:false เช่นกราฟที่นับ 'คำตอบ' ไม่ใช่ 'คน') */
+    if (cf.base !== false)
+      body.append(el('p', 'chart-base', `ฐานข้อมูล: ผู้ตอบ ${fmt(rows.length)} คน`));
   });
   sec.append(grid);
 }

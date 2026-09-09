@@ -1,6 +1,6 @@
 /* หน้า 4 — พฤติกรรมการเข้าถึง: คนเจอข่าวได้อย่างไร */
 
-import { Q, COL, C } from './columns.js?v=113';
+import { Q, COL, C } from './columns.js?v=115';
 
 export default {
   id: "behavior",
@@ -63,9 +63,13 @@ export default {
     { type: "charts",
       title: "ช่องทางและตัวตัดสินใจ",
       charts: [
-        { type: "bubbles", wide: true, title: "ช่องทางรับข่าวหลัก", note: "ขนาดวงกลม = จำนวนคนที่ใช้",
+        /* เดิมเป็นวงกลมขนาดตามค่า แต่คนเทียบ "ขนาดวงกลม" ด้วยตาได้ไม่แม่น
+           เปลี่ยนเป็นหลอดเรียงอันดับ ซึ่งเทียบความยาวได้ตรง ๆ และอ่านค่าได้ทันที */
+        { type: "rank", wide: true, title: "ช่องทางรับข่าวหลัก",
+          note: "นับจากคนที่เลือกช่องทางนั้น (เลือกได้หลายช่องทาง)",
           x: Q.channel, multi: true, agg: "count", sort: "value", top: 7,
-          hint: "วงใหญ่สุด = คนอยู่ตรงนั้นเยอะที่สุด ควรเอาข่าวโลกไปวางตรงนั้น" },
+          showPercent: true, valueUnit: "คน", blockUnit: "คน", color: C.drama,
+          hint: "หลอดยาวสุด = คนอยู่ตรงนั้นเยอะที่สุด ควรเอาข่าวโลกไปวางตรงนั้น" },
 
         { type: "chips", wide: true, title: "อะไรทำให้ตัดสินใจกดดูข่าว", note: "เลือกได้ไม่เกิน 3 ข้อ",
           x: Q.decide, multi: true, sort: "value", top: 10 },

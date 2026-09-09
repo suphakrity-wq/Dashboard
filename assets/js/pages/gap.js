@@ -1,6 +1,6 @@
 /* หน้า 2 — ช่องว่างการรับรู้: เทียบข่าวสองชุดที่ผู้ตอบรู้จักจริง */
 
-import { Q, COL, C } from './columns.js?v=113';
+import { Q, COL, C } from './columns.js?v=115';
 
 export default {
   id: "gap",
@@ -64,7 +64,7 @@ export default {
       charts: [
         { type: "heatmap", wide: true,
           title: "ข่าวโลกแต่ละข่าว · แยกตามกลุ่มผู้ตอบ",
-          note: "ยิ่งเข้ม = ยิ่งมีคนในกลุ่มนั้นรู้จัก",
+          note: "ตัวเลขคือสัดส่วนคนในกลุ่มนั้นที่รู้จักข่าวชิ้นนั้น · ยิ่งเข้ม = ยิ่งรู้จักเยอะ",
           x: Q.newsA, group: Q.age, multi: true, top: 6,
           groupFallback: [Q.gender, Q.howFound],
           singleGroupNote: "ผู้ตอบอยู่กลุ่มเดียวกันหมด ตารางนี้เลยยังไม่มีอะไรให้เทียบ — ดูอันดับข่าวด้านล่างแทนได้",

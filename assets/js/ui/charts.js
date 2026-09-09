@@ -8,10 +8,10 @@
  * ข้อตกลง: ดึงข้อมูลผ่าน groupBy/crossTab จาก core/compute.js เท่านั้น
  */
 
-import { el, growBar, segmentBars } from './dom.js?v=113';
-import { fmt, round1, pct } from '../core/format.js?v=113';
-import { num, groupBy, crossTab, avgOf, pickGroupColumn, distinctValues, compareGroups } from '../core/compute.js?v=113';
-import { welchTTest } from '../core/stats.js?v=113';
+import { el, growBar, segmentBars } from './dom.js?v=115';
+import { fmt, round1, pct } from '../core/format.js?v=115';
+import { num, groupBy, crossTab, avgOf, pickGroupColumn, distinctValues, compareGroups } from '../core/compute.js?v=115';
+import { welchTTest } from '../core/stats.js?v=115';
 
 /* สีของหลอดสื่อ "สถานะ" ไม่ใช่ชื่อชุดข้อมูล:
    ฝั่งที่มีค่ามากกว่า = ม่วง (สีเด่นของงานนี้) อีกฝั่ง = เทาเข้ม
@@ -461,6 +461,12 @@ export function heatmap(host, cf, rows) {
     table.append(th);
   });
 
+  /* แสดงเป็น % ของกลุ่มนั้น ไม่ใช่จำนวนคนดิบ
+     เพราะแต่ละกลุ่มมีคนไม่เท่ากัน (เช่น 20 คน กับ 5 คน) เอาจำนวนดิบมาเทียบกันตรง ๆ จะหลอกตา */
+  const share = (v, g) => (sizes[g] ? Math.round(v / sizes[g] * 100) : 0);
+  const maxPct = Math.max(1, ...labels.map((_, i) =>
+    Math.max(...matrix[i].map((v, j) => share(v, groups[j])))));
+
   labels.forEach((label, i) => {
     const line = el('div', 'heat-line');
     const name = el('span', 'heat-row', label);
@@ -468,12 +474,13 @@ export function heatmap(host, cf, rows) {
     line.append(name);
 
     matrix[i].forEach((v, j) => {
+      const p = share(v, groups[j]);
       const cell = el('span', 'heat-cell');
-      const step = v === 0 ? 0 : Math.min(5, Math.ceil(v / max * 4) + 1);
+      const step = p === 0 ? 0 : Math.min(5, Math.ceil(p / maxPct * 4) + 1);
       cell.style.setProperty('--cell', step ? `var(--sc-${step})` : 'var(--hair)');
       if (step >= 4) cell.classList.add('is-dark');
-      cell.append(el('span', null, v ? String(v) : '–'));
-      cell.title = `${label}\n${groups[j]}: ${v} จาก ${sizes[groups[j]]} คน`;
+      cell.append(el('span', null, p ? p + '%' : '–'));
+      cell.title = `${label}\n${groups[j]}: ${v} จาก ${sizes[groups[j]]} คน (${p}%)`;
       line.append(cell);
     });
     table.append(line);
@@ -481,13 +488,13 @@ export function heatmap(host, cf, rows) {
   host.append(table);
 
   const scale = el('div', 'heat-scale');
-  scale.append(el('span', null, 'น้อย'));
+  scale.append(el('span', null, 'คนในกลุ่มรู้จักน้อย'));
   [1, 2, 3, 4, 5].forEach(n => {
     const chip = el('i');
     chip.style.background = `var(--sc-${n})`;
     scale.append(chip);
   });
-  scale.append(el('span', null, `มาก (สูงสุด ${max} คน)`));
+  scale.append(el('span', null, `รู้จักมาก (สูงสุด ${maxPct}% ของกลุ่ม)`));
   host.append(scale);
 }
 
