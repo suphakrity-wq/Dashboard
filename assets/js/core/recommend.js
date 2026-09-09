@@ -13,11 +13,11 @@
  *   - พฤติกรรมการเจอข่าว -> กติกาด้านล่างนี้ (เจอโดยบังเอิญเยอะ = ต้องไปหาคนถึงฟีด)
  */
 
-import { pct } from './format.js?v=68';
-import { groupBy } from './compute.js?v=68';
-import { SOURCES } from './benchmarks.js?v=68';
-import { analyzeText } from './textAnalysis.js?v=68';
-import { causes as calcCauses } from './insight.js?v=68';
+import { pct } from './format.js?v=72';
+import { groupBy } from './compute.js?v=72';
+import { SOURCES } from './benchmarks.js?v=72';
+import { analyzeText } from './textAnalysis.js?v=72';
+import { causes as calcCauses } from './insight.js?v=72';
 
 /** ข้อเสนอจากพฤติกรรม — ใช้เมื่อสัดส่วน "เจอข่าวโดยบังเอิญ" สูงกว่าเกณฑ์ */
 const FEED_ACTION = {

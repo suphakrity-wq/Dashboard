@@ -78,7 +78,19 @@
 /* บล็อกที่ถึงค่าแล้ว — สีมาจากตัวแปร --c ที่ JS ใส่ให้รายบล็อก */
 .is-seg > .seg-blk.is-on{background:var(--c)}
 /* บล็อกที่มีเศษ เช่น 4.5 — เติมบางส่วนแล้วมนมุมเหมือนบล็อกเต็ม */
-.is-seg > .seg-blk > .seg-part{display:block;height:100%;border-radius:var(--r-xs);background:var(--c)}
+/* ปลายทั้งสองข้างของ "ทั้งหลอด" มนเต็ม ส่วนรอยต่อระหว่างช่องมนเล็กน้อยพอ
+   (เขียนไว้เผื่อความสูงหลอดเปลี่ยน จะได้ยังมนเต็มเสมอ ไม่ต้องแก้ตัวเลขตาม) */
+.is-seg > .seg-blk:first-child{border-top-left-radius:var(--r-pill);border-bottom-left-radius:var(--r-pill)}
+.is-seg > .seg-blk:last-child{border-top-right-radius:var(--r-pill);border-bottom-right-radius:var(--r-pill)}
+.is-seg > .seg-blk:first-child > .seg-part{
+  border-top-left-radius:var(--r-pill);border-bottom-left-radius:var(--r-pill)}
+
+/* ตัวเติมเศษ: มนเฉพาะด้านซ้าย ด้านขวาตัดตรงเพื่อให้กลืนไปกับช่องเดียวกัน
+   ถ้ามนทั้งสองด้าน จะเห็นเป็น "หลอดเล็กซ้อนอยู่ในหลอด" อีกอันหนึ่ง */
+.is-seg > .seg-blk > .seg-part{display:block;height:100%;background:var(--c);
+  border-radius:var(--r-xs) 0 0 var(--r-xs)}
+/* เศษที่เกือบเต็มช่อง ให้มนขวาตามช่องไปด้วย ไม่งั้นปลายจะดูตัดแปลก ๆ */
+.is-seg > .seg-blk > .seg-part.is-full{border-radius:var(--r-xs)}
 @keyframes segIn{from{opacity:.25;transform:scaleX(.55)}to{opacity:1;transform:none}}
 
 /* ---- สีบอกสถานะ ไม่ใช่ชื่อชุดข้อมูล ----

@@ -8,17 +8,17 @@
  * ห้าม: ใส่สูตรคำนวณในไฟล์นี้ — ให้เรียกจาก core/ แทน
  */
 
-import { $, el, growBar, segmentBars } from './dom.js?v=68';
-import { fmt, round1, pct } from '../core/format.js?v=68';
-import { splitValues, isNumericColumn } from '../core/compute.js?v=68';
-import { store } from '../core/store.js?v=68';
-import { verdict as calcVerdict, causes as calcCauses, pulls as calcPulls } from '../core/insight.js?v=68';
-import { recommend } from '../core/recommend.js?v=68';
-import { analyzeText } from '../core/textAnalysis.js?v=68';
-import { wilsonInterval } from '../core/stats.js?v=68';
-import { SOURCES, CONTEXT_FACTS, compareBenchmarks } from '../core/benchmarks.js?v=68';
-import { aggregate, groupBy as groupRows } from '../core/compute.js?v=68';
-import { CHARTS } from './charts.js?v=68';
+import { $, el, growBar, segmentBars } from './dom.js?v=72';
+import { fmt, round1, pct } from '../core/format.js?v=72';
+import { splitValues, isNumericColumn } from '../core/compute.js?v=72';
+import { store } from '../core/store.js?v=72';
+import { verdict as calcVerdict, causes as calcCauses, pulls as calcPulls } from '../core/insight.js?v=72';
+import { recommend } from '../core/recommend.js?v=72';
+import { analyzeText } from '../core/textAnalysis.js?v=72';
+import { wilsonInterval } from '../core/stats.js?v=72';
+import { SOURCES, CONTEXT_FACTS, compareBenchmarks } from '../core/benchmarks.js?v=72';
+import { aggregate, groupBy as groupRows } from '../core/compute.js?v=72';
+import { CHARTS } from './charts.js?v=72';
 
 let rerender = () => {};
 export const onRerender = fn => { rerender = fn; };

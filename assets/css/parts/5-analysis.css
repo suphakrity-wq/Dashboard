@@ -13,7 +13,7 @@
 .verdict.mid .vd-answer,.verdict.neutral .vd-answer{color:var(--on-dark-muted)}
 
 .vd-bars{margin-top:26px;display:flex;flex-direction:column;gap:12px}
-.vd-bar{display:grid;grid-template-columns:120px 1fr 58px;align-items:center;gap:14px}
+.vd-bar{display:grid;grid-template-columns:120px minmax(0,1fr) 58px;align-items:center;gap:14px}
 .vd-name{font-size:var(--t-sm);opacity:.75}
 .vd-track{height:14px;border-radius:var(--r-pill);background:rgba(255,255,255,.14);overflow:hidden}
 .vd-track i{display:block;height:100%;width:0;border-radius:var(--r-pill);background:rgba(255,255,255,.85);
@@ -169,3 +169,11 @@
 .digest-fig span{font-size:var(--t-xs);color:var(--muted)}
 .digest-line{font-size:var(--t-sm);color:var(--ink-2);line-height:1.5;flex:1}
 .digest-go{font-size:var(--t-xs);font-weight:700;color:var(--purple)}
+
+/* จอแคบ: คอลัมน์ชื่อ 120px + ตัวเลข 58px กินที่จนหลอดเหลือไม่กี่พิกเซล
+   (เคยวัดได้ 18px ที่จอ 320) จึงย้ายชื่อขึ้นบรรทัดบน ให้หลอดได้เต็มความกว้าง */
+@media (max-width:520px){
+  .vd-bar{grid-template-columns:minmax(0,1fr) auto;gap:6px 12px}
+  .vd-name{grid-column:1/-1;font-size:var(--t-xs)}
+  .vd-bar b{font-size:var(--t-md)}
+}
