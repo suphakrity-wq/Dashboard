@@ -20,6 +20,10 @@
   transition:width var(--t-slow) var(--ease)}
 .vd-bar:first-child .vd-track i{background:var(--gray-on-dark)}
 .vd-bar:last-child .vd-track i{background:var(--purple-2)}
+/* หลอดแบบแบ่งช่องบนพื้นเข้ม — ช่องที่ยังไม่ถึงค่าต้องเป็นสีขาวโปร่ง ไม่ใช่เทาอ่อนแบบพื้นขาว
+   ไม่งั้นช่องว่างจะสว่างกว่าตัวการ์ดจนแย่งสายตา */
+.verdict .is-seg > .seg-blk{background:rgba(255,255,255,.16)}
+.verdict:hover .is-seg > .seg-blk:not(.is-on){background:rgba(255,255,255,.16)}
 .vd-bar b{font-size:var(--t-lg);font-weight:900;font-variant-numeric:tabular-nums;text-align:right}
 .vd-warn{margin-top:24px;font-size:var(--t-xs);opacity:.75;border-top:1px solid rgba(255,255,255,.16);padding-top:14px}
 

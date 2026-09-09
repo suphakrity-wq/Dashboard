@@ -8,16 +8,16 @@
  * ห้าม: ใส่สูตรคำนวณในไฟล์นี้ — ให้เรียกจาก core/ แทน
  */
 
-import { $, el, growBar } from './dom.js?v=59';
-import { fmt, round1, pct } from '../core/format.js?v=59';
-import { splitValues, isNumericColumn } from '../core/compute.js?v=59';
-import { store } from '../core/store.js?v=59';
-import { verdict as calcVerdict, causes as calcCauses, pulls as calcPulls } from '../core/insight.js?v=59';
-import { analyzeText } from '../core/textAnalysis.js?v=59';
-import { wilsonInterval } from '../core/stats.js?v=59';
-import { SOURCES, CONTEXT_FACTS, compareBenchmarks } from '../core/benchmarks.js?v=59';
-import { aggregate, groupBy as groupRows } from '../core/compute.js?v=59';
-import { CHARTS } from './charts.js?v=59';
+import { $, el, growBar, segmentBars } from './dom.js?v=60';
+import { fmt, round1, pct } from '../core/format.js?v=60';
+import { splitValues, isNumericColumn } from '../core/compute.js?v=60';
+import { store } from '../core/store.js?v=60';
+import { verdict as calcVerdict, causes as calcCauses, pulls as calcPulls } from '../core/insight.js?v=60';
+import { analyzeText } from '../core/textAnalysis.js?v=60';
+import { wilsonInterval } from '../core/stats.js?v=60';
+import { SOURCES, CONTEXT_FACTS, compareBenchmarks } from '../core/benchmarks.js?v=60';
+import { aggregate, groupBy as groupRows } from '../core/compute.js?v=60';
+import { CHARTS } from './charts.js?v=60';
 
 let rerender = () => {};
 export const onRerender = fn => { rerender = fn; };
@@ -73,18 +73,23 @@ function verdict(host, b, rows, cfg) {
      <p class="vd-why">${v.why}</p>`;
 
   const bars = el('div', 'vd-bars');
-  const max = Math.max(v.world || 0, v.drama || 0, 1);
-  [[b.worldLabel || 'ข่าวโลก', v.world], [b.dramaLabel || 'ข่าวดราม่า', v.drama]].forEach(([label, value]) => {
+  const max = Math.ceil(Math.max(v.world || 0, v.drama || 0, 1));
+  const segs = [];   // แบ่งช่องเหมือนหลอดอื่นในเว็บ (ดู segmentBars ใน ui/dom.js)
+  [[b.worldLabel || 'ข่าวโลก', v.world, 'var(--gray-on-dark)'],
+   [b.dramaLabel || 'ข่าวดราม่า', v.drama, 'var(--purple-2)']].forEach(([label, value, color]) => {
     const row = el('div', 'vd-bar');
     row.append(el('span', 'vd-name', label));
     const track = el('div', 'vd-track');
     const fill = el('i');
+    fill.style.setProperty('--c', color);
     track.append(fill);
     row.append(track, el('b', null, fmt(round1(value))));
     bars.append(row);
+    segs.push({ track, value: value || 0, color });
     growBar(fill, (value || 0) / max * 100);
   });
   card.append(bars);
+  segmentBars(segs, max, b.unit || 'ข่าว/คน');
 
   /* แถบตัวเลขสถิติ — บอกทั้งขนาดของผลต่าง ความแม่น และความน่าจะเป็นที่จะเกิดจากความบังเอิญ */
   if (v.stats) {
@@ -134,6 +139,8 @@ function causes(host, b, rows, cfg) {
   }
 
   const grid = el('div', 'grid');
+  const segs = [];          // ทุกการ์ดใช้สเกลเดียวกัน จึงตัดสินใจแบ่งช่องพร้อมกัน
+  const people = rows.length || 1;
   list.forEach(c => {
     const card = el('article', 'card cause' + (c.rank === 1 ? ' is-top' : ''));
 
@@ -150,6 +157,7 @@ function causes(host, b, rows, cfg) {
     track.append(fill);
 
     card.append(head, figure, track);
+    segs.push({ track, value: c.count, color: 'var(--accent)' });
     if (c.fix) {
       const fix = el('div', 'cause-fix');
       fix.append(el('span', 'fix-cap', 'ทางแก้'));
@@ -160,6 +168,7 @@ function causes(host, b, rows, cfg) {
     growBar(fill, c.share);
   });
   sec.append(grid);
+  segmentBars(segs, people, 'คน');   // 1 ช่อง = กี่คน (สเกลเดียวกันทุกการ์ด = เทียบกันได้)
 }
 
 /* ---------- แรงดึงฝั่งดราม่า ---------- */
@@ -324,6 +333,7 @@ function textThemes(host, b, rows, cfg) {
   sec.append(meta);
 
   const grid = el('div', 'grid');
+  const segs = [];
   res.themes.slice(0, b.top || 6).forEach((t, i) => {
     const card = el('article', 'card theme' + (i === 0 ? ' is-top' : ''));
     card.classList.add(t.kind === 'barrier' ? 'is-barrier' : 'is-pull');
@@ -342,6 +352,7 @@ function textThemes(host, b, rows, cfg) {
     const fill = el('i');
     track.append(fill);
     card.append(track);
+    segs.push({ track, value: t.count, color: 'var(--accent)' });
     growBar(fill, t.share);
 
     if (t.samples.length) {
@@ -360,6 +371,7 @@ function textThemes(host, b, rows, cfg) {
     grid.append(card);
   });
   sec.append(grid);
+  segmentBars(segs, res.total, 'คำตอบ');   // 1 ช่อง = กี่คำตอบ
 
   if (res.unmatched.length) {
     const rest = el('details', 'unmatched');
