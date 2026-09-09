@@ -8,18 +8,18 @@
  * ห้าม: ใส่สูตรคำนวณในไฟล์นี้ — ให้เรียกจาก core/ แทน
  */
 
-import { $, el, growBar, segmentBars } from './dom.js?v=139';
-import { fmt, round1, pct } from '../core/format.js?v=139';
-import { splitValues, isNumericColumn } from '../core/compute.js?v=139';
-import { store } from '../core/store.js?v=139';
-import { verdict as calcVerdict, causes as calcCauses, pulls as calcPulls } from '../core/insight.js?v=139';
-import { recommend } from '../core/recommend.js?v=139';
-import { analyzeText } from '../core/textAnalysis.js?v=139';
-import { auditRows } from '../core/quality.js?v=139';
-import { wilsonInterval } from '../core/stats.js?v=139';
-import { SOURCES, CONTEXT_FACTS, compareBenchmarks } from '../core/benchmarks.js?v=139';
-import { aggregate, groupBy as groupRows } from '../core/compute.js?v=139';
-import { CHARTS } from './charts.js?v=139';
+import { $, el, growBar, segmentBars } from './dom.js?v=142';
+import { fmt, round1, pct } from '../core/format.js?v=142';
+import { splitValues, isNumericColumn } from '../core/compute.js?v=142';
+import { store } from '../core/store.js?v=142';
+import { verdict as calcVerdict, causes as calcCauses, pulls as calcPulls } from '../core/insight.js?v=142';
+import { recommend } from '../core/recommend.js?v=142';
+import { analyzeText } from '../core/textAnalysis.js?v=142';
+import { auditRows } from '../core/quality.js?v=142';
+import { wilsonInterval } from '../core/stats.js?v=142';
+import { SOURCES, CONTEXT_FACTS, compareBenchmarks } from '../core/benchmarks.js?v=142';
+import { aggregate, groupBy as groupRows } from '../core/compute.js?v=142';
+import { CHARTS } from './charts.js?v=142';
 
 let rerender = () => {};
 export const onRerender = fn => { rerender = fn; };
@@ -209,10 +209,12 @@ function table(host, b, rows, cfg = {}) {
   const cols = (b.columns?.length ? b.columns : store.columns);
   const size = b.pageSize || 20;
   const pageCount = Math.max(1, Math.ceil((store.onlyFlagged
-    ? rows.filter(r => problemsOf(r)).length : rows.length) / size));
+    ? store.rows.filter(r => problemsOf(r)).length : rows.length) / size));
   store.page = Math.min(store.page, pageCount - 1);
+  /* ดูเฉพาะคำตอบที่ใช้ไม่ได้: ต้องดึงจากข้อมูลดิบทั้งหมด
+     เพราะถ้าตัวกรองเปิดอยู่ แถวพวกนี้ถูกคัดออกไปแล้ว จะไม่เหลืออะไรให้ตรวจ */
   let view = rows;
-  if (store.onlyFlagged) view = rows.filter(r => problemsOf(r));
+  if (store.onlyFlagged) view = store.rows.filter(r => problemsOf(r));
   const pages2 = Math.max(1, Math.ceil(view.length / size));
   store.page = Math.min(store.page, pages2 - 1);
   const slice = view.slice(store.page * size, store.page * size + size);
@@ -234,7 +236,7 @@ function table(host, b, rows, cfg = {}) {
     `${fmt(view.length)} แถว · ${cols.length} คอลัมน์ · หน้า ${store.page + 1}/${pageCount}`);
 
   // ปุ่มดูเฉพาะแถวที่ติดตัวกรอง — นับจากข้อมูลทั้งชุด ไม่ใช่เฉพาะหน้านี้
-  const flagged = rows.filter(r => problemsOf(r)).length;
+  const flagged = store.rows.filter(r => problemsOf(r)).length;
   const only = el('button', 'odd-btn' + (store.onlyFlagged ? ' on' : ''));
   only.type = 'button';
   only.hidden = !flagged;
