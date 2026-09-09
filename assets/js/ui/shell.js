@@ -1,10 +1,10 @@
 /* [ui] เปลือกของแอป: เมนูซ้าย, แถบเครื่องมือ, แถบสรุปด้านบน, สถานะการโหลด */
 
-import { $, el, countUp } from './dom.js?v=66';
-import { aggregate } from '../core/compute.js?v=66';
-import { wilsonInterval } from '../core/stats.js?v=66';
-import { store } from '../core/store.js?v=66';
-import { sparkline } from './charts.js?v=66';
+import { $, el, countUp } from './dom.js?v=68';
+import { aggregate } from '../core/compute.js?v=68';
+import { wilsonInterval } from '../core/stats.js?v=68';
+import { store } from '../core/store.js?v=68';
+import { sparkline } from './charts.js?v=68';
 
 /* ---- ปุ่มเปิด/ปิดเมนูบนจอโทรศัพท์ ----
    จอคอมกับแท็บเล็ตเมนูโชว์อยู่แล้ว ปุ่มนี้ถูกซ่อนด้วย CSS

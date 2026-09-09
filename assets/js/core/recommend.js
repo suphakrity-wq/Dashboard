@@ -13,11 +13,11 @@
  *   - พฤติกรรมการเจอข่าว -> กติกาด้านล่างนี้ (เจอโดยบังเอิญเยอะ = ต้องไปหาคนถึงฟีด)
  */
 
-import { pct } from './format.js?v=66';
-import { groupBy } from './compute.js?v=66';
-import { SOURCES } from './benchmarks.js?v=66';
-import { analyzeText } from './textAnalysis.js?v=66';
-import { causes as calcCauses } from './insight.js?v=66';
+import { pct } from './format.js?v=68';
+import { groupBy } from './compute.js?v=68';
+import { SOURCES } from './benchmarks.js?v=68';
+import { analyzeText } from './textAnalysis.js?v=68';
+import { causes as calcCauses } from './insight.js?v=68';
 
 /** ข้อเสนอจากพฤติกรรม — ใช้เมื่อสัดส่วน "เจอข่าวโดยบังเอิญ" สูงกว่าเกณฑ์ */
 const FEED_ACTION = {
@@ -59,9 +59,10 @@ export function recommend(rows, analysis = {}, { top = 5, textColumn } = {}) {
     effect: t.effect || null, source: t.source, from: 'ปลายเปิด'
   }));
 
-  /* 3) จากพฤติกรรม — เจอข่าวโดยบังเอิญมากกว่าครึ่ง แปลว่าฟีดเป็นคนเลือกข่าวให้ */
-  if (analysis.channelCol) {
-    const g = groupBy(rows, { x: analysis.channelCol, agg: 'count', sort: 'value' });
+  /* 3) จากพฤติกรรม — เจอข่าวโดยบังเอิญเยอะ แปลว่าฟีดเป็นคนเลือกข่าวให้
+     ต้องใช้ howFoundCol (เจอยังไง) ไม่ใช่ channelCol (ช่องทางไหน) — คนละคอลัมน์กัน */
+  if (analysis.howFoundCol) {
+    const g = groupBy(rows, { x: analysis.howFoundCol, agg: 'count', sort: 'value' });
     const i = g.labels.findIndex(l => l.includes('บังเอิญ'));
     if (i >= 0) {
       const share = pct(g.values[i], people);

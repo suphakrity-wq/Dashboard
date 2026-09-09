@@ -1,6 +1,6 @@
 /* หน้า 1 — สรุปผล: คำตอบของคำถามวิจัย + สาเหตุหลัก */
 
-import { Q, COL, C } from './columns.js?v=66';
+import { Q, COL, C } from './columns.js?v=68';
 
 export default {
   id: "summary",
@@ -21,6 +21,11 @@ export default {
 
   blocks: [
     { type: "verdict" },
+
+    { type: "pageDigest",
+      title: "สรุปทุกหน้าในที่เดียว",
+      desc: "ตัวเลขสำคัญของแต่ละหน้า กดเข้าไปดูรายละเอียดได้",
+      channelColumn: Q.channel },
 
     { type: "charts",
       title: "คนเจอข่าวได้อย่างไร",

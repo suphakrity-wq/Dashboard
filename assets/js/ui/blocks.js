@@ -8,17 +8,17 @@
  * ห้าม: ใส่สูตรคำนวณในไฟล์นี้ — ให้เรียกจาก core/ แทน
  */
 
-import { $, el, growBar, segmentBars } from './dom.js?v=66';
-import { fmt, round1, pct } from '../core/format.js?v=66';
-import { splitValues, isNumericColumn } from '../core/compute.js?v=66';
-import { store } from '../core/store.js?v=66';
-import { verdict as calcVerdict, causes as calcCauses, pulls as calcPulls } from '../core/insight.js?v=66';
-import { recommend } from '../core/recommend.js?v=66';
-import { analyzeText } from '../core/textAnalysis.js?v=66';
-import { wilsonInterval } from '../core/stats.js?v=66';
-import { SOURCES, CONTEXT_FACTS, compareBenchmarks } from '../core/benchmarks.js?v=66';
-import { aggregate, groupBy as groupRows } from '../core/compute.js?v=66';
-import { CHARTS } from './charts.js?v=66';
+import { $, el, growBar, segmentBars } from './dom.js?v=68';
+import { fmt, round1, pct } from '../core/format.js?v=68';
+import { splitValues, isNumericColumn } from '../core/compute.js?v=68';
+import { store } from '../core/store.js?v=68';
+import { verdict as calcVerdict, causes as calcCauses, pulls as calcPulls } from '../core/insight.js?v=68';
+import { recommend } from '../core/recommend.js?v=68';
+import { analyzeText } from '../core/textAnalysis.js?v=68';
+import { wilsonInterval } from '../core/stats.js?v=68';
+import { SOURCES, CONTEXT_FACTS, compareBenchmarks } from '../core/benchmarks.js?v=68';
+import { aggregate, groupBy as groupRows } from '../core/compute.js?v=68';
+import { CHARTS } from './charts.js?v=68';
 
 let rerender = () => {};
 export const onRerender = fn => { rerender = fn; };
@@ -523,4 +523,83 @@ function conclusion(host, b, rows, cfg) {
   sec.append(card);
 }
 
-export const BLOCKS = { charts, verdict, causes, pull, table, notes, textThemes, benchmarks, conclusion };
+
+/* ---------- สรุปของทุกหน้ารวมไว้ที่เดียว ----------
+   หน้าแรกควรตอบได้ครบโดยไม่ต้องกดเข้าไปทีละหน้า
+   ตัวเลขทุกตัวคำนวณสด ๆ จากข้อมูลชุดเดียวกับหน้านั้น ๆ ไม่ได้พิมพ์ค่าไว้
+   เพิ่ม/แก้หัวข้อ: แก้ที่อาร์เรย์ cards ด้านล่างนี้ที่เดียว */
+function pageDigest(host, b, rows, cfg) {
+  const A = cfg.analysis || {};
+  const sec = section(host, b);
+
+  const v = calcVerdict(rows, A);
+  const cz = calcCauses(rows, A, { top: 1 })[0];
+  const pl = calcPulls(rows, A, { top: 1 })[0];
+  const rec = recommend(rows, A, { top: 1 }).actions[0];
+
+  const share = (col, needle) => {
+    const g = groupRows(rows, { x: col, agg: 'count', sort: 'value' });
+    const i = g.labels.findIndex(l => l.includes(needle));
+    return i < 0 ? null : { label: g.labels[i], share: pct(g.values[i], rows.length || 1) };
+  };
+  const topOf = col => {
+    const g = groupRows(rows, { x: col, multi: true, agg: 'count', sort: 'value', top: 1 });
+    return g.labels.length ? { label: g.labels[0], share: pct(g.values[0], rows.length || 1) } : null;
+  };
+
+  const accident = share(A.howFoundCol, 'บังเอิญ');   // เจอยังไง ไม่ใช่ช่องทางไหน
+  const channel = b.channelColumn ? topOf(b.channelColumn) : null;
+
+  const cards = [
+    { page: 'gap', icon: 'balance',
+      big: v.stats ? (v.stats.meanDiff > 0 ? '+' : '') + round1(v.stats.meanDiff) : '–',
+      unit: 'ข่าว/คน',
+      line: `ข่าวดราม่านำข่าวโลกเท่านี้ต่อคน — ${v.answer}` },
+
+    { page: 'reasons', icon: 'psychology',
+      big: cz ? cz.share : '–', unit: '%',
+      line: cz ? `ไม่ดูข่าวโลกเพราะ “${cz.label}” มากที่สุด` : 'ยังไม่มีคำตอบ' },
+
+    { page: 'behavior', icon: 'touch_app',
+      big: accident ? accident.share : '–', unit: '%',
+      line: accident
+        ? `เจอข่าวโดยบังเอิญ ไม่ได้ตั้งใจหา${channel ? ` · ช่องทางหลักคือ ${channel.label}` : ''}`
+        : 'ยังไม่มีข้อมูลช่องทาง' },
+
+    { page: 'conclusion', icon: 'lightbulb',
+      big: rec ? rec.share : '–', unit: '%',
+      line: rec ? `ทำก่อน: ${rec.do}` : 'ยังมีข้อมูลไม่พอจะเสนอแนวทาง' },
+
+    { page: 'data', icon: 'database',
+      big: rows.length, unit: 'แถว',
+      line: `ข้อมูลดิบ ${fmt(store.columns.length)} คอลัมน์ ตรวจย้อนกลับได้ทุกคำตอบ` }
+  ];
+
+  const byId = Object.fromEntries((cfg.pages || []).map(p => [p.id, p]));
+  const grid = el('div', 'grid');
+
+  cards.forEach(c => {
+    const page = byId[c.page] || {};
+    const card = el('a', 'card digest');
+    card.href = '#/' + c.page;
+
+    const head = el('div', 'digest-head');
+    head.append(el('span', 'digest-ico', ''));
+    head.lastChild.innerHTML = `<i class="ms">${page.icon || c.icon}</i>`;
+    head.append(el('b', null, page.label || c.page));
+    card.append(head);
+
+    const fig = el('div', 'digest-fig');
+    fig.append(el('b', null, String(c.big)));
+    fig.append(el('span', null, c.unit));
+    card.append(fig);
+
+    card.append(el('p', 'digest-line', c.line));
+    card.append(el('span', 'digest-go', 'ดูรายละเอียด →'));
+    grid.append(card);
+  });
+
+  sec.append(grid);
+}
+
+export const BLOCKS = { charts, verdict, causes, pull, table, notes, textThemes, benchmarks, conclusion, pageDigest };

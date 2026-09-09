@@ -5,7 +5,7 @@
  * (match ใช้การค้นหาคำบางส่วน ไม่ต้องตรงทั้งประโยค)
    แนวคิดของข้อเสนอแนะอ้างอิงงานวิจัยในโฟลเดอร์ เอกสาร/ แต่ไม่ได้แสดงชื่อทฤษฎีให้ผู้ใช้เห็น */
 
-import { Q, COL } from './columns.js?v=66';
+import { Q, COL } from './columns.js?v=68';
 
 export const ANALYSIS = {
   worldCol: COL.countA,
@@ -14,6 +14,7 @@ export const ANALYSIS = {
   whyDramaCol: Q.whyB,
   howFoundCol: Q.howFound,
   channelCol: Q.channel,
+  howFoundCol: Q.howFound,   // เจอข่าวยังไง (บังเอิญ / ตั้งใจหา) — คนละคอลัมน์กับช่องทาง
   openTextCol: Q.stop,   // ข้อ 5 คำตอบปลายเปิด
 
   /** ต่ำกว่านี้ถือว่ากลุ่มตัวอย่างยังน้อยเกินกว่าจะสรุป

@@ -152,3 +152,20 @@
   border-radius:0 var(--r-md) var(--r-md) 0;padding:12px 15px}
 .cmp-test.is-sig{background:var(--purple-soft);border-left:3px solid var(--purple);color:var(--ink)}
 .cmp-test.is-nosig{background:var(--hair);border-left:3px solid var(--gray);color:var(--ink-2)}
+
+/* ---- การ์ดสรุปของแต่ละหน้า (หน้าแรก) ----
+   เป็นลิงก์ทั้งใบ กดตรงไหนก็ไปหน้านั้น */
+.card.digest{display:flex;flex-direction:column;gap:10px;text-decoration:none;color:inherit;
+  transition:transform var(--t-base) var(--ease), box-shadow var(--t-base) var(--ease)}
+.card.digest:hover{transform:translateY(-2px);box-shadow:var(--sh-2)}
+.digest-head{display:flex;align-items:center;gap:10px}
+.digest-ico{width:32px;height:32px;border-radius:var(--r-sm);background:var(--hair);
+  display:grid;place-items:center;color:var(--ink-2);flex-shrink:0}
+.digest-ico .ms{font-size:var(--ico-md)}
+.digest-head b{font-size:var(--t-sm);font-weight:700}
+.digest-fig{display:flex;align-items:baseline;gap:7px}
+.digest-fig b{font-size:var(--t-2xl);font-weight:900;line-height:1;letter-spacing:-.02em;
+  font-variant-numeric:tabular-nums;color:var(--purple)}
+.digest-fig span{font-size:var(--t-xs);color:var(--muted)}
+.digest-line{font-size:var(--t-sm);color:var(--ink-2);line-height:1.5;flex:1}
+.digest-go{font-size:var(--t-xs);font-weight:700;color:var(--purple)}
