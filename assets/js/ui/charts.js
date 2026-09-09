@@ -8,10 +8,10 @@
  * ข้อตกลง: ดึงข้อมูลผ่าน groupBy/crossTab จาก core/compute.js เท่านั้น
  */
 
-import { el, growBar, segmentBars } from './dom.js?v=80';
-import { fmt, round1, pct } from '../core/format.js?v=80';
-import { num, groupBy, crossTab, avgOf, pickGroupColumn, distinctValues, compareGroups } from '../core/compute.js?v=80';
-import { welchTTest } from '../core/stats.js?v=80';
+import { el, growBar, segmentBars } from './dom.js?v=81';
+import { fmt, round1, pct } from '../core/format.js?v=81';
+import { num, groupBy, crossTab, avgOf, pickGroupColumn, distinctValues, compareGroups } from '../core/compute.js?v=81';
+import { welchTTest } from '../core/stats.js?v=81';
 
 /* สีของหลอดสื่อ "สถานะ" ไม่ใช่ชื่อชุดข้อมูล:
    ฝั่งที่มีค่ามากกว่า = ม่วง (สีเด่นของงานนี้) อีกฝั่ง = เทาเข้ม
@@ -340,7 +340,8 @@ export const CHARTS = { rank, gap, donut, compare };
 
 
 /* ---------- 6. Waffle: 100 จุด = 100% ----------
-   เหมาะกับ "สัดส่วนของผู้ตอบ" มากกว่าหลอด เพราะนับจุดได้ด้วยตา */
+   เหมาะกับ "สัดส่วนของผู้ตอบ" มากกว่าหลอด เพราะนับจุดได้ด้วยตา
+   จุด 100 จุดคือสัดส่วน ไม่ใช่คน 100 คน — จำนวนคนจริงจึงต้องขึ้นในคำอธิบายและใต้ภาพเสมอ */
 export function waffle(host, cf, rows) {
   const { labels, values } = groupBy(rows, cf);
   const total = values.reduce((a, b) => a + b, 0) || 1;
@@ -358,7 +359,7 @@ export function waffle(host, cf, rows) {
     for (let k = 0; k < n; k++) {
       const cell = el('i', 'wf-cell');
       cell.style.background = palette[i % palette.length];
-      cell.title = `${labels[i]} — ${Math.round(exact[i])}%`;
+      cell.title = `${labels[i]} — ${values[i]} คนจาก ${total} คน (${Math.round(exact[i])}%)`;
       cell.style.animationDelay = Math.min(grid.children.length * 3, 300) + 'ms';
       grid.append(cell);
     }
@@ -369,13 +370,16 @@ export function waffle(host, cf, rows) {
     const row = el('div', 'wf-item');
     const dot = el('i', 'dot');
     dot.style.background = palette[i % palette.length];
-    row.append(dot, el('span', 'wf-name', label), el('b', null, Math.round(exact[i]) + '%'));
+    row.append(dot, el('span', 'wf-name', label),
+      el('b', null, `${values[i]} คน`), el('span', 'wf-pct', Math.round(exact[i]) + '%'));
     legend.append(row);
   });
 
   const wrap = el('div', 'waffle-wrap');
   wrap.append(grid, legend);
   host.append(wrap);
+  // บอกให้ชัดว่าจุดเป็นการเทียบสัดส่วน ไม่ใช่จำนวนคนจริง (คนจริงอยู่ในคำอธิบายด้านข้าง)
+  host.append(el('p', 'wf-base', `100 จุดคือการเทียบสัดส่วน · ผู้ตอบจริง ${total} คน`));
 }
 
 /* ---------- 7. Gauge: เข็มวัดครึ่งวงกลม ----------

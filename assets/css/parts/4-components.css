@@ -485,3 +485,7 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;padding-right:2
 @media (max-width:359px){
   .summary-bar{grid-template-columns:1fr}
 }
+
+/* Waffle: จำนวนคนจริงเป็นตัวหลัก เปอร์เซ็นต์เป็นตัวรอง + ฐานผู้ตอบใต้ภาพ */
+.wf-item .wf-pct{font-size:var(--t-xs);color:var(--muted);font-variant-numeric:tabular-nums}
+.wf-base{margin:10px 0 0;font-size:var(--t-xs);color:var(--muted)}

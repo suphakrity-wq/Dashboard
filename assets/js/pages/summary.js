@@ -1,6 +1,6 @@
 /* หน้า 1 — สรุปผล: คำตอบของคำถามวิจัย + สาเหตุหลัก */
 
-import { Q, COL, C } from './columns.js?v=80';
+import { Q, COL, C } from './columns.js?v=81';
 
 export default {
   id: "summary",
@@ -32,8 +32,8 @@ export default {
       desc: "ถ้าคนส่วนใหญ่เจอข่าวโดยบังเอิญ แปลว่าฟีดเป็นคนเลือกข่าวให้ ไม่ใช่ตัวผู้ใช้",
       charts: [
         { type: "waffle", wide: true,
-          title: "ใน 100 คน เจอข่าวได้อย่างไร",
-          note: "1 จุด = 1% ของผู้ตอบ",
+          title: "ผู้ตอบเจอข่าวได้อย่างไร",
+          note: "ตัวเลขในคำอธิบายคือจำนวนคนจริง ส่วน 100 จุดคือการเทียบเป็นสัดส่วน",
           x: Q.howFound, agg: "count", sort: "value", colors: C.scale,
           hint: "นับจุดได้ด้วยตา ไม่ต้องเทียบกับแกน" }
       ] },
