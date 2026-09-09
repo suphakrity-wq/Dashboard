@@ -8,18 +8,18 @@
  * ห้าม: ใส่สูตรคำนวณในไฟล์นี้ — ให้เรียกจาก core/ แทน
  */
 
-import { $, el, growBar, segmentBars } from './dom.js?v=130';
-import { fmt, round1, pct } from '../core/format.js?v=130';
-import { splitValues, isNumericColumn } from '../core/compute.js?v=130';
-import { store } from '../core/store.js?v=130';
-import { verdict as calcVerdict, causes as calcCauses, pulls as calcPulls } from '../core/insight.js?v=130';
-import { recommend } from '../core/recommend.js?v=130';
-import { analyzeText } from '../core/textAnalysis.js?v=130';
-import { auditCells } from '../core/quality.js?v=130';
-import { wilsonInterval } from '../core/stats.js?v=130';
-import { SOURCES, CONTEXT_FACTS, compareBenchmarks } from '../core/benchmarks.js?v=130';
-import { aggregate, groupBy as groupRows } from '../core/compute.js?v=130';
-import { CHARTS } from './charts.js?v=130';
+import { $, el, growBar, segmentBars } from './dom.js?v=139';
+import { fmt, round1, pct } from '../core/format.js?v=139';
+import { splitValues, isNumericColumn } from '../core/compute.js?v=139';
+import { store } from '../core/store.js?v=139';
+import { verdict as calcVerdict, causes as calcCauses, pulls as calcPulls } from '../core/insight.js?v=139';
+import { recommend } from '../core/recommend.js?v=139';
+import { analyzeText } from '../core/textAnalysis.js?v=139';
+import { auditRows } from '../core/quality.js?v=139';
+import { wilsonInterval } from '../core/stats.js?v=139';
+import { SOURCES, CONTEXT_FACTS, compareBenchmarks } from '../core/benchmarks.js?v=139';
+import { aggregate, groupBy as groupRows } from '../core/compute.js?v=139';
+import { CHARTS } from './charts.js?v=139';
 
 let rerender = () => {};
 export const onRerender = fn => { rerender = fn; };
@@ -201,23 +201,18 @@ function table(host, b, rows, cfg = {}) {
   const sec = section(host, b);
   const card = el('article', 'card');
 
-  /* ผลตรวจคุณภาพของแต่ละช่อง — แสดงให้เห็นว่าแถวไหนติดตัวกรองเพราะอะไร
-     แถวที่ผ่านการกรองมาแล้วจะพก __quality มาด้วย ส่วนตอนปิดตัวกรองต้องตรวจเอง */
-  const audit = auditCells(store.rows, cfg.analysis || {});
-  const qualityOf = r => r.__quality ||
-    { fixes: audit.fixes.get(r), drops: audit.drops.get(r) };
+  /* ผลตรวจคุณภาพรายคน — บอกได้ว่าคำตอบชุดไหนถูกคัดออกเพราะอะไร
+     ตรวจจาก store.rows เสมอ จะได้เห็นครบทั้งตอนเปิดและปิดตัวกรอง */
+  const audit = auditRows(store.rows, cfg.analysis || {});
+  const problemsOf = r => audit.get(r) || null;
 
   const cols = (b.columns?.length ? b.columns : store.columns);
   const size = b.pageSize || 20;
   const pageCount = Math.max(1, Math.ceil((store.onlyFlagged
-    ? rows.filter(r => { const x = qualityOf(r); return (x.drops && x.drops.size) || (x.fixes && x.fixes.size); }).length
-    : rows.length) / size));
+    ? rows.filter(r => problemsOf(r)).length : rows.length) / size));
   store.page = Math.min(store.page, pageCount - 1);
   let view = rows;
-  if (store.onlyFlagged) {
-    const q = r => { const x = qualityOf(r); return (x.drops && x.drops.size) || (x.fixes && x.fixes.size); };
-    view = rows.filter(q);
-  }
+  if (store.onlyFlagged) view = rows.filter(r => problemsOf(r));
   const pages2 = Math.max(1, Math.ceil(view.length / size));
   store.page = Math.min(store.page, pages2 - 1);
   const slice = view.slice(store.page * size, store.page * size + size);
@@ -239,15 +234,13 @@ function table(host, b, rows, cfg = {}) {
     `${fmt(view.length)} แถว · ${cols.length} คอลัมน์ · หน้า ${store.page + 1}/${pageCount}`);
 
   // ปุ่มดูเฉพาะแถวที่ติดตัวกรอง — นับจากข้อมูลทั้งชุด ไม่ใช่เฉพาะหน้านี้
-  const flagged = rows.filter(r => {
-    const x = qualityOf(r); return (x.drops && x.drops.size) || (x.fixes && x.fixes.size);
-  }).length;
+  const flagged = rows.filter(r => problemsOf(r)).length;
   const only = el('button', 'odd-btn' + (store.onlyFlagged ? ' on' : ''));
   only.type = 'button';
   only.hidden = !flagged;
-  only.innerHTML = `<i class="ms">rule</i><span class="odd-txt">เฉพาะแถวที่ติดตัวกรอง</span>` +
+  only.innerHTML = `<i class="ms">rule</i><span class="odd-txt">เฉพาะคำตอบที่ใช้ไม่ได้</span>` +
                    `<span class="odd-n">${flagged}</span>`;
-  only.title = 'แสดงเฉพาะคนที่มีช่องถูกตัดหรือถูกแก้คำ';
+  only.title = 'แสดงเฉพาะคนที่ระบบคัดออก พร้อมเหตุผล';
   only.onclick = () => { store.onlyFlagged = !store.onlyFlagged; store.page = 0; rerender(); };
   tools.append(search, only, info);
 
@@ -266,29 +259,25 @@ function table(host, b, rows, cfg = {}) {
     const tr = el('tr', 'row-main');
     tr.append(el('td', 'td-toggle', '›'));
 
-    const q = qualityOf(r);
+    const problems = problemsOf(r);
     const st = el('td', 'td-flag');
-    if (q.drops && q.drops.size) {
-      const chip = el('span', 'flag-chip is-drop', `ตัด ${q.drops.size}`);
-      chip.title = [...q.drops.values()].join('\n');
+    if (problems) {
+      const chip = el('span', 'flag-chip is-drop', 'ใช้ไม่ได้');
+      chip.title = problems.join('\n');
       st.append(chip);
+    } else {
+      st.append(el('span', 'flag-chip is-ok', 'ใช้ได้'));
     }
-    if (q.fixes && q.fixes.size) {
-      const chip = el('span', 'flag-chip is-fix', `แก้คำ ${q.fixes.size}`);
-      chip.title = [...q.fixes.entries()].map(([c, v]) => `${c} → ${v}`).join('\n');
-      st.append(chip);
-    }
-    if (!st.children.length) st.append(el('span', 'flag-chip is-ok', 'ปกติ'));
     tr.append(st);
+    if (problems) tr.classList.add('is-excluded');
 
     cols.forEach(c => {
-      const dropped = q.drops && q.drops.get(c);
-      const fixed = q.fixes && q.fixes.get(c);
-      const td = el('td', (isNumericColumn(store.rows, c) ? 'num' : '') +
-        (dropped ? ' is-dropped' : fixed ? ' is-fixed' : ''), r[c] ?? '');
-      td.title = dropped ? 'ไม่ถูกนับ — ' + dropped
-        : fixed ? 'ระบบแก้คำให้เป็น: ' + fixed
-        : (r[c] ?? '');
+      const td = el('td', isNumericColumn(store.rows, c) ? 'num' : '', r[c] ?? '');
+      // ช่องที่เป็นต้นเหตุ ให้เห็นชัดว่าเพราะอะไรถึงโดนคัด
+      const why = problems && problems.find(p => String(r[c] ?? '').trim() &&
+        p.includes(String(r[c] ?? '').trim().slice(0, 24)));
+      if (why) { td.classList.add('is-dropped'); td.title = why; }
+      else td.title = r[c] ?? '';
       tr.append(td);
     });
 

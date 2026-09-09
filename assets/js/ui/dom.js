@@ -145,12 +145,17 @@ function paintGroup(group, animate) {
   });
   scaleNote(group, plan, max, unitName);
 
-  // ปลายหลอดต้องมน: เศษที่บางกว่าความสูงหลอดวาดหัวมนไม่ได้ (ออกมาเป็นขีดตรง ๆ)
-  // จึงติดหัวกลมให้แทน โดย "กึ่งกลางวงกลม = ค่าจริง" ความกว้างของแถบยังตรงกับตัวเลขเป๊ะ
+  /* ปลายหลอดต้องมนเสมอ
+     ถ้าเศษบางกว่าความสูงหลอด CSS จะบีบรัศมีมุมลงเหลือครึ่ง "ความกว้าง"
+     หัวแท่งจึงเป็นมุมมนนิดเดียว ไม่ใช่ครึ่งวงกลม — ตาเห็นเป็น "ไม่โค้ง"
+     จึงกันความกว้างขั้นต่ำไว้เท่าความสูงหลอด = ได้แคปซูลเต็มใบเสมอ
+     (เคยลองวาดวงกลมทับด้วย ::after แต่ตำแหน่งของกล่องเพี้ยน เห็นเป็นรอยบิ่นที่หัวแท่ง)
+     ผลข้างเคียง: ค่าที่เล็กมากจะดูยาวกว่าจริงเล็กน้อย แต่ตัวเลขข้างหลอดยังเป๊ะเสมอ */
   items.forEach(({ track }) => {
-    const h = track.getBoundingClientRect().height;
+    const h = Math.round(track.getBoundingClientRect().height);
+    if (!h) return;
     track.querySelectorAll('.seg-part').forEach(part => {
-      part.classList.toggle('is-tip', part.getBoundingClientRect().width < h);
+      part.style.minWidth = `min(${h}px, 100%)`;
     });
   });
 }

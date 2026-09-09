@@ -1,6 +1,6 @@
 /* หน้า 4 — พฤติกรรมการเข้าถึง: คนเจอข่าวได้อย่างไร */
 
-import { Q, COL, C } from './columns.js?v=130';
+import { Q, COL, C } from './columns.js?v=139';
 
 export default {
   id: "behavior",
@@ -12,9 +12,9 @@ export default {
   desc: "คนเจอข่าวได้อย่างไร ใช้ช่องทางไหน และอะไรทำให้ตัดสินใจกดดู",
 
   summary: [
-    { label: "เจอข่าวโดยบังเอิญ", tone: "accent", column: Q.howFound, agg: "share", equals: "บังเอิญ", unit: "%" },
-    { label: "ตั้งใจหาข่าวเอง", column: Q.howFound, agg: "share", equals: "ตั้งใจ", unit: "%" },
-    { label: "ช่องทางที่ใช้", column: Q.channel, agg: "distinct", unit: "ช่องทาง" },
+    { label: "เจอข่าวโดยบังเอิญ", tone: "accent", column: Q.howFound, agg: "share", equals: "บังเอิญ", unit: "%", sub: "เลื่อนเจอเอง ไม่ได้ตั้งใจหา" },
+    { label: "ตั้งใจหาข่าวเอง", column: Q.howFound, agg: "share", equals: "ตั้งใจ", unit: "%", sub: "เปิดเข้าไปหาข่าวเอง" },
+    { label: "ช่องทางที่มีคนใช้", column: Q.channel, agg: "distinct", multi: true, unit: "ช่องทาง", sub: "จากตัวเลือกในฟอร์ม" },
     { label: "ผู้ตอบทั้งหมด", column: Q.age, agg: "count", unit: "คน" }
   ],
 

@@ -1,9 +1,9 @@
 /* [core] เก็บสถานะของข้อมูลและตัวกรอง + แจ้งเตือนเมื่อมีการเปลี่ยนแปลง
    ฝั่งหน้าตาไม่ต้องรู้ว่าโหลดมาจากไหน แค่ subscribe แล้วอ่าน visibleRows() */
 
-import { loadAll, readCache, writeCache, listSources } from './source.js?v=130';
-import { addComputedColumns } from './compute.js?v=130';
-import { scrubRows } from './quality.js?v=130';
+import { loadAll, readCache, writeCache, listSources } from './source.js?v=139';
+import { addComputedColumns } from './compute.js?v=139';
+import { cleanRows } from './quality.js?v=139';
 
 export const store = {
   rows: [],        // ข้อมูลดิบทุกแถว (รวมทุกแหล่ง)
@@ -83,9 +83,8 @@ export async function refresh(cfg, { useCache = true } = {}) {
 export function visibleRows(cfg) {
   let rows = store.rows;
 
-  // ทำความสะอาดคำตอบก่อนตัวกรองอื่น: แก้คำพิมพ์ผิด + ตัดเฉพาะช่องที่ใช้ไม่ได้
-  // (ไม่ตัดทั้งคน — คำตอบข้ออื่นของคนนั้นยังนับตามปกติ) ผู้ใช้กดเปิด/ปิดได้เอง
-  if (store.hideOdd) rows = scrubRows(rows, cfg.analysis || {});
+  // คัดคำตอบที่ใช้ไม่ได้ออกทั้งชุดก่อนตัวกรองอื่น (ผู้ใช้กดเปิด/ปิดได้เอง)
+  if (store.hideOdd) rows = cleanRows(rows, cfg.analysis || {});
 
   const tab = (cfg.tabs || [])[store.tab];
   if (tab?.column && tab.value != null) {

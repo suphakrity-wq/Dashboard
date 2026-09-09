@@ -1,6 +1,6 @@
 /* หน้า 2 — ช่องว่างการรับรู้: เทียบข่าวสองชุดที่ผู้ตอบรู้จักจริง */
 
-import { Q, COL, C } from './columns.js?v=130';
+import { Q, COL, C } from './columns.js?v=139';
 
 export default {
   id: "gap",
@@ -12,10 +12,10 @@ export default {
   desc: "เทียบว่าคนรู้จักข่าวสองชุดต่างกันแค่ไหน และต่างกันในกลุ่มไหน",
 
   summary: [
-    { label: "ข่าวโลก", tone: "world", column: COL.countA, agg: "avg", unit: "ข่าว" },
-    { label: "ข่าวดราม่า", tone: "accent", column: COL.countB, agg: "avg", unit: "ข่าว" },
-    { label: "รู้จักข่าวโลกสูงสุด", column: COL.countA, agg: "max", unit: "ข่าว" },
-    { label: "รู้จักข่าวดราม่าสูงสุด", column: COL.countB, agg: "max", unit: "ข่าว" }
+    { label: "ข่าวโลกที่รู้จักเฉลี่ย", tone: "world", column: COL.countA, agg: "avg", unit: "ข่าว", sub: "ต่อคน จาก 10 ข่าว" },
+    { label: "ข่าวดราม่าที่รู้จักเฉลี่ย", tone: "accent", column: COL.countB, agg: "avg", unit: "ข่าว", sub: "ต่อคน จาก 10 ข่าว" },
+    { label: "คนที่รู้จักข่าวโลกมากสุด", column: COL.countA, agg: "max", unit: "ข่าว", sub: "ของผู้ตอบคนเดียว" },
+    { label: "คนที่รู้จักข่าวดราม่ามากสุด", column: COL.countB, agg: "max", unit: "ข่าว", sub: "ของผู้ตอบคนเดียว" }
   ],
 
   blocks: [

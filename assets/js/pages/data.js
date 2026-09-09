@@ -1,6 +1,6 @@
 /* หน้า 5 — ข้อมูลดิบ: คำตอบทุกแถวทุกคอลัมน์ */
 
-import { Q } from './columns.js?v=130';
+import { Q } from './columns.js?v=139';
 
 export default {
   id: "data",
@@ -12,10 +12,10 @@ export default {
   desc: "คำตอบดิบทุกแถวทุกคอลัมน์จาก Google Sheet — ค้นหา กรอง และกางดูรายคนได้",
 
   summary: [
-    { label: "จำนวนแถว", column: Q.age, agg: "count", unit: "แถว" },
-    { label: "ช่วงอายุที่พบ", column: Q.age, agg: "distinct", unit: "ช่วง" },
-    { label: "อาชีพ/กลุ่ม", column: Q.gender, agg: "distinct", unit: "กลุ่ม" },
-    { label: "ช่องทางที่พบ", column: Q.channel, agg: "distinct", unit: "ช่องทาง" }
+    { label: "คำตอบทั้งหมด", column: Q.age, agg: "count", unit: "ชุด", sub: "หนึ่งชุด = ผู้ตอบหนึ่งคน" },
+    { label: "ช่วงอายุที่พบ", column: Q.age, agg: "distinct", unit: "ช่วง", sub: "นับเฉพาะช่วงที่มีคนตอบ" },
+    { label: "เพศที่พบ", column: Q.gender, agg: "distinct", unit: "เพศ", sub: "นับเฉพาะที่มีคนตอบ" },
+    { label: "ช่องทางที่มีคนใช้", column: Q.channel, agg: "distinct", multi: true, unit: "ช่องทาง" }
   ],
 
   blocks: [

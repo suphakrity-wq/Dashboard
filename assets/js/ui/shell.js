@@ -1,11 +1,11 @@
 /* [ui] เปลือกของแอป: เมนูซ้าย, แถบเครื่องมือ, แถบสรุปด้านบน, สถานะการโหลด */
 
-import { $, el, countUp } from './dom.js?v=130';
-import { aggregate } from '../core/compute.js?v=130';
-import { wilsonInterval } from '../core/stats.js?v=130';
-import { store } from '../core/store.js?v=130';
-import { sparkline } from './charts.js?v=130';
-import { auditSummary } from '../core/quality.js?v=130';
+import { $, el, countUp } from './dom.js?v=139';
+import { aggregate } from '../core/compute.js?v=139';
+import { wilsonInterval } from '../core/stats.js?v=139';
+import { store } from '../core/store.js?v=139';
+import { sparkline } from './charts.js?v=139';
+import { auditSummary } from '../core/quality.js?v=139';
 
 /* ---- ปุ่มเปิด/ปิดเมนูบนจอโทรศัพท์ ----
    จอคอมกับแท็บเล็ตเมนูโชว์อยู่แล้ว ปุ่มนี้ถูกซ่อนด้วย CSS
@@ -190,20 +190,17 @@ export function renderOddToggle(cfg, onChange) {
   if (!btn) return;
   const info = auditSummary(store.rows, cfg.analysis || {});
 
-  const total = info.cells + info.fixed;
-  btn.hidden = !total;                    // ไม่มีอะไรต้องจัดการ ก็ไม่ต้องมีปุ่มให้รก
-  if (!total) { store.hideOdd = false; return; }
+  btn.hidden = !info.excluded;            // ไม่มีอะไรต้องคัดออก ก็ไม่ต้องมีปุ่มให้รก
+  if (!info.excluded) { store.hideOdd = false; return; }
 
   const on = store.hideOdd;
   btn.classList.toggle('on', on);
   btn.setAttribute('aria-pressed', String(on));
   btn.innerHTML = `<i class="ms">${on ? 'filter_alt' : 'filter_alt_off'}</i>` +
-                  `<span class="odd-txt">กรองคำตอบ</span>` +
-                  `<span class="odd-n">${total}</span>`;
-  btn.title = (on ? 'กำลังกรองอยู่' : 'ยังไม่ได้กรอง') + ' — กดเพื่อสลับ\n' +
-    `\u00b7 ตัดทิ้ง ${info.cells} ช่อง จาก ${info.rows} คน (เฉพาะช่องที่มีปัญหา ข้ออื่นยังนับ)\n` +
-    (info.fixed ? `\u00b7 แก้คำพิมพ์ผิดให้ ${info.fixed} ช่อง\n` : '') +
-    info.reasons.map(r => `\u00b7 ${r.label} (${r.count})`).join('\n');
+                  `<span class="odd-txt">คัดคำตอบเสีย</span>` +
+                  `<span class="odd-n">${info.excluded}</span>`;
+  btn.title = (on ? `กำลังคัดออก ${info.excluded} คน` : `ยังนับรวม ${info.excluded} คนที่คำตอบใช้ไม่ได้`) +
+    ' — กดเพื่อสลับ\n' + info.reasons.map(r => `\u00b7 ${r.label} (${r.count})`).join('\n');
 
   btn.onclick = () => {
     store.hideOdd = !store.hideOdd;

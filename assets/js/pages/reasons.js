@@ -1,6 +1,6 @@
 /* หน้า 3 — เหตุผลเบื้องหลัง: อะไรทำให้กดดู และอะไรทำให้เลื่อนผ่าน */
 
-import { Q, C } from './columns.js?v=130';
+import { Q, C } from './columns.js?v=139';
 
 export default {
   id: "reasons",
@@ -12,10 +12,10 @@ export default {
   desc: "คำตอบที่บอกว่าอะไรทำให้กดดู และอะไรทำให้เลื่อนผ่าน",
 
   summary: [
-    { label: "ระบุเหตุผลที่ไม่ดูข่าวโลก", column: Q.whyNotA, agg: "filled", unit: "%" },
+    { label: "ตอบเหตุผลที่ไม่ดูข่าวโลก", column: Q.whyNotA, agg: "filled", unit: "%", sub: "ของผู้ตอบทั้งหมด" },
     { label: "ผู้ตอบทั้งหมด", column: Q.age, agg: "count", unit: "คน" },
-    { label: "บอกว่าดราม่าดึงดูดกว่า", tone: "accent", column: Q.appeal, agg: "share", equals: "ดราม่า", unit: "%" },
-    { label: "สนใจสองแบบพอกัน", column: Q.appeal, agg: "share", equals: "ใกล้เคียง", unit: "%" }
+    { label: "บอกว่าดราม่าดึงดูดกว่า", tone: "accent", column: Q.appeal, agg: "share", equals: ["ประเด็นบนโซเชียล", "ดราม่า"], unit: "%", sub: "จากคำถามข้อ 3" },
+    { label: "สนใจสองแบบพอกัน", column: Q.appeal, agg: "share", equals: "ใกล้เคียง", unit: "%", sub: "จากคำถามข้อ 3" }
   ],
 
   blocks: [

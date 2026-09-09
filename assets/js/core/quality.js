@@ -1,17 +1,19 @@
-/* [core] ตรวจคุณภาพคำตอบทีละช่อง ไม่ใช่ทีละคน
+/* [core] ตรวจว่าคำตอบชุดไหน "ใช้ไม่ได้" แล้วคัดออกทั้งชุด
  *
- * ทำไมต้องมี: แบบฟอร์มมีช่องให้พิมพ์เอง จึงมีคำตอบเล่น ๆ ปนมา
- * (เช่น ช่อง "ได้พบข่าวยังไง" มีคนตอบว่านกพิราบส่งมาให้)
+ * ทำไมต้องมี: แบบฟอร์มมีช่องให้พิมพ์เอง จึงมีคำตอบเล่น ๆ และคำตอบมั่ว ๆ ปนมา
+ * (เช่น ช่อง "ได้พบข่าวยังไง" มีคนตอบว่านกพิราบส่งมาให้
+ *  หรือช่องที่ให้เขียนเหตุผล มีคนพิมพ์แค่ "หัวข้อ" ซึ่งจับใจความไม่ได้)
  *
- * หลักการ 3 ข้อ
- *   1. ตัดเฉพาะ "ช่องที่มีปัญหา" ทิ้ง ช่องอื่นของคนคนนั้นยังนับตามปกติ
- *      (เดิมตัดทั้งแถว ทำให้เสียคำตอบดี ๆ ของคนนั้นไปด้วย)
- *   2. พิมพ์ผิดไม่ใช่คำตอบเสีย — ถ้าข้อความใกล้เคียงตัวเลือกจริงมากพอ
- *      ให้ถือว่าตอบข้อนั้นแล้วแก้คำให้ ไม่ต้องตัดทิ้ง
- *   3. ไม่แก้ข้อมูลต้นทาง ทุกอย่างคำนวณตอนแสดงผล และผู้ใช้ปิดได้ทุกเมื่อ
+ * หลักการ
+ *   1. ถ้าคำตอบของใคร "มีปัญหา" แม้ข้อเดียว ให้คัดคนนั้นออกทั้งชุด
+ *      เพราะคนที่กรอกมั่วข้อหนึ่ง ทำให้คำตอบข้ออื่นของคนเดียวกันน่าสงสัยไปด้วย
+ *   2. ไม่แก้คำให้ใคร — ระบบมีหน้าที่ "คัดออก" ไม่ใช่ "เดาแทนผู้ตอบ"
+ *   3. ไม่ลบข้อมูลต้นทาง แค่ติดธงไว้ ผู้ใช้กดเปิด/ปิดเองได้ และดูได้ว่าใครติดเพราะอะไร
  *
  * แก้ไฟล์นี้เมื่อ: อยากเพิ่ม/ลดความเข้มของกฎ หรือเจอคำตอบแปลก ๆ แบบใหม่
  */
+
+import { THEMES } from './textAnalysis.js?v=139';
 
 const clean = s => String(s ?? '').replace(/\s+/g, ' ').trim();
 
@@ -28,172 +30,126 @@ const CHOICE_COLS = a => [
 const itemsOf = (value, multi) =>
   (multi ? String(value ?? '').split(',') : [value]).map(clean).filter(Boolean);
 
-/** ข้อความที่นับว่าไม่มีเนื้อหา ต่อให้พิมพ์มาก็ตอบคำถามไม่ได้ */
-const EMPTY_TEXT = ['-', '--', 'ไม่มี', 'ไม่รู้', 'ไม่ทราบ', 'ไม่แน่ใจ', 'ฟหก', 'asdf', 'test', 'ทดสอบ'];
+/* ---------- ตรวจข้อความที่ผู้ใช้พิมพ์เอง ---------- */
+
+/** ตอบมาก็เท่ากับไม่ได้ตอบ */
+const EMPTY_TEXT = ['-', '--', 'ไม่มี', 'ไม่รู้', 'ไม่ทราบ', 'ไม่แน่ใจ', 'เฉย ๆ', 'เฉยๆ',
+                    'ฟหก', 'asdf', 'test', 'ทดสอบ', 'อะไรก็ได้', 'ไม่ตอบ', 'ผ่าน'];
 
 /** ซ้ำตัวเดิมรัว ๆ เช่น "5555" "อออ" "..." */
 const isRepeat = t => t.length >= 2 && new Set(t.replace(/[\s.]/g, '')).size <= 1;
 
-/* ---------- เทียบความใกล้เคียงของข้อความ (ใช้จับคำพิมพ์ผิด) ---------- */
+/** พิมพ์มั่ว: มีแต่ตัวเลข/สัญลักษณ์ หรือพยัญชนะรัวโดยไม่มีสระเลย */
+const looksRandom = t => {
+  if (/^[\d\s.,!?@#$%^&*()_+=-]+$/.test(t)) return true;
+  const thai = (t.match(/[ก-ฮ]/g) || []).length;
+  const vowels = (t.match(/[ะ-ู็-๎]/g) || []).length;
+  return thai >= 6 && vowels === 0;
+};
 
-/** ระยะแก้ไข (Levenshtein): ต้องเพิ่ม/ลบ/เปลี่ยนตัวอักษรกี่ครั้งถึงจะเหมือนกัน */
-function editDistance(a, b) {
-  if (a === b) return 0;
-  if (!a.length || !b.length) return Math.max(a.length, b.length);
-  let prev = Array.from({ length: b.length + 1 }, (_, j) => j);
-  for (let i = 1; i <= a.length; i++) {
-    const cur = [i];
-    for (let j = 1; j <= b.length; j++) {
-      cur[j] = Math.min(
-        prev[j] + 1,                                   // ลบ
-        cur[j - 1] + 1,                                // เพิ่ม
-        prev[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1)  // เปลี่ยน
-      );
-    }
-    prev = cur;
-  }
-  return prev[b.length];
-}
+/** คำสำคัญทั้งหมดที่ระบบใช้จัดหมวดคำตอบปลายเปิด — ใช้ดูว่าข้อความเกี่ยวกับเรื่องนี้ไหม */
+const ALL_KEYWORDS = THEMES.flatMap(t => t.keywords);
 
-/** ตัดสระ/วรรณยุกต์ไทยและช่องว่างออกก่อนเทียบ — คนพิมพ์ผิดตรงนี้บ่อยที่สุด */
-const skeleton = t => t.toLowerCase().replace(/[ัิ-ฺ็-๎\s"'.,!?()]/g, '');
+/**
+ * ข้อความที่ใช้ประเมินไม่ได้ คืนเหตุผล (null = ใช้ได้)
+ * เกณฑ์ "สั้นจนจับใจความไม่ได้": สั้นกว่า 12 ตัวอักษร และไม่มีคำสำคัญของเรื่องนี้เลย
+ *   "หัวข้อ" / "เงิน" / "น่าสนใจ" -> สั้นและไม่ได้บอกเหตุผล = ใช้ไม่ได้
+ *   "พาดหัวข่าวน่าสนใจ" -> มีคำสำคัญ (พาดหัว) = ใช้ได้ ถึงจะไม่ยาว
+ */
+/** คำเชื่อมที่บอกว่าประโยคกำลัง "อธิบายเหตุผล" ไม่ใช่โยนคำเดี่ยวมา */
+const CONNECTORS = ['เพราะ', 'เพื่อ', 'ทำให้', 'เนื่องจาก', 'ถ้า', 'เวลา', 'ตอนที่', 'ที่มี', 'ที่ทำให้'];
 
-/** ความเหมือน 0–1 (1 = ตรงกันเป๊ะ) */
-export function similarity(a, b) {
-  const x = skeleton(a), y = skeleton(b);
-  if (!x || !y) return 0;
-  const d = editDistance(x, y);
-  return 1 - d / Math.max(x.length, y.length);
-}
+function textProblem(raw) {
+  const t = clean(raw);
+  if (!t) return null;                        // ไม่ตอบ = ไม่ผิด แค่ไม่มีข้อมูล
+  const low = t.toLowerCase();
 
-/** หาตัวเลือกจริงที่ใกล้เคียงข้อความนี้ที่สุด (คืน null ถ้าไม่ใกล้พอ) */
-export function nearestOption(text, options, min = 0.8) {
-  let best = null, score = 0;
-  options.forEach(o => {
-    const s = similarity(text, o);
-    if (s > score) { score = s; best = o; }
-  });
-  return score >= min ? { option: best, score } : null;
+  if (t.length < 3 || isRepeat(t) || EMPTY_TEXT.includes(low))
+    return `ข้อความไม่มีเนื้อหา: “${t}”`;
+  if (looksRandom(t))
+    return `ข้อความอ่านไม่ออก: “${t}”`;
+
+  /* คำเดี่ยว ๆ สั้น ๆ อย่าง "หัวข้อ" "พาดหัว" "น่าสนใจ" "เงิน"
+     ถึงจะเป็นคำที่เกี่ยวกับเรื่องนี้ แต่ไม่ได้บอกเหตุผลอะไรเลย ใช้ประเมินไม่ได้
+     ยกเว้นประโยคที่มีคำเชื่อมอธิบายเหตุผล ซึ่งถือว่าสื่อความได้แล้ว */
+  const words = t.split(' ').filter(Boolean).length;
+  const explains = CONNECTORS.some(c => t.includes(c));
+  if (!explains && words <= 2 && t.length < 14)
+    return `สั้นจนจับใจความไม่ได้: “${t}”`;
+
+  /* ยาวขึ้นมาหน่อยแต่ยังกว้างลอย ๆ และไม่มีคำไหนเกี่ยวกับเรื่องที่ถามเลย
+     เช่น "เนื้อหาน่าสนใจ" — ตอบแล้วก็ยังไม่รู้ว่าอะไรทำให้หยุดดู */
+  if (!ALL_KEYWORDS.some(k => low.includes(k.toLowerCase())) && t.length < 20)
+    return `กว้างเกินจนใช้ประเมินไม่ได้: “${t}”`;
+  return null;
 }
 
 /* ---------- ตรวจทั้งชุดข้อมูล ---------- */
 
-/**
- * ตรวจทีละช่อง คืน 3 อย่าง
- *   fixes — ช่องที่เป็นคำพิมพ์ผิด พร้อมคำที่ถูกต้อง (ยังนับเป็นคำตอบ)
- *   drops — ช่องที่ใช้ไม่ได้จริง ๆ พร้อมเหตุผล (ไม่นับเฉพาะช่องนั้น)
- * ทั้งสองอันเก็บเป็น Map: row -> Map(ชื่อคอลัมน์ -> ค่า/เหตุผล)
- */
-export function auditCells(rows, analysis = {}) {
-  const fixes = new Map();
-  const drops = new Map();
-  const put = (map, row, col, val) => {
-    const m = map.get(row) || new Map();
-    m.set(col, val);
-    map.set(row, m);
+/** ตรวจทีละคน คืน Map: row -> รายการเหตุผลที่คำตอบชุดนั้นใช้ไม่ได้ */
+export function auditRows(rows, analysis = {}) {
+  const bad = new Map();
+  const flag = (row, why) => {
+    const list = bad.get(row) || [];
+    if (!list.includes(why)) list.push(why);
+    bad.set(row, list);
   };
 
-  /* กฎ 1 — ช่องที่ต้องเลือกจากรายการ
-     ค่าที่มีคนตอบซ้ำกันตั้งแต่ 2 คนขึ้นไป = ตัวเลือกจริงของฟอร์ม
-     ค่าที่มีอยู่คนเดียว = พิมพ์เข้ามาเอง ต้องตัดสินต่อว่า "พิมพ์ผิด" หรือ "ไม่เกี่ยว"
+  /* กฎ 1 — ช่องที่ต้องเลือกจากรายการ แต่มีข้อความที่ไม่มีใครตอบซ้ำเลย
+     ช่องพวกนี้เลือกจากรายการที่ฟอร์มเตรียมไว้ คำตอบจริงจึงต้องมีคนอื่นตอบซ้ำบ้าง
      ใช้เฉพาะเมื่อกลุ่มใหญ่พอ (12 คนขึ้นไป) ไม่งั้นกลุ่มเล็กจะโดนธงทั้งชุด */
   if (rows.length >= 12) {
     CHOICE_COLS(analysis).forEach(({ col, multi }) => {
       const count = new Map();
       rows.forEach(r => itemsOf(r[col], multi)
         .forEach(v => count.set(v, (count.get(v) || 0) + 1)));
-      const options = [...count.entries()].filter(([, n]) => n >= 2).map(([v]) => v);
-      if (!options.length) return;
-
-      rows.forEach(r => {
-        const items = itemsOf(r[col], multi);
-        let changed = false;
-        const kept = [];
-        const bad = [];
-        items.forEach(v => {
-          if (count.get(v) >= 2) { kept.push(v); return; }
-          const near = nearestOption(v, options);
-          if (near) { kept.push(near.option); changed = true; }   // พิมพ์ผิด — นับเป็นตัวเลือกนั้น
-          else bad.push(v);                                       // ไม่ใกล้เคียงอะไรเลย
-        });
-        if (changed) put(fixes, r, col, kept.join(multi ? ', ' : ''));
-        if (bad.length) {
-          put(drops, r, col, `คำตอบนอกตัวเลือก: “${bad.join(' / ')}”`);
-          // ยังเหลือตัวเลือกที่ใช้ได้อยู่ ก็เก็บเฉพาะส่วนที่ใช้ได้ไว้
-          if (kept.length) put(fixes, r, col, kept.join(multi ? ', ' : ''));
-        }
-      });
+      rows.forEach(r => itemsOf(r[col], multi).forEach(v => {
+        if (count.get(v) === 1) flag(r, `คำตอบนอกตัวเลือก: “${v}”`);
+      }));
     });
   }
 
-  /* กฎ 2 — ช่องพิมพ์เองที่ไม่มีเนื้อหา (ตัดเฉพาะช่องนี้ ไม่กระทบข้ออื่น) */
+  /* กฎ 2 — ช่องที่ให้พิมพ์เอง มีข้อความที่ใช้ประเมินไม่ได้ */
   const textCol = analysis.openTextCol;
-  if (textCol) {
-    rows.forEach(r => {
-      const t = clean(r[textCol]);
-      if (!t) return;
-      if (t.length < 3 || isRepeat(t) || EMPTY_TEXT.includes(t.toLowerCase()))
-        put(drops, r, textCol, `ข้อความไม่มีเนื้อหา: “${t}”`);
-    });
-  }
+  if (textCol) rows.forEach(r => {
+    const why = textProblem(r[textCol]);
+    if (why) flag(r, why);
+  });
 
-  /* กฎ 3 — ไม่เลือกข่าวเลยสักชุด = ไม่มีคำตอบให้วัด ไม่ใช่คำตอบว่า "ศูนย์"
-     ตัดเฉพาะสองช่องที่ใช้นับข่าว คำตอบเรื่องเหตุผลของคนนั้นยังใช้ได้
+  /* กฎ 3 — ไม่เลือกข่าวเลยสักชุด = ไม่มีคำตอบให้วัด
 
      หมายเหตุ: จงใจ "ไม่" ตัดคนที่เลือกครบทั้งสองชุด
      ถึงจะดูเหมือนกดผ่าน ๆ แต่คนกลุ่มนี้มีผลต่างเป็นศูนย์ การตัดออกจะทำให้
      ผลลัพธ์เอนไปทางสมมติฐานของเราเอง ซึ่งเป็นการลำเอียงที่ตรวจจับยาก */
   const a = analysis.worldCol, b = analysis.dramaCol;
-  if (a && b) {
-    rows.forEach(r => {
-      const x = Number(r[a]), y = Number(r[b]);
-      if (!Number.isFinite(x) || !Number.isFinite(y)) return;
-      if (x === 0 && y === 0) {
-        put(drops, r, a, 'ไม่เลือกข่าวเลยทั้งสองชุด');
-        put(drops, r, b, 'ไม่เลือกข่าวเลยทั้งสองชุด');
-      }
-    });
-  }
-
-  return { fixes, drops };
-}
-
-/** คืนแถวชุดใหม่ที่แก้คำพิมพ์ผิดแล้ว และเอาเฉพาะช่องที่ใช้ไม่ได้ออก
-    แถวไหนไม่มีอะไรต้องแก้ จะคืนวัตถุเดิมไปเลย (ไม่ต้องคัดลอกโดยไม่จำเป็น) */
-export function scrubRows(rows, analysis) {
-  const { fixes, drops } = auditCells(rows, analysis);
-  if (!fixes.size && !drops.size) return rows;
-  return rows.map(r => {
-    const f = fixes.get(r), d = drops.get(r);
-    if (!f && !d) return r;
-    const copy = { ...r };
-    if (f) f.forEach((val, col) => { copy[col] = val; });
-    if (d) d.forEach((_, col) => { copy[col] = ''; });
-    // ติดผลตรวจไว้กับแถวด้วย เพื่อให้หน้าข้อมูลดิบบอกได้ว่าแถวไหนโดนอะไร
-    // ตั้งเป็น non-enumerable เพื่อไม่ให้โผล่เป็นคอลัมน์ในตารางหรือการค้นหา
-    Object.defineProperty(copy, '__quality', { value: { fixes: f, drops: d }, enumerable: false });
-    return copy;
+  if (a && b) rows.forEach(r => {
+    const x = Number(r[a]), y = Number(r[b]);
+    if (Number.isFinite(x) && Number.isFinite(y) && x === 0 && y === 0)
+      flag(r, 'ไม่เลือกข่าวเลยทั้งสองชุด');
   });
+
+  return bad;
 }
 
-/** สรุปให้ UI: มีกี่ช่องที่ถูกตัด กี่ช่องที่แก้คำให้ และเพราะอะไร */
+/** คัดเฉพาะคำตอบที่ใช้ได้ (ตัดทั้งชุดของคนที่ติดธง) */
+export function cleanRows(rows, analysis) {
+  const bad = auditRows(rows, analysis);
+  if (!bad.size) return rows;
+  return rows.filter(r => !bad.has(r));
+}
+
+/** สรุปให้ UI: มีกี่คนที่ถูกคัดออก และเพราะอะไรบ้าง */
 export function auditSummary(rows, analysis) {
-  const { fixes, drops } = auditCells(rows, analysis);
+  const bad = auditRows(rows, analysis);
   const reasons = new Map();
-  let cells = 0;
-  drops.forEach(m => m.forEach(why => {
-    cells++;
+  bad.forEach(list => list.forEach(why => {
     const key = why.split(':')[0];
     reasons.set(key, (reasons.get(key) || 0) + 1);
   }));
-  let fixedCells = 0;
-  fixes.forEach(m => { fixedCells += m.size; });
   return {
     total: rows.length,
-    rows: drops.size,        // จำนวนคนที่มีอย่างน้อยหนึ่งช่องถูกตัด
-    cells,                   // จำนวนช่องที่ถูกตัดจริง ๆ
-    fixed: fixedCells,       // จำนวนช่องที่ระบบแก้คำพิมพ์ผิดให้
-    drops, fixes,
+    excluded: bad.size,
+    bad,
     reasons: [...reasons.entries()].map(([label, count]) => ({ label, count }))
       .sort((x, y) => y.count - x.count)
   };

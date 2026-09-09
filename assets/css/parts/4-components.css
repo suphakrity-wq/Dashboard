@@ -86,10 +86,8 @@
     พอเอาพื้นรางออกแล้วก็ไม่มีปัญหานั้นอีก) */
 .is-seg > .seg-blk > .seg-part{display:block;position:relative;height:100%;background:var(--c);
   border-radius:var(--r-pill)}
-/* เศษที่บางกว่าความสูงหลอด วาดหัวมนในตัวเองไม่ได้ จึงติดวงกลมให้ตรงปลาย
-   วงกลมมีจุดกึ่งกลางอยู่ที่ค่าจริงพอดี ค่าที่อ่านได้จึงไม่เพี้ยน */
-.is-seg > .seg-blk > .seg-part.is-tip::after{content:'';position:absolute;top:0;bottom:0;left:0;
-  aspect-ratio:1;background:var(--c);border-radius:var(--r-pill)}
+/* ความกว้างขั้นต่ำของเศษถูกกำหนดจาก JS (= ความสูงหลอด) เพื่อให้หัวมนเต็มใบเสมอ
+   ดู segmentBars ใน ui/dom.js */
 /* หลอดทั้งอันปรากฏจากซ้ายไปขวาเป็นชิ้นเดียว ไม่ใช่แต่ละบล็อกเด้งขึ้นเอง
    ใส่ที่ .is-seg (ตัวหลอด) ไม่ใช่ที่บล็อก และไม่ใช้ fill-mode
    ค่าปกติของ clip-path จึงเป็น 'ไม่ตัดอะไรเลย' — ถ้าอนิเมชันไม่ทำงาน หลอดก็ยังเห็นครบ */
@@ -519,7 +517,13 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;padding-right:2
 .odd-btn:hover{background:var(--hair);color:var(--ink)}
 .odd-btn.on{background:var(--ink);border-color:var(--ink);color:var(--on-dark)}
 .odd-btn.on .odd-n{background:var(--lime);color:var(--lime-ink)}
-@media (max-width:920px){ .odd-btn .odd-txt{display:none} }   /* แคบแล้วเหลือไอคอน + จำนวน */
+/* แคบแล้วเหลือไอคอน + จำนวน — 1280px เพราะแถวเครื่องมือห้ามตกบรรทัด (ดู .page-tools) */
+@media (max-width:1300px){ .odd-btn .odd-txt{display:none} }
+/* ช่วง 761–1300px แถวเครื่องมือห้ามตกบรรทัด ช่องเลือกจึงต้องหดได้มากกว่าปกติ
+   ไม่งั้นหัวเพจจะดันหน้าเว็บให้เลื่อนแนวนอนได้ (เคยเกินไป 5px ที่จอ 1200) */
+@media (min-width:761px) and (max-width:1300px){
+  .filters select.input{max-width:172px}
+}
 
 /* ป้ายบอกสเกลใต้กลุ่มหลอด — ต้องอ่านได้โดยไม่ต้องชี้เมาส์ */
 .scale-note{margin:10px 0 0;font-size:var(--t-xs);color:var(--muted);line-height:1.4}
@@ -647,3 +651,6 @@ td.is-fixed{color:var(--lime-ink);background:var(--lime-soft)}
 .cause-no, .pull-no, .theme-no, .digest-ico, .nav-ico, .side-mark, .bubble, .heat-cell,
 .odd-n, .rank-top-tag, .flag-chip, .split-head .dot, .bk-seg b, .stack i b,
 .deck-dots button, .nav-toggle, .src-btn .ms, .deck-full .ms{line-height:1}
+
+/* แถวที่ถูกคัดออกทั้งชุด — จางลงให้เห็นว่าไม่ถูกนับ แต่ยังอ่านได้ */
+tr.is-excluded > td:not(.td-flag):not(.td-toggle){opacity:.55}

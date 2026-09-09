@@ -1,7 +1,7 @@
 /* หน้า 6 — ข้อสรุปและข้อเสนอ
    รวมหลักฐาน 3 ชั้น: คำตอบแบบเลือกตอบ + คำตอบปลายเปิด + งานวิจัยภายนอก */
 
-import { Q, COL } from './columns.js?v=130';
+import { Q, COL } from './columns.js?v=139';
 
 export default {
   id: "conclusion",
@@ -14,7 +14,7 @@ export default {
 
   summary: [
     { label: "ผู้ตอบทั้งหมด", column: Q.age, agg: "count", unit: "คน" },
-    { label: "ตอบคำถามปลายเปิด", column: Q.stop, agg: "filled", unit: "%" },
+    { label: "เขียนเหตุผลเอง", column: Q.stop, agg: "filled", unit: "%", sub: "ช่องพิมพ์อิสระข้อ 5" },
     { label: "ข่าวโลกที่รู้จักเฉลี่ย", tone: "world", column: COL.countA, agg: "avg", unit: "ข่าว" },
     { label: "ข่าวดราม่าที่รู้จักเฉลี่ย", tone: "accent", column: COL.countB, agg: "avg", unit: "ข่าว" }
   ],

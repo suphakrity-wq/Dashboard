@@ -41,7 +41,15 @@ export function aggregate(rows, col, how = 'sum', opt = {}) {
   const values = rows.map(r => num(r[col])).filter(v => v !== null);
   switch (how) {
     case 'count':    return rows.length;
-    case 'distinct': return new Set(rows.map(r => r[col]).filter(v => v !== '' && v != null)).size;
+    case 'distinct': {
+      /* ช่องที่เลือกได้หลายข้อเก็บเป็นข้อความคั่นจุลภาค ถ้าไม่แยกก่อนนับ
+         จะได้ "จำนวนรูปแบบการเลือก" ไม่ใช่ "จำนวนตัวเลือกที่มีคนใช้" (เคยขึ้น 19 ทั้งที่มี 7 ช่องทาง) */
+      const set = new Set();
+      rows.forEach(r => splitValues(r[col], opt.multi).forEach(v => {
+        if (v !== '' && v != null && v !== 'ไม่ระบุ') set.add(v);
+      }));
+      return set.size;
+    }
     case 'filled':   return rows.length
       ? rows.filter(r => String(r[col] ?? '').trim() !== '').length / rows.length * 100 : null;
     case 'share': {
