@@ -80,10 +80,6 @@ function drawBlocks(track, value, per, n, color, gap, unitName, animate) {
   else track.removeAttribute('title');
   track.textContent = '';
 
-  // ปลายหลอดต้องโค้งเสมอ: เศษที่แคบกว่าความสูงหลอดจะวาดหัวมนไม่ได้ (กลายเป็นขีดตรง ๆ)
-  // จึงกันความกว้างขั้นต่ำไว้เท่าความสูง = พอดีกับครึ่งวงกลมสองข้าง
-  const capPx = Math.round(track.getBoundingClientRect().height);
-
   for (let i = 0; i < n; i++) {
     const cell = el('i', 'seg-blk');
     const left = (value - i * per) / per;          // สัดส่วนของค่าที่ตกอยู่ในบล็อกนี้
@@ -94,7 +90,6 @@ function drawBlocks(track, value, per, n, color, gap, unitName, animate) {
       const part = el('span', 'seg-part');
       part.style.setProperty('--c', color);
       part.style.width = Math.round(left * 100) + '%';
-      if (capPx > 0) part.style.minWidth = `min(${capPx}px, 100%)`;
       cell.append(part);
     }
     // อนิเมชันเฉพาะตอนวาดครั้งแรก ตอนย่อ/ขยายหน้าต่างไม่ต้องเล่นใหม่ทุกครั้ง
@@ -128,6 +123,15 @@ function paintGroup(group, animate) {
   items.forEach(({ track, value, color }) => {
     if (plan) drawBlocks(track, value, plan.per, plan.n, color, plan.gap, unitName, animate);
     else drawSolid(track, value, max, color);
+  });
+
+  // ปลายหลอดต้องมน: เศษที่บางกว่าความสูงหลอดวาดหัวมนไม่ได้ (ออกมาเป็นขีดตรง ๆ)
+  // จึงติดหัวกลมให้แทน โดย "กึ่งกลางวงกลม = ค่าจริง" ความกว้างของแถบยังตรงกับตัวเลขเป๊ะ
+  items.forEach(({ track }) => {
+    const h = track.getBoundingClientRect().height;
+    track.querySelectorAll('.seg-part').forEach(part => {
+      part.classList.toggle('is-tip', part.getBoundingClientRect().width < h);
+    });
   });
 }
 

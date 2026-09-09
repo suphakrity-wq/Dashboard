@@ -84,8 +84,12 @@
 /* ตัวเติมเศษ: มนเต็มทั้งสองด้านเหมือนช่องปกติ
    (ตอนที่รางยังมีพื้นอยู่ข้างหลัง การมนสองด้านทำให้ดูเป็นหลอดซ้อนหลอด
     พอเอาพื้นรางออกแล้วก็ไม่มีปัญหานั้นอีก) */
-.is-seg > .seg-blk > .seg-part{display:block;height:100%;background:var(--c);
+.is-seg > .seg-blk > .seg-part{display:block;position:relative;height:100%;background:var(--c);
   border-radius:var(--r-pill)}
+/* เศษที่บางกว่าความสูงหลอด วาดหัวมนในตัวเองไม่ได้ จึงติดวงกลมให้ตรงปลาย
+   วงกลมมีจุดกึ่งกลางอยู่ที่ค่าจริงพอดี ค่าที่อ่านได้จึงไม่เพี้ยน */
+.is-seg > .seg-blk > .seg-part.is-tip::after{content:'';position:absolute;top:0;bottom:0;right:0;
+  aspect-ratio:1;transform:translateX(50%);background:var(--c);border-radius:var(--r-pill)}
 @keyframes segIn{from{opacity:.25;transform:scaleX(.55)}to{opacity:1;transform:none}}
 
 /* ---- สีบอกสถานะ ไม่ใช่ชื่อชุดข้อมูล ----
