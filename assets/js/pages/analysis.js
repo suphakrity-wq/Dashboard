@@ -5,16 +5,16 @@
  * (match ใช้การค้นหาคำบางส่วน ไม่ต้องตรงทั้งประโยค)
    แนวคิดของข้อเสนอแนะอ้างอิงงานวิจัยในโฟลเดอร์ เอกสาร/ แต่ไม่ได้แสดงชื่อทฤษฎีให้ผู้ใช้เห็น */
 
-import { Q, COL } from './columns.js?v=92';
+import { Q, COL } from './columns.js?v=100';
 
 export const ANALYSIS = {
   worldCol: COL.countA,
   dramaCol: COL.countB,
   whyNotWorldCol: Q.whyNotA,
   whyDramaCol: Q.whyB,
-  howFoundCol: Q.howFound,
-  channelCol: Q.channel,
   howFoundCol: Q.howFound,   // เจอข่าวยังไง (บังเอิญ / ตั้งใจหา) — คนละคอลัมน์กับช่องทาง
+  channelCol: Q.channel,
+  appealCol: Q.appeal,       // ข่าวประเภทไหนดึงดูดกว่า — ใช้ตรวจคำตอบนอกตัวเลือกด้วย
   openTextCol: Q.stop,   // ข้อ 5 คำตอบปลายเปิด
 
   /** ต่ำกว่านี้ถือว่ากลุ่มตัวอย่างยังน้อยเกินกว่าจะสรุป

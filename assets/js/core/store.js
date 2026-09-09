@@ -1,8 +1,9 @@
 /* [core] เก็บสถานะของข้อมูลและตัวกรอง + แจ้งเตือนเมื่อมีการเปลี่ยนแปลง
    ฝั่งหน้าตาไม่ต้องรู้ว่าโหลดมาจากไหน แค่ subscribe แล้วอ่าน visibleRows() */
 
-import { loadAll, readCache, writeCache, listSources } from './source.js?v=92';
-import { addComputedColumns } from './compute.js?v=92';
+import { loadAll, readCache, writeCache, listSources } from './source.js?v=100';
+import { addComputedColumns } from './compute.js?v=100';
+import { cleanRows } from './quality.js?v=100';
 
 export const store = {
   rows: [],        // ข้อมูลดิบทุกแถว (รวมทุกแหล่ง)
@@ -15,6 +16,7 @@ export const store = {
 
   // สถานะการกรอง (ฝั่ง UI เปลี่ยนค่าพวกนี้)
   tab: 0,
+  hideOdd: false,   // ซ่อนคำตอบผิดปกติหรือไม่ (ปุ่มบนหัวเพจ)
   filters: {},
   search: '',
   page: 0
@@ -79,6 +81,9 @@ export async function refresh(cfg, { useCache = true } = {}) {
 /** แถวที่ผ่านแท็บ + ตัวกรอง + คำค้น */
 export function visibleRows(cfg) {
   let rows = store.rows;
+
+  // ตัดคำตอบที่ดูไม่น่าใช่คำตอบจริงออกก่อนตัวกรองอื่น (ผู้ใช้กดเปิด/ปิดได้เอง)
+  if (store.hideOdd) rows = cleanRows(rows, cfg.analysis || {});
 
   const tab = (cfg.tabs || [])[store.tab];
   if (tab?.column && tab.value != null) {

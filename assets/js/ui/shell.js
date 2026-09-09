@@ -1,10 +1,11 @@
 /* [ui] เปลือกของแอป: เมนูซ้าย, แถบเครื่องมือ, แถบสรุปด้านบน, สถานะการโหลด */
 
-import { $, el, countUp } from './dom.js?v=92';
-import { aggregate } from '../core/compute.js?v=92';
-import { wilsonInterval } from '../core/stats.js?v=92';
-import { store } from '../core/store.js?v=92';
-import { sparkline } from './charts.js?v=92';
+import { $, el, countUp } from './dom.js?v=100';
+import { aggregate } from '../core/compute.js?v=100';
+import { wilsonInterval } from '../core/stats.js?v=100';
+import { store } from '../core/store.js?v=100';
+import { sparkline } from './charts.js?v=100';
+import { auditSummary } from '../core/quality.js?v=100';
 
 /* ---- ปุ่มเปิด/ปิดเมนูบนจอโทรศัพท์ ----
    จอคอมกับแท็บเล็ตเมนูโชว์อยู่แล้ว ปุ่มนี้ถูกซ่อนด้วย CSS
@@ -177,6 +178,41 @@ export function renderSourcePicker(fixtures = [], currentId = null) {
   });
   pick.value = currentId;
   pick.onchange = () => { location.search = '?demo=' + pick.value; };
+}
+
+/** ปุ่มกรองคำตอบผิดปกติ — เช่น ช่อง "ได้พบข่าวยังไง" ที่มีคนพิมพ์เล่นเข้ามาเอง
+    ปิดอยู่เป็นค่าเริ่มต้น เพื่อให้ตัวเลขตรงกับข้อมูลดิบจนกว่าผู้ใช้จะสั่งกรองเอง
+    ตัวเลือกถูกจำไว้ในเครื่องผู้ใช้ ไม่ได้ส่งไปไหน */
+export function renderOddToggle(cfg, onChange) {
+  const btn = $('#odd-toggle');
+  if (!btn) return;
+  const info = auditSummary(store.rows, cfg.analysis || {});
+
+  btn.hidden = !info.odd;                 // ไม่มีคำตอบแปลก ก็ไม่ต้องมีปุ่มให้รก
+  if (!info.odd) { store.hideOdd = false; return; }
+
+  const on = store.hideOdd;
+  btn.classList.toggle('on', on);
+  btn.setAttribute('aria-pressed', String(on));
+  btn.innerHTML = `<i class="ms">${on ? 'filter_alt' : 'filter_alt_off'}</i>` +
+                  `<span class="odd-txt">คำตอบผิดปกติ</span>` +
+                  `<span class="odd-n">${info.odd}</span>`;
+  btn.title = (on ? 'กำลังซ่อน' : 'กำลังนับรวม') +
+    ` ${info.odd} คำตอบที่ดูไม่น่าใช่คำตอบจริง — กดเพื่อสลับ\n` +
+    info.reasons.map(r => `\u00b7 ${r.label} (${r.count})`).join('\n');
+
+  btn.onclick = () => {
+    store.hideOdd = !store.hideOdd;
+    store.page = 0;
+    try { localStorage.setItem('hideOdd', store.hideOdd ? '1' : '0'); } catch {}
+    renderOddToggle(cfg, onChange);
+    onChange();
+  };
+}
+
+/** อ่านค่าที่ผู้ใช้เคยเลือกไว้ (เรียกครั้งเดียวตอนเปิดเว็บ) */
+export function restoreOddChoice() {
+  try { store.hideOdd = localStorage.getItem('hideOdd') === '1'; } catch { store.hideOdd = false; }
 }
 
 /** ข้อความสถานะ + รายการแหล่งข้อมูล */

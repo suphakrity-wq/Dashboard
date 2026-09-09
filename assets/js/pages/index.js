@@ -1,15 +1,15 @@
 /* รวมทุกหน้าไว้ที่เดียว — ลำดับในอาร์เรย์คือลำดับในเมนูด้านซ้าย
    เพิ่มหน้าใหม่: สร้างไฟล์ในโฟลเดอร์นี้ แล้ว import มาต่อท้าย */
 
-import summary  from './summary.js?v=92';
-import present  from './present.js?v=92';
-import gap      from './gap.js?v=92';
-import reasons  from './reasons.js?v=92';
-import behavior from './behavior.js?v=92';
-import conclusion from './conclusion.js?v=92';
-import data     from './data.js?v=92';
+import summary  from './summary.js?v=100';
+import present  from './present.js?v=100';
+import gap      from './gap.js?v=100';
+import reasons  from './reasons.js?v=100';
+import behavior from './behavior.js?v=100';
+import conclusion from './conclusion.js?v=100';
+import data     from './data.js?v=100';
 
 export const PAGES = [summary, present, gap, reasons, behavior, conclusion, data];
 
-export { COMPUTED, TABS, FILTERS } from './columns.js?v=92';
-export { ANALYSIS } from './analysis.js?v=92';
+export { COMPUTED, TABS, FILTERS } from './columns.js?v=100';
+export { ANALYSIS } from './analysis.js?v=100';

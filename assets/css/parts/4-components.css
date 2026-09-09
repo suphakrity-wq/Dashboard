@@ -493,3 +493,19 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;padding-right:2
 /* Waffle: จำนวนคนจริงเป็นตัวหลัก เปอร์เซ็นต์เป็นตัวรอง + ฐานผู้ตอบใต้ภาพ */
 .wf-item .wf-pct{font-size:var(--t-xs);color:var(--muted);font-variant-numeric:tabular-nums}
 .wf-base{margin:10px 0 0;font-size:var(--t-xs);color:var(--muted)}
+
+/* ---- ปุ่มกรองคำตอบผิดปกติ (หัวเพจ) ----
+   ปิดอยู่ = โทนกลาง ๆ / เปิดอยู่ = พื้นเข้ม เพื่อให้เห็นชัดว่าตัวเลขถูกกรองแล้ว */
+.odd-btn{display:inline-flex;align-items:center;gap:7px;flex:0 0 auto;
+  padding:7px 12px;border:1px solid var(--line);border-radius:var(--r-md);
+  background:var(--surface);color:var(--muted);cursor:pointer;
+  font:inherit;font-size:var(--t-xs);font-weight:600;white-space:nowrap;
+  transition:background var(--t-fast) ease,color var(--t-fast) ease,border-color var(--t-fast) ease}
+.odd-btn .ms{font-size:var(--ico-sm)}
+.odd-btn .odd-n{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 6px;
+  border-radius:var(--r-pill);background:var(--hair);color:var(--ink);
+  font-size:var(--t-xs);font-weight:800;font-variant-numeric:tabular-nums}
+.odd-btn:hover{background:var(--hair);color:var(--ink)}
+.odd-btn.on{background:var(--ink);border-color:var(--ink);color:var(--on-dark)}
+.odd-btn.on .odd-n{background:var(--lime);color:var(--lime-ink)}
+@media (max-width:920px){ .odd-btn .odd-txt{display:none} }   /* แคบแล้วเหลือไอคอน + จำนวน */

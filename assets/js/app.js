@@ -1,12 +1,12 @@
 /* จุดเริ่มต้นของแอป — ต่อ core (ข้อมูล/คำนวณ) เข้ากับ ui (หน้าตา)
    core/  = ตรรกะล้วน ไม่มี DOM   |   ui/ = วาดหน้าจอ   |   pages/ = นิยามเนื้อหาแต่ละหน้า */
 
-import { $ } from './ui/dom.js?v=92';
-import { store, refresh, visibleRows, subscribe } from './core/store.js?v=92';
-import { BLOCKS, onRerender } from './ui/blocks.js?v=92';
-import { renderNav, renderTabs, renderFilters, renderSummary, renderStatus, markDemo, setupNav, renderSourcePicker } from './ui/shell.js?v=92';
-import { PAGES, COMPUTED, TABS, FILTERS, ANALYSIS } from './pages/index.js?v=92';
-import { FIXTURES, findFixture } from '../../test-data/fixtures.js?v=92';
+import { $ } from './ui/dom.js?v=100';
+import { store, refresh, visibleRows, subscribe } from './core/store.js?v=100';
+import { BLOCKS, onRerender } from './ui/blocks.js?v=100';
+import { renderNav, renderTabs, renderFilters, renderSummary, renderStatus, markDemo, setupNav, renderSourcePicker, renderOddToggle, restoreOddChoice } from './ui/shell.js?v=100';
+import { PAGES, COMPUTED, TABS, FILTERS, ANALYSIS } from './pages/index.js?v=100';
+import { FIXTURES, findFixture } from '../../test-data/fixtures.js?v=100';
 
 /* config.js = ตั้งค่าที่ผู้ใช้แก้บ่อย ส่วนเนื้อหาหน้าอยู่ใน pages/ */
 const CFG = {
@@ -66,11 +66,14 @@ $('#side-title').textContent = CFG.brand || 'Dashboard';
 $('#side-sub').textContent = CFG.brandSub || '';
 $('#refresh').onclick = () => refresh(CFG, { useCache: false });
 
+restoreOddChoice();
 renderSourcePicker(FIXTURES, DEMO ? fixture?.id : null);
 if (DEMO) markDemo(fixture);
 onRerender(render);
 subscribe(() => {
-  if (store.status === 'ready') { renderTabs(CFG, render); renderFilters(CFG, render); }
+  if (store.status === 'ready') {
+    renderTabs(CFG, render); renderFilters(CFG, render); renderOddToggle(CFG, render);
+  }
   render();
 });
 

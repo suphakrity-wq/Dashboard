@@ -185,37 +185,42 @@
 /* ---- สไลด์นำเสนอ ----
    แสดงทีละสไลด์ สลับด้วยคลาส .on (ไม่ใช้ display:none เพื่อให้ transition ทำงาน) */
 .deck{display:flex;flex-direction:column;gap:var(--sp-3)}
+
+/* สเกลตัวอักษรของสไลด์ — กำหนดที่เดียว ทุกชิ้นในสไลด์อ้างจากตัวแปรชุดนี้
+   เวลาเข้าโหมดเต็มจอจะเปลี่ยนแค่ 4 ตัวนี้ ขนาดทุกอย่างจึงขยายพร้อมกันตามสัดส่วนเดิม */
+.deck{--s-title:var(--t-2xl); --s-quote:var(--t-lg); --s-body:var(--t-md); --s-small:var(--t-sm)}
+
 .deck-stage{position:relative;background:var(--ink);color:var(--on-dark);
   border-radius:var(--r-xl);padding:44px 46px;min-height:420px;box-shadow:var(--sh-3);
   display:grid}
 .slide{grid-area:1/1;opacity:0;visibility:hidden;transform:translateY(8px);
   transition:opacity var(--t-base) var(--ease), transform var(--t-base) var(--ease)}
 .slide.on{opacity:1;visibility:visible;transform:none}
-.slide-tag{display:inline-block;font-size:var(--t-xs);font-weight:700;letter-spacing:.06em;
+.slide-tag{display:inline-block;font-size:var(--s-small);font-weight:700;letter-spacing:.06em;
   color:var(--purple-on-dark);margin-bottom:14px}
-.slide h3{font-size:var(--t-2xl);font-weight:900;line-height:1.15;letter-spacing:-.02em;margin-bottom:18px}
-.slide-lead{font-size:var(--t-md);opacity:.8;margin-bottom:16px;line-height:1.5}
+.slide h3{font-size:var(--s-title);font-weight:900;line-height:1.15;letter-spacing:-.02em;margin-bottom:18px}
+.slide-lead{font-size:var(--s-body);opacity:.8;margin-bottom:16px;line-height:1.5}
 .slide-list{display:flex;flex-direction:column;gap:12px;margin:0;padding-left:20px}
-.slide-list li{font-size:var(--t-md);line-height:1.55;opacity:.92}
+.slide-list li{font-size:var(--s-body);line-height:1.55;opacity:.92}
 .slide-list li b{font-weight:700}
-.slide-sub{font-size:var(--t-xs);opacity:.62}
+.slide-sub{font-size:var(--s-small);opacity:.62}
 
 /* เดาไว้ vs เจอจริง — เครื่องหมายหน้าข้อบอกผลทันทีโดยไม่ต้องพึ่งสี */
 .slide-check{display:flex;flex-direction:column;gap:14px;margin:0;padding:0;list-style:none}
-.slide-check li{position:relative;padding-left:34px;font-size:var(--t-md);line-height:1.5}
+.slide-check li{position:relative;padding-left:34px;font-size:var(--s-body);line-height:1.5}
 .slide-check li > .slide-sub{display:block;margin-top:4px}
 .slide-check li::before{content:'?';position:absolute;left:0;top:1px;
-  width:24px;height:24px;border-radius:var(--r-pill);display:grid;place-items:center;
-  font-size:var(--t-xs);font-weight:800;background:rgba(255,255,255,.16);color:inherit}
-.slide-check li.is-yes::before{content:'✓';background:var(--lime);color:var(--lime-ink)}
-.slide-check li.is-no::before{content:'✕';background:#fff;color:var(--ink)}
-.slide-quote{margin-top:18px;font-size:var(--t-lg);line-height:1.5;font-weight:500;
+  width:1.15em;height:1.15em;border-radius:var(--r-pill);display:grid;place-items:center;
+  font-size:var(--s-small);font-weight:800;background:rgba(255,255,255,.16);color:inherit}
+.slide-check li.is-yes::before{content:'\2713';background:var(--lime);color:var(--lime-ink)}
+.slide-check li.is-no::before{content:'\2715';background:#fff;color:var(--ink)}
+.slide-quote{margin-top:18px;font-size:var(--s-quote);line-height:1.5;font-weight:500;
   border-left:3px solid var(--purple-on-dark);padding-left:16px;opacity:.9}
 .slide-big{margin:6px 0 18px;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
 .slide-big b{font-size:var(--t-3xl);font-weight:900;line-height:1;letter-spacing:-.03em;
   color:var(--lime-on-dark);font-variant-numeric:tabular-nums}
-.slide-big span{font-size:var(--t-md);opacity:.7}
-.slide-big p{flex:1 1 100%;font-size:var(--t-sm);opacity:.7;margin-top:4px}
+.slide-big span{font-size:var(--s-body);opacity:.7}
+.slide-big p{flex:1 1 100%;font-size:var(--s-small);opacity:.7;margin-top:4px}
 
 .deck-nav{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
 .deck-nav .btn{min-width:52px;font-size:var(--t-md);line-height:1}
@@ -228,9 +233,7 @@
 
 @media (max-width:760px){
   .deck-stage{padding:26px 20px;min-height:0;border-radius:var(--r-lg)}
-  .slide h3{font-size:var(--t-xl)}
-  .slide-list li,.slide-lead,.slide-check li{font-size:var(--t-sm)}
-  .slide-quote{font-size:var(--t-md)}
+  .deck{--s-title:var(--t-xl); --s-quote:var(--t-md); --s-body:var(--t-sm); --s-small:var(--t-xs)}
 }
 
 /* บรรทัดสรุปที่ต่อท้ายรายการ เดา vs เจอ ต้องมีระยะห่างจากข้อสุดท้าย */
@@ -249,17 +252,13 @@ html:has(.deck.is-full){overflow:hidden}   /* กันหน้าข้าง�
 
 .deck.is-full .deck-stage{flex:1;min-height:0;padding:clamp(24px, 6vh, 64px) clamp(24px, 7vw, 96px);
   overflow:auto;border-radius:var(--r-xl);align-content:center}   /* จอสูง ๆ ไม่ให้เนื้อหาลอยอยู่ข้างบน */
-.deck.is-full .slide h3{font-size:clamp(26px, 4.2vw, 58px)}
-.deck.is-full .slide-list li,
-.deck.is-full .slide-check li,
-.deck.is-full .slide-lead{font-size:clamp(15px, 1.7vw, 26px)}
+/* เต็มจอ: เปลี่ยนแค่ตัวแปรสเกล ทุกชิ้นจึงขยายพร้อมกันและคงสัดส่วนเดิมไว้ */
+.deck.is-full{--s-title:clamp(var(--t-xl), 4vw, 56px); --s-quote:clamp(var(--t-md), 2.1vw, 30px);
+  --s-body:clamp(var(--t-sm), 1.75vw, 26px); --s-small:clamp(var(--t-xs), 1.3vw, 20px)}
+/* ขั้นต่ำผูกกับสเกลปกติ เพื่อไม่ให้เข้าเต็มจอแล้วตัวอักษรกลับเล็กลงกว่าเดิม */
 .deck.is-full .slide-list{gap:clamp(10px, 1.4vh, 18px)}
 .deck.is-full .slide-check{gap:clamp(12px, 1.8vh, 22px)}
-.deck.is-full .slide-quote{font-size:clamp(17px, 2.1vw, 32px)}
-.deck.is-full .slide-big b{font-size:clamp(46px, 8vw, 120px)}
-.deck.is-full .slide-sub{font-size:clamp(12px, 1.15vw, 18px)}
-.deck.is-full .slide-tag{font-size:clamp(11px, 1.1vw, 17px)}
-.deck.is-full .slide-check li::before{width:clamp(22px, 1.9vw, 30px);height:clamp(22px, 1.9vw, 30px)}
+.deck.is-full .slide-big b{font-size:clamp(46px, 7.5vw, 110px)}
 
 /* ---- สไลด์แบบมีภาพประกอบ ----
    ซ้าย = ข้อความ ขวา = แผงขาวที่ใส่กราฟ (กราฟทุกตัวออกแบบมาสำหรับพื้นขาว)
@@ -269,12 +268,12 @@ html:has(.deck.is-full){overflow:hidden}   /* กันหน้าข้าง�
 .slide-text{min-width:0}
 .slide-fig{min-width:0;background:var(--surface);color:var(--ink);
   border-radius:var(--r-lg);padding:clamp(14px, 1.6vw, 22px)}
-.slide-fig .fig-note{margin-top:12px;font-size:var(--t-xs);color:var(--muted);line-height:1.5}
+.slide-fig .fig-note{margin-top:12px;font-size:var(--s-small);color:var(--muted);line-height:1.5}
 
 /* เทียบสองฝั่งแบบย่อในสไลด์ */
 .fig-vs{display:flex;flex-direction:column;gap:16px}
 .fig-vs-head{display:flex;justify-content:space-between;align-items:baseline;gap:10px;
-  font-size:var(--t-sm);margin-bottom:8px}
+  font-size:var(--s-small);margin-bottom:8px}
 .fig-vs-head b{font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap}
 .fig-vs-track{height:14px;border-radius:var(--r-pill);background:var(--track);overflow:hidden}
 .fig-vs-track.is-seg{background:none;overflow:visible}
@@ -284,11 +283,19 @@ html:has(.deck.is-full){overflow:hidden}   /* กันหน้าข้าง�
 /* ตารางสรุปว่าวัดอะไรบ้าง */
 .fig-spec{display:flex;flex-direction:column;gap:0}
 .fig-spec-row{display:grid;grid-template-columns:1.1fr 1.5fr .9fr;gap:10px;
-  padding:10px 0;border-bottom:1px solid var(--line);font-size:var(--t-xs);line-height:1.45}
+  padding:10px 0;border-bottom:1px solid var(--line);font-size:var(--s-small);line-height:1.45}
 .fig-spec-row:last-child{border-bottom:none}
 .fig-spec-row.is-head{font-weight:700;color:var(--muted);border-bottom:1px solid var(--ink)}
 .fig-spec-row .is-key{font-weight:700;color:var(--ink)}
 
 @media (max-width:900px){
   .slide-cols{grid-template-columns:1fr;gap:20px}
+}
+
+/* จอเตี้ย (โน้ตบุ๊ก 720p / มือถือแนวตั้ง): ลดระยะขอบในโหมดเต็มจอ
+   เพื่อให้เนื้อหาสไลด์จบในหน้าเดียวโดยไม่ต้องเลื่อน */
+@media (max-height:820px){
+  .deck.is-full{padding:16px clamp(14px, 2.4vw, 28px)}
+  .deck.is-full .deck-stage{padding:clamp(18px, 3.4vh, 40px) clamp(20px, 5vw, 72px)}
+  .deck.is-full .slide-list{gap:clamp(8px, 1.1vh, 14px)}
 }
