@@ -8,10 +8,10 @@
  * ข้อตกลง: ดึงข้อมูลผ่าน groupBy/crossTab จาก core/compute.js เท่านั้น
  */
 
-import { el, growBar, segmentBars } from './dom.js?v=60';
-import { fmt, round1, pct } from '../core/format.js?v=60';
-import { num, groupBy, crossTab, avgOf, pickGroupColumn, distinctValues, compareGroups } from '../core/compute.js?v=60';
-import { welchTTest } from '../core/stats.js?v=60';
+import { el, growBar, segmentBars } from './dom.js?v=61';
+import { fmt, round1, pct } from '../core/format.js?v=61';
+import { num, groupBy, crossTab, avgOf, pickGroupColumn, distinctValues, compareGroups } from '../core/compute.js?v=61';
+import { welchTTest } from '../core/stats.js?v=61';
 
 /* สีของหลอดสื่อ "สถานะ" ไม่ใช่ชื่อชุดข้อมูล:
    ฝั่งที่มีค่ามากกว่า = ม่วง (สีเด่นของงานนี้) อีกฝั่ง = เทาเข้ม
@@ -169,13 +169,18 @@ export function gap(host, cf, rows) {
 export function donut(host, cf, rows) {
   const { labels, values } = groupBy(rows, cf);
   const total = values.reduce((a, b) => a + b, 0) || 1;
-  const palette = cf.colors || ['var(--blue)', 'var(--orange)', 'var(--gray)', 'var(--ink-2)'];
+  /* ไล่เฉดตามลำดับค่า (ค่ามากสุด = เข้มสุด) ค่าเริ่มต้นเป็นเฉดม่วงชุดเดียวกับทั้งเว็บ
+     หมายเหตุ: ห้ามกลับไปใช้ --blue / --orange ทั้งสองตัวถูกถอดออกจากชุดสีแล้ว */
+  const palette = cf.colors ||
+    ['var(--sc-5)', 'var(--sc-4)', 'var(--sc-3)', 'var(--sc-2)', 'var(--sc-1)'];
 
   const NS = 'http://www.w3.org/2000/svg';
   const svg = document.createElementNS(NS, 'svg');
   svg.setAttribute('viewBox', '0 0 42 42');
   svg.setAttribute('class', 'donut');
 
+  /* วงเต็มไม่มีรอยต่อ: ปลายตัดตรง (butt) และไม่หักช่องไฟออกจากความยาวส่วนโค้ง
+     ของเดิมหักออก 0.6 + ปลายมน ทำให้วงขาดเป็นช่วง ๆ และส่วนเล็ก ๆ ลอยเป็นเม็ดยา */
   const R = 15.9155, C = 2 * Math.PI * R;
   let acc = 0;
   values.forEach((v, i) => {
@@ -183,11 +188,13 @@ export function donut(host, cf, rows) {
     arc.setAttribute('cx', 21); arc.setAttribute('cy', 21); arc.setAttribute('r', R);
     arc.setAttribute('fill', 'none');
     arc.setAttribute('stroke', palette[i % palette.length]);
-    arc.setAttribute('stroke-width', 5);
-    arc.setAttribute('stroke-linecap', 'round');
-    arc.setAttribute('stroke-dasharray', `${(v / total * C - 0.6).toFixed(2)} ${C}`);
-    arc.setAttribute('stroke-dashoffset', (C / 4 - acc).toFixed(2));
+    arc.setAttribute('stroke-width', 9);
+    arc.setAttribute('stroke-dasharray', `${(v / total * C).toFixed(3)} ${C}`);
+    arc.setAttribute('stroke-dashoffset', (C / 4 - acc).toFixed(3));
     arc.setAttribute('transform', 'rotate(-90 21 21)');
+    const t = document.createElementNS(NS, 'title');
+    t.textContent = `${labels[i]} — ${pct(v, total)}%`;
+    arc.append(t);
     svg.append(arc);
     acc += v / total * C;
   });

@@ -8,16 +8,16 @@
  * ห้าม: ใส่สูตรคำนวณในไฟล์นี้ — ให้เรียกจาก core/ แทน
  */
 
-import { $, el, growBar, segmentBars } from './dom.js?v=60';
-import { fmt, round1, pct } from '../core/format.js?v=60';
-import { splitValues, isNumericColumn } from '../core/compute.js?v=60';
-import { store } from '../core/store.js?v=60';
-import { verdict as calcVerdict, causes as calcCauses, pulls as calcPulls } from '../core/insight.js?v=60';
-import { analyzeText } from '../core/textAnalysis.js?v=60';
-import { wilsonInterval } from '../core/stats.js?v=60';
-import { SOURCES, CONTEXT_FACTS, compareBenchmarks } from '../core/benchmarks.js?v=60';
-import { aggregate, groupBy as groupRows } from '../core/compute.js?v=60';
-import { CHARTS } from './charts.js?v=60';
+import { $, el, growBar, segmentBars } from './dom.js?v=61';
+import { fmt, round1, pct } from '../core/format.js?v=61';
+import { splitValues, isNumericColumn } from '../core/compute.js?v=61';
+import { store } from '../core/store.js?v=61';
+import { verdict as calcVerdict, causes as calcCauses, pulls as calcPulls } from '../core/insight.js?v=61';
+import { analyzeText } from '../core/textAnalysis.js?v=61';
+import { wilsonInterval } from '../core/stats.js?v=61';
+import { SOURCES, CONTEXT_FACTS, compareBenchmarks } from '../core/benchmarks.js?v=61';
+import { aggregate, groupBy as groupRows } from '../core/compute.js?v=61';
+import { CHARTS } from './charts.js?v=61';
 
 let rerender = () => {};
 export const onRerender = fn => { rerender = fn; };

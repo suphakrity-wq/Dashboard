@@ -39,7 +39,9 @@ export const C = {
   drama:  "#6d4dfb",   // ข่าวดราม่า / ตัวเอกของงานวิจัย
   soft:   "#9b86ff",   // ข้อมูลรอง
   faint:  "#cdc2ff",
-  scale:  ["#6d4dfb", "#2a2a30", "#b9a9ff", "#c3c3cb"]   // ใช้กับ donut / waffle / stacked
+  scale:  ["#6d4dfb", "#2a2a30", "#b9a9ff", "#c3c3cb"],  // ใช้กับ waffle
+  // ไล่เฉดจากเข้มไปอ่อนตามลำดับค่า (ค่ามากสุด = เข้มสุด) ใช้กับ donut / stacked
+  ramp:   ["var(--sc-5)", "var(--sc-4)", "var(--sc-3)", "var(--sc-2)", "var(--sc-1)"]
 };
 
 /** แท็บและตัวกรองด้านบน ใช้ร่วมกันทุกหน้า */

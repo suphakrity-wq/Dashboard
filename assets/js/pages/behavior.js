@@ -1,6 +1,6 @@
 /* หน้า 4 — พฤติกรรมการเข้าถึง: คนเจอข่าวได้อย่างไร */
 
-import { Q, COL, C } from './columns.js?v=60';
+import { Q, COL, C } from './columns.js?v=61';
 
 export default {
   id: "behavior",
@@ -53,11 +53,11 @@ export default {
       title: "ภาพรวมช่องทางและการค้นพบข่าว",
       charts: [
         { type: "donut", title: "เจอข่าวได้อย่างไร", note: "ตั้งใจหา หรือเลื่อนเจอเอง",
-          x: Q.howFound, agg: "count", sort: "value", unit: "คน", colors: C.scale,
+          x: Q.howFound, agg: "count", sort: "value", unit: "คน", colors: C.ramp,
           hint: "ถ้า “บังเอิญเลื่อนเจอ” สูง แปลว่าอัลกอริทึมเป็นคนเลือกข่าวให้ ไม่ใช่ตัวผู้ใช้เอง" },
 
         { type: "stacked", title: "ข่าวประเภทไหนดึงดูดใจมากกว่า", note: "สัดส่วนคำตอบทั้งหมด",
-          x: Q.appeal, agg: "count", sort: "value", colors: C.scale }
+          x: Q.appeal, agg: "count", sort: "value", colors: C.ramp }
       ] },
 
     { type: "charts",
