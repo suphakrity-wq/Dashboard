@@ -8,18 +8,18 @@
  * ห้าม: ใส่สูตรคำนวณในไฟล์นี้ — ให้เรียกจาก core/ แทน
  */
 
-import { $, el, growBar, segmentBars } from './dom.js?v=155';
-import { fmt, round1, pct } from '../core/format.js?v=155';
-import { splitValues, isNumericColumn } from '../core/compute.js?v=155';
-import { store } from '../core/store.js?v=155';
-import { verdict as calcVerdict, causes as calcCauses, pulls as calcPulls } from '../core/insight.js?v=155';
-import { recommend } from '../core/recommend.js?v=155';
-import { analyzeText } from '../core/textAnalysis.js?v=155';
-import { auditRows } from '../core/quality.js?v=155';
-import { wilsonInterval } from '../core/stats.js?v=155';
-import { SOURCES, CONTEXT_FACTS, compareBenchmarks } from '../core/benchmarks.js?v=155';
-import { aggregate, groupBy as groupRows } from '../core/compute.js?v=155';
-import { CHARTS } from './charts.js?v=155';
+import { $, el, growBar, segmentBars } from './dom.js?v=159';
+import { fmt, round1, pct } from '../core/format.js?v=159';
+import { splitValues, isNumericColumn } from '../core/compute.js?v=159';
+import { store } from '../core/store.js?v=159';
+import { verdict as calcVerdict, causes as calcCauses, pulls as calcPulls } from '../core/insight.js?v=159';
+import { recommend } from '../core/recommend.js?v=159';
+import { analyzeText } from '../core/textAnalysis.js?v=159';
+import { auditRows } from '../core/quality.js?v=159';
+import { wilsonInterval } from '../core/stats.js?v=159';
+import { SOURCES, CONTEXT_FACTS, compareBenchmarks } from '../core/benchmarks.js?v=159';
+import { aggregate, groupBy as groupRows } from '../core/compute.js?v=159';
+import { CHARTS } from './charts.js?v=159';
 
 let rerender = () => {};
 export const onRerender = fn => { rerender = fn; };
@@ -212,7 +212,11 @@ function table(host, b, rows, cfg = {}) {
      ใช้อ้างอิงว่าชุดคำตอบลำดับใดใช้ไม่ได้ */
   const orderOf = r => store.rows.indexOf(r) + 1;
 
-  const cols = (b.columns?.length ? b.columns : store.columns);
+  /* คอลัมน์ที่ไม่มีใครตอบเลยสักแถว ไม่ต้องแสดง
+     เช่นคอลัมน์ Score ที่ Google Form ใส่มาให้เฉพาะแบบทดสอบ ในฟอร์มนี้ว่างทุกแถว
+     ปล่อยไว้ก็เป็นคอลัมน์เปล่าที่ต้องเลื่อนผ่าน ไม่ได้บอกอะไร */
+  const hasData = c => store.rows.some(r => String(r[c] ?? '').trim() !== '');
+  const cols = (b.columns?.length ? b.columns : store.columns).filter(hasData);
   const size = b.pageSize || 20;
   const pageCount = Math.max(1, Math.ceil((store.onlyFlagged
     ? store.rows.filter(r => problemsOf(r)).length : rows.length) / size));
@@ -255,7 +259,7 @@ function table(host, b, rows, cfg = {}) {
   // รายชื่อลำดับที่ใช้ไม่ได้ทั้งหมด อ้างอิงกลับไปที่ฟอร์มต้นทางได้เลย
   const badList = store.rows.map((r, k) => problemsOf(r) ? k + 1 : null).filter(Boolean);
   const badLine = badList.length
-    ? el('p', 'bad-list', `ฟอร์มที่ตอบผิดพลาด ${badList.length} ชุด — ลำดับที่ ${badList.join(', ')}`)
+    ? el('p', 'bad-list', `ฟอร์มที่ตอบผิดพลาด ${badList.length} ชุด · ลำดับที่ ${badList.join(", ")}`)
     : null;
 
   /* --- ตาราง --- */

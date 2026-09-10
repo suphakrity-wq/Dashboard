@@ -1,7 +1,7 @@
 /* หน้า 1 ภาพรวมการสำรวจ: หัวข้อที่สำรวจ ตัวเลขหลัก และสาเหตุที่พบบ่อย
    บทสรุปฉบับเต็มอยู่หน้าสุดท้าย (conclusion.js) หน้านี้ทำหน้าที่เป็นหน้าแรกของรายงาน */
 
-import { Q, COL, C } from './columns.js?v=155';
+import { Q, COL, C } from './columns.js?v=159';
 
 export default {
   id: "summary",

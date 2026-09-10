@@ -8,10 +8,10 @@
  * ข้อตกลง: ดึงข้อมูลผ่าน groupBy/crossTab จาก core/compute.js เท่านั้น
  */
 
-import { el, growBar, segmentBars } from './dom.js?v=155';
-import { fmt, round1, pct } from '../core/format.js?v=155';
-import { num, groupBy, crossTab, avgOf, pickGroupColumn, distinctValues, compareGroups } from '../core/compute.js?v=155';
-import { welchTTest } from '../core/stats.js?v=155';
+import { el, growBar, segmentBars } from './dom.js?v=159';
+import { fmt, round1, pct } from '../core/format.js?v=159';
+import { num, groupBy, crossTab, avgOf, pickGroupColumn, distinctValues, compareGroups } from '../core/compute.js?v=159';
+import { welchTTest } from '../core/stats.js?v=159';
 
 /* สีของหลอดสื่อ "สถานะ" ไม่ใช่ชื่อชุดข้อมูล:
    ฝั่งที่มีค่ามากกว่า = ม่วง (สีเด่นของงานนี้) อีกฝั่ง = เทาเข้ม
@@ -825,7 +825,6 @@ export function pie(host, cf, rows) {
   const RO = R + W / 2, RI = R - W / 2;
   const CORNER = 4;                 // มุมกึ่งโค้ง ไม่ใช่ปลายมนเต็มใบ (ปลายมนเต็มใบ = W/2 = 11)
   const GAP = slices.length > 1 ? 4 : 0;   // ช่องว่างระหว่างชิ้น หน่วยเป็นองศา
-  const TRACK_GAP = GAP * 0.4;             // ชั้นหลังเว้นแคบกว่า จึงโผล่พ้นชิ้นสีทั้งสองด้าน
   const MIN_SWEEP = 1.6;                   // ชิ้นที่เล็กมากยังต้องเห็นเป็นเส้นบาง ๆ ไม่ใช่หายไป
 
   const at = (deg, rad) => {
@@ -874,21 +873,9 @@ export function pie(host, cf, rows) {
     return { from: from + (full - sweep) / 2, sweep };
   };
 
-  /* ---- ชั้นหลัง: รางสีเทาแบ่งช่องด้วยมุมชุดเดียวกับชิ้นสี ----
-     ทำให้เห็นว่าวงถูกแบ่งเป็นกี่ช่องแม้ชิ้นนั้นจะเล็กมาก
-     และช่องว่างอ่านเป็น "เส้นแบ่ง" ไม่ใช่ "ข้อมูลขาดหาย" */
-  if (slices.length > 1) {
-    let tstart = 0;
-    slices.forEach(g => {
-      const full = g.n / total * 360;
-      const { from, sweep } = inset(tstart, full, TRACK_GAP);
-      const t = mk('path');
-      t.setAttribute('d', sectorPath(from, sweep));
-      t.setAttribute('class', 'pie-track');
-      svg.append(t);
-      tstart += full;
-    });
-  }
+  /* ไม่มีชั้นหลังเป็นรางสี — เคยลองแล้ว รางโผล่พ้นชิ้นสีทั้งสองด้าน
+     ตาอ่านเป็น "เส้นขอบสี" รอบชิ้น ไม่ใช่ "ช่องแบ่ง" ซึ่งรกกว่าเดิม
+     ช่องว่างบนพื้นการ์ดสีขาวอ่านเป็นเส้นแบ่งได้ชัดอยู่แล้วโดยไม่ต้องมีรางรอง */
 
   let start = 0;
   const labelBoxes = [];

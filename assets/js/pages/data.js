@@ -1,6 +1,6 @@
 /* หน้า 7 ข้อมูลดิบ: คำตอบทุกแถวทุกคอลัมน์ ใช้ตรวจสอบย้อนกลับไปที่ต้นทาง */
 
-import { Q } from './columns.js?v=155';
+import { Q } from './columns.js?v=159';
 
 export default {
   id: "data",

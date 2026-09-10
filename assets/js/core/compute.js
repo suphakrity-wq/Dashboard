@@ -30,10 +30,14 @@ export function splitValues(value, multi) {
   return out.filter(Boolean);
 }
 
-/** คอลัมน์นี้เป็นตัวเลขล้วนหรือไม่ (ใช้จัดชิดขวาในตาราง) */
+/** คอลัมน์นี้เป็นตัวเลขล้วนหรือไม่ (ใช้จัดชิดขวาในตาราง)
+    ต้องเทียบทั้งค่า ไม่ใช่ใช้ num() ซึ่งอ่านแค่ส่วนหน้า
+    num("9/8/2026") ได้ 9 คอลัมน์ Timestamp จึงเคยถูกจัดเป็นตัวเลขทั้งคอลัมน์ */
+const NUMERIC_TEXT = /^-?\d+(\.\d+)?$/;
 export function isNumericColumn(rows, col) {
   const sample = rows.slice(0, 30).map(r => r[col]).filter(v => v !== '' && v != null);
-  return sample.length > 0 && sample.every(v => num(v) !== null);
+  return sample.length > 0 &&
+         sample.every(v => NUMERIC_TEXT.test(String(v).replace(/[,\s฿$%]/g, '')));
 }
 
 /** ค่าสรุปของคอลัมน์เดียว */
