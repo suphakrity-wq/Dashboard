@@ -8,10 +8,10 @@
  * ข้อตกลง: ดึงข้อมูลผ่าน groupBy/crossTab จาก core/compute.js เท่านั้น
  */
 
-import { el, growBar, segmentBars } from './dom.js?v=147';
-import { fmt, round1, pct } from '../core/format.js?v=147';
-import { num, groupBy, crossTab, avgOf, pickGroupColumn, distinctValues, compareGroups } from '../core/compute.js?v=147';
-import { welchTTest } from '../core/stats.js?v=147';
+import { el, growBar, segmentBars } from './dom.js?v=150';
+import { fmt, round1, pct } from '../core/format.js?v=150';
+import { num, groupBy, crossTab, avgOf, pickGroupColumn, distinctValues, compareGroups } from '../core/compute.js?v=150';
+import { welchTTest } from '../core/stats.js?v=150';
 
 /* สีของหลอดสื่อ "สถานะ" ไม่ใช่ชื่อชุดข้อมูล:
    ฝั่งที่มีค่ามากกว่า = ม่วง (สีเด่นของงานนี้) อีกฝั่ง = เทาเข้ม
@@ -195,7 +195,7 @@ export function donut(host, cf, rows) {
     arc.setAttribute('stroke-dashoffset', (C / 4 - acc).toFixed(3));
     arc.setAttribute('transform', 'rotate(-90 21 21)');
     const t = document.createElementNS(NS, 'title');
-    t.textContent = `${labels[i]} — ${pct(v, total)}%`;
+    t.textContent = `${labels[i]} · ${pct(v, total)}%`;
     arc.append(t);
     svg.append(arc);
     acc += v / total * C;
@@ -272,8 +272,8 @@ export function compare(host, cf, rows) {
   if (widest && narrowest && widest !== narrowest) {
     const lead = el('p', 'lead');
     lead.innerHTML = `กลุ่มที่ช่องว่างกว้างที่สุดคือ <b>${widest.label}</b> ` +
-      `(ห่างกัน ${fmt(round1(widest.gap))} ข่าว) · แคบที่สุดคือ <b>${narrowest.label}</b> ` +
-      `(ห่างกัน ${fmt(round1(narrowest.gap))} ข่าว)`;
+      `(ต่างกัน ${fmt(round1(widest.gap))} ข่าว) · แคบที่สุดคือ <b>${narrowest.label}</b> ` +
+      `(ต่างกัน ${fmt(round1(narrowest.gap))} ข่าว)`;
     host.append(lead);
   }
 
@@ -293,7 +293,7 @@ export function compare(host, cf, rows) {
         ? `เทียบ “${byN[0].label}” กับ “${byN[1].label}” แล้ว ช่องว่างต่างกันอย่างมีนัยสำคัญ ` +
           `(ต่างกัน ${Math.abs(test.diff).toFixed(1)} ข่าว, p = ${test.p < 0.001 ? '<.001' : test.p.toFixed(3)})`
         : `เทียบ “${byN[0].label}” กับ “${byN[1].label}” แล้ว ยังบอกไม่ได้ว่าต่างกันจริง ` +
-          `(p = ${test.p.toFixed(3)} — ผลต่างเท่านี้เกิดจากความบังเอิญได้)`;
+          `(p = ${test.p.toFixed(3)} จึงยังสรุปไม่ได้ว่าผลต่างนี้ไม่ได้เกิดจากการสุ่ม)`;
       note.classList.add(test.p < 0.05 ? 'is-sig' : 'is-nosig');
       host.append(note);
     }
@@ -311,7 +311,7 @@ export function compare(host, cf, rows) {
     head.append(el('span', 'cmp-n', `${fmt(g.n)} คน`));
     if (g.gap != null) {
       const chip = el('span', 'cmp-gap');
-      chip.textContent = 'ห่างกัน ' + fmt(round1(Math.abs(g.gap))) + ' ข่าว';
+      chip.textContent = 'ต่างกัน ' + fmt(round1(Math.abs(g.gap))) + ' ข่าว';
       chip.classList.add(g.gap >= 0 ? 'is-drama' : 'is-world');
       head.append(chip);
     }
@@ -364,7 +364,7 @@ export function waffle(host, cf, rows) {
     for (let k = 0; k < n; k++) {
       const cell = el('i', 'wf-cell');
       cell.style.background = palette[i % palette.length];
-      cell.title = `${labels[i]} — ${values[i]} คนจาก ${total} คน (${Math.round(exact[i])}%)`;
+      cell.title = `${labels[i]} · ${values[i]} คนจาก ${total} คน (${Math.round(exact[i])}%)`;
       cell.style.animationDelay = Math.min(grid.children.length * 3, 300) + 'ms';
       grid.append(cell);
     }
@@ -444,7 +444,7 @@ export function heatmap(host, cf, rows) {
   const groupCol = pickGroupColumn(rows, [cf.group, ...(cf.groupFallback || [])]);
   if (!groupCol) {
     host.append(el('p', 'hint', cf.singleGroupNote ||
-      'ยังแบ่งกลุ่มไม่ได้ เพราะผู้ตอบอยู่กลุ่มเดียวกันทั้งหมด — ดูอันดับข่าวด้านล่างแทนได้'));
+      'ยังจำแนกกลุ่มไม่ได้ เนื่องจากผู้ตอบทั้งหมดอยู่ในกลุ่มเดียวกัน กรุณาดูอันดับข่าวด้านล่างประกอบ'));
     return;
   }
   const all = crossTab(rows, { ...cf, group: groupCol });
@@ -458,7 +458,7 @@ export function heatmap(host, cf, rows) {
   // ต้องมีอย่างน้อยสองกลุ่มที่ใหญ่พอถึงจะ "เทียบ" ได้ ตารางคอลัมน์เดียวไม่มีประโยชน์
   if (keep.length < 2) {
     host.append(el('p', 'hint',
-      `มีกลุ่มที่ผู้ตอบถึง ${minN} คนไม่ถึงสองกลุ่ม จึงยังเทียบข้ามกลุ่มไม่ได้ — ` +
+      `มีกลุ่มที่ผู้ตอบถึง ${minN} คนไม่ถึงสองกลุ่ม จึงยังเปรียบเทียบข้ามกลุ่มไม่ได้ · ` +
       `ดูอันดับข่าวด้านล่างซึ่งนับรวมทุกคนแทน`));
     return;
   }
@@ -535,7 +535,7 @@ export function bubbles(host, cf, rows) {
     const name = el('span', 'bubble-name', label);
     const share = el('span', 'bubble-share', `${fmt(values[i])} คน · ${pct(values[i], rows.length)}%`);
     item.append(ball, name, share);
-    item.title = `${label} — ${values[i]} คนจาก ${rows.length} คน (${pct(values[i], rows.length)}%)`;
+    item.title = `${label} · ${values[i]} คนจาก ${rows.length} คน (${pct(values[i], rows.length)}%)`;
     wrap.append(item);
   });
   host.append(wrap);
@@ -551,7 +551,7 @@ export function stacked(host, cf, rows) {
   values.forEach((v, i) => {
     const seg = el('i');
     seg.style.background = palette[i % palette.length];
-    seg.title = `${labels[i]} — ${v} คน (${pct(v, total)}%)`;
+    seg.title = `${labels[i]} · ${v} คน (${pct(v, total)}%)`;
     // ตัวเลขอยู่ในแถบเลย ไม่ต้องกวาดตาไปหาในรายการข้างล่าง
     const tag = el('b', null, pct(v, total) + '%');
     if (i >= 2) seg.classList.add('is-light');
@@ -668,7 +668,7 @@ export function chips(host, cf, rows) {
     chip.append(el('span', 'cloud-name', label));
     chip.append(el('b', null, `${fmt(v)} คน`));
     chip.append(el('span', 'cloud-pct', pct(v, rows.length) + '%'));
-    chip.title = `${label} — ${fmt(v)} คน (${pct(v, rows.length)}%)`;
+    chip.title = `${label} · ${fmt(v)} คน (${pct(v, rows.length)}%)`;
     box.append(chip);
   });
   host.append(box);
@@ -715,7 +715,7 @@ export function grouped(host, cf, rows) {
       const track = el('div', 'grp-track');
       const fill = el('i');
       fill.style.setProperty('--c', sr.color);
-      fill.title = `${sr.label} · ${d.r.label} — ${d.vals[k]} คน`;
+      fill.title = `${sr.label} · ${d.r.label} · ${d.vals[k]} คน`;
       track.append(fill);
       growBar(fill, d.vals[k] / peak * 100);
       row.append(track, el('b', null, `${d.vals[k]} คน`));
@@ -755,7 +755,7 @@ export function split(host, cf, rows) {
     const seg = el('i');
     seg.style.background = g.color;
     seg.style.width = (g.n / total * 100) + '%';
-    seg.title = `${g.label} — ${g.n} คน (${pct(g.n, total)}%)`;
+    seg.title = `${g.label} · ${g.n} คน (${pct(g.n, total)}%)`;
     bar.append(seg);
   });
   host.append(bar);
@@ -775,4 +775,137 @@ export function split(host, cf, rows) {
   host.append(el('p', 'scale-note', `นับจากผู้ตอบที่ตอบครบทั้งสองชุด ${total} คน`));
 }
 
-Object.assign(CHARTS, { waffle, gauge, heatmap, bubbles, stacked, paired, chips, grouped, split });
+
+/* ---------- วงกลมสัดส่วน (pie) ----------
+   ใช้กับคำถามที่ผู้ตอบเลือกได้คำตอบเดียว ผลรวมทุกชิ้นจึงเท่ากับผู้ตอบทั้งหมดพอดี
+   รับข้อมูลได้สองแบบ
+     1) x: ชื่อคอลัมน์            — นับความถี่ของคำตอบในคอลัมน์นั้น
+     2) columnA + columnB + groups — แบ่งผู้ตอบเป็นกลุ่มจากผลต่างของสองคอลัมน์
+   ห้ามใช้กับคำถามที่เลือกได้หลายข้อ เพราะผลรวมจะเกิน 100% แล้ววงจะสื่อความผิด
+
+   วาดเป็นวงแหวนที่เว้นช่องระหว่างชิ้น ไม่ใช่วงตันที่ต่อกันสนิท
+   ช่องว่างคงที่ทำให้ปลายมนของแต่ละชิ้นไม่ชนกัน (ข้อจำกัดเดิมของโดนัทแบบต่อสนิท ดู UI.md)
+   ตัวเลข % วางอยู่ในกล่องพื้นขาวมุมมน ไม่ใช้เส้นขอบตัวอักษร
+   เพราะเส้นขอบจะทำให้ตัวเลขบางลงและอ่านยากเมื่อทับสีอ่อน */
+export function pie(host, cf, rows) {
+  if (!rows.length) { host.append(el('p', 'hint', 'ยังไม่มีผู้ตอบให้นับ')); return; }
+
+  const palette = cf.colors ||
+    ['var(--pie-1)', 'var(--pie-2)', 'var(--pie-3)', 'var(--pie-4)', 'var(--pie-5)'];
+  let slices;
+
+  if (cf.columnA && cf.columnB) {
+    const groups = (cf.groups || []).map(g => ({ label: g.label, color: g.color, n: 0 }));
+    rows.forEach(r => {
+      const a = num(r[cf.columnA]), b = num(r[cf.columnB]);
+      if (a == null || b == null) return;
+      const k = b > a ? 0 : b < a ? 1 : 2;
+      if (groups[k]) groups[k].n++;
+    });
+    slices = groups;
+  } else {
+    const { labels, values } = groupBy(rows, cf);
+    slices = labels.map((label, i) => ({ label, n: values[i], color: palette[i % palette.length] }));
+  }
+
+  slices = slices.filter(s => s.n > 0);
+  const total = slices.reduce((s, g) => s + g.n, 0);
+  if (!total) { host.append(el('p', 'hint', 'ยังไม่มีคำตอบในหัวข้อนี้')); return; }
+
+  const NS = 'http://www.w3.org/2000/svg';
+  const mk = t => document.createElementNS(NS, t);
+  const svg = mk('svg');
+  svg.setAttribute('viewBox', '0 0 100 100');
+  svg.setAttribute('class', 'pie');
+
+  const CX = 50, CY = 50, R = 38, W = 15;
+  /* ช่องว่างระหว่างชิ้น วัดเป็นองศา ชิ้นที่แคบกว่าช่องว่างจะหายไป
+     จึงตัดช่องว่างของชิ้นนั้นทิ้ง แล้วบีบให้เหลืออย่างน้อยพอมองเห็น */
+  const GAP = slices.length > 1 ? 4 : 0;
+  const MIN_ARC = 2;
+  const at = (deg, rad) => {
+    const a = (deg - 90) * Math.PI / 180;
+    return [CX + rad * Math.cos(a), CY + rad * Math.sin(a)];
+  };
+
+  let start = 0;
+  const labelBoxes = [];
+  slices.forEach((g, i) => {
+    const share = g.n / total;
+    const full = share * 360;
+    const color = g.color || palette[i % palette.length];
+
+    if (slices.length === 1) {
+      const ring = mk('circle');
+      ring.setAttribute('cx', CX); ring.setAttribute('cy', CY); ring.setAttribute('r', R);
+      ring.setAttribute('fill', 'none');
+      ring.setAttribute('stroke', color);
+      ring.setAttribute('stroke-width', W);
+      svg.append(ring);
+    } else {
+      const arc = Math.max(MIN_ARC, full - GAP);
+      const from = start + (full - arc) / 2;
+      const [x1, y1] = at(from, R), [x2, y2] = at(from + arc, R);
+      const path = mk('path');
+      path.setAttribute('d',
+        `M ${x1.toFixed(3)} ${y1.toFixed(3)} ` +
+        `A ${R} ${R} 0 ${arc > 180 ? 1 : 0} 1 ${x2.toFixed(3)} ${y2.toFixed(3)}`);
+      path.setAttribute('fill', 'none');
+      path.setAttribute('stroke', color);
+      path.setAttribute('stroke-width', W);
+      path.setAttribute('stroke-linecap', 'round');
+      const t = mk('title');
+      t.textContent = `${g.label} · ${fmt(g.n)} คน (${pct(g.n, total)}%)`;
+      path.append(t);
+      svg.append(path);
+    }
+
+    /* ตัวเลขวางบนกึ่งกลางความหนาของวง ชิ้นที่แคบกว่านี้กล่องจะทับชิ้นข้างเคียง
+       จึงปล่อยให้อ่านจากคำอธิบายด้านข้างแทน */
+    if (full >= 26) labelBoxes.push({ deg: start + full / 2, text: pct(g.n, total) + '%' });
+    start += full;
+  });
+
+  /* วาดกล่องตัวเลขทีหลังทั้งชุด เพื่อให้อยู่เหนือทุกชิ้นเสมอ ไม่ถูกชิ้นถัดไปทับ */
+  labelBoxes.forEach(({ deg, text }) => {
+    const [lx, ly] = at(deg, R);
+    const w = text.length * 4.6 + 7, h = 11;
+    const box = mk('rect');
+    box.setAttribute('x', (lx - w / 2).toFixed(2));
+    box.setAttribute('y', (ly - h / 2).toFixed(2));
+    box.setAttribute('width', w.toFixed(2));
+    box.setAttribute('height', h);
+    box.setAttribute('rx', h / 2);
+    box.setAttribute('class', 'pie-tagbox');
+    const label = mk('text');
+    label.setAttribute('x', lx.toFixed(2));
+    label.setAttribute('y', ly.toFixed(2));
+    label.setAttribute('class', 'pie-pct');
+    label.textContent = text;
+    svg.append(box, label);
+  });
+
+  const legend = el('div', 'pie-legend');
+  slices.forEach((g, i) => {
+    const row = el('div', 'pl-row');
+    const dot = el('i', 'dot');
+    dot.style.background = g.color || palette[i % palette.length];
+    const name = el('span', 'pl-name', g.label);
+    name.title = g.label;
+    row.append(dot, name,
+      el('b', null, pct(g.n, total) + '%'),
+      el('span', 'pl-n', fmt(g.n) + ' คน'));
+    legend.append(row);
+  });
+
+  const wrap = el('div', 'pie-wrap');
+  const chart = el('div', 'pie-chart');
+  chart.append(svg);
+  wrap.append(chart, legend);
+  host.append(wrap);
+  host.append(el('p', 'scale-note',
+    `ทั้งวงเท่ากับผู้ตอบ ${fmt(total)} คน · แต่ละชิ้นคือสัดส่วนของคำตอบนั้น · ` +
+    `ช่องว่างระหว่างชิ้นมีไว้แบ่งชิ้น ไม่ได้แทนค่าใด`));
+}
+
+Object.assign(CHARTS, { waffle, gauge, heatmap, bubbles, stacked, paired, chips, grouped, split, pie });

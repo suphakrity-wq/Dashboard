@@ -109,8 +109,10 @@ function planBlocks(items, max) {
   }
   if (n < MIN_BLOCKS) { n = MIN_BLOCKS; per = max / MIN_BLOCKS; }
   if (narrowest / n < HARD_MIN_PX) return null;   // แคบเกินไปจริง ๆ ใช้หลอดต่อเนื่องแทน
-  // ช่องไฟระหว่างช่อง — ช่องยาวขึ้นแล้วก็ควรเว้นห่างขึ้นตาม ไม่งั้นดูเป็นแท่งเดียวติดกัน
-  return { per, n, gap: narrowest / n < 40 ? 4 : 6 };
+  /* ช่องไฟระหว่างช่อง — ต้องกว้างพอให้เห็นเป็นคนละช่อง ไม่ใช่รอยต่อบาง ๆ
+     ค่าเดิม 4/6px บนหลอดสูง 18-26px อ่านเป็นเส้นแบ่ง ไม่ใช่ช่องว่าง
+     ช่องยาวขึ้นก็เว้นห่างขึ้นตาม สัดส่วนช่องไฟต่อความยาวช่องจึงคงที่ */
+  return { per, n, gap: narrowest / n < 40 ? 7 : 10 };
 }
 
 /* ป้ายบอกสเกลใต้กลุ่มหลอด — ต้องเห็นได้โดยไม่ต้องเอาเมาส์ไปชี้
@@ -129,8 +131,11 @@ function scaleNote(group, plan, max, unitName) {
     anchor.after(group.note);
   }
   const u = unitName ? ' ' + unitName : '';
+  /* บอกด้วยว่าช่องว่างระหว่างช่องไม่ได้แทนค่าใด เป็นเส้นแบ่งเฉย ๆ
+     กฎเดียวกับช่องว่างระหว่างชิ้นของวงกลมสัดส่วน (ดู UI.md) */
   group.note.textContent = plan
-    ? `หลอดเต็ม = ${fmtNum(plan.n * plan.per)}${u} · 1 ช่อง = ${fmtNum(plan.per)}${u}`
+    ? `หลอดเต็ม = ${fmtNum(plan.n * plan.per)}${u} · 1 ช่อง = ${fmtNum(plan.per)}${u} · `
+      + `ช่องว่างระหว่างช่องมีไว้แบ่งช่อง ไม่ได้แทนค่าใด`
     : `หลอดเต็ม = ${fmtNum(max)}${u}`;
 }
 

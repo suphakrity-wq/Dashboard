@@ -13,7 +13,7 @@
  * แก้ไฟล์นี้เมื่อ: อยากเพิ่ม/ลดความเข้มของกฎ หรือเจอคำตอบแปลก ๆ แบบใหม่
  */
 
-import { classify } from './textAnalysis.js?v=147';
+import { classify } from './textAnalysis.js?v=150';
 
 const clean = s => String(s ?? '').replace(/\s+/g, ' ').trim();
 

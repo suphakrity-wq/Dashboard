@@ -1,9 +1,9 @@
 /* [core] ตรรกะการวิเคราะห์ — คืนค่าเป็น "ข้อมูล" ล้วน ไม่มี HTML
    ฝั่งหน้าตาเอาผลลัพธ์ไปวาดเอง จะเปลี่ยนหน้าตาโดยไม่กระทบตรรกะได้ */
 
-import { avgOf, groupBy, num } from './compute.js?v=147';
-import { pct } from './format.js?v=147';
-import { pairedTTest, wilcoxonSignedRank, effectSizeLabel, requiredN } from './stats.js?v=147';
+import { avgOf, groupBy, num } from './compute.js?v=150';
+import { pct } from './format.js?v=150';
+import { pairedTTest, wilcoxonSignedRank, effectSizeLabel, requiredN } from './stats.js?v=150';
 
 /**
  * ตัดสินคำถามวิจัยด้วยการทดสอบทางสถิติ ไม่ใช่เกณฑ์ที่ตั้งเอง
@@ -67,7 +67,7 @@ export function verdict(rows, analysis = {}) {
     stats,
     enough: n >= minSample, minSample,
     warn: n < minSample
-      ? `ผู้ตอบ ${n} คน ยังไม่ถึงเกณฑ์ ${minSample} คนที่ตั้งไว้ — อ่านผลประกอบช่วงความเชื่อมั่นเสมอ`
+      ? `ผู้ตอบ ${n} คน ยังไม่ถึงเกณฑ์ ${minSample} คนที่กำหนดไว้ จึงควรอ่านผลควบคู่กับช่วงความเชื่อมั่นเสมอ`
       : null
   };
 }

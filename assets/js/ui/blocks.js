@@ -8,18 +8,18 @@
  * ห้าม: ใส่สูตรคำนวณในไฟล์นี้ — ให้เรียกจาก core/ แทน
  */
 
-import { $, el, growBar, segmentBars } from './dom.js?v=147';
-import { fmt, round1, pct } from '../core/format.js?v=147';
-import { splitValues, isNumericColumn } from '../core/compute.js?v=147';
-import { store } from '../core/store.js?v=147';
-import { verdict as calcVerdict, causes as calcCauses, pulls as calcPulls } from '../core/insight.js?v=147';
-import { recommend } from '../core/recommend.js?v=147';
-import { analyzeText } from '../core/textAnalysis.js?v=147';
-import { auditRows } from '../core/quality.js?v=147';
-import { wilsonInterval } from '../core/stats.js?v=147';
-import { SOURCES, CONTEXT_FACTS, compareBenchmarks } from '../core/benchmarks.js?v=147';
-import { aggregate, groupBy as groupRows } from '../core/compute.js?v=147';
-import { CHARTS } from './charts.js?v=147';
+import { $, el, growBar, segmentBars } from './dom.js?v=150';
+import { fmt, round1, pct } from '../core/format.js?v=150';
+import { splitValues, isNumericColumn } from '../core/compute.js?v=150';
+import { store } from '../core/store.js?v=150';
+import { verdict as calcVerdict, causes as calcCauses, pulls as calcPulls } from '../core/insight.js?v=150';
+import { recommend } from '../core/recommend.js?v=150';
+import { analyzeText } from '../core/textAnalysis.js?v=150';
+import { auditRows } from '../core/quality.js?v=150';
+import { wilsonInterval } from '../core/stats.js?v=150';
+import { SOURCES, CONTEXT_FACTS, compareBenchmarks } from '../core/benchmarks.js?v=150';
+import { aggregate, groupBy as groupRows } from '../core/compute.js?v=150';
+import { CHARTS } from './charts.js?v=150';
 
 let rerender = () => {};
 export const onRerender = fn => { rerender = fn; };
@@ -206,7 +206,7 @@ function table(host, b, rows, cfg = {}) {
   const audit = auditRows(store.rows, cfg.analysis || {});
   const problemsOf = r => audit.get(r) || null;
   /* ลำดับถาวรตามที่ส่งฟอร์มเข้ามา — ไม่เปลี่ยนตามการกรองหรือการแบ่งหน้า
-     ใช้อ้างอิงได้ว่า "ฟอร์มลำดับที่เท่าไรตอบผิดพลาด" */
+     ใช้อ้างอิงว่าชุดคำตอบลำดับใดใช้ไม่ได้ */
   const orderOf = r => store.rows.indexOf(r) + 1;
 
   const cols = (b.columns?.length ? b.columns : store.columns);
@@ -527,19 +527,19 @@ function conclusion(host, b, rows, cfg) {
   const pullTheme = tx.themes.find(t => t.kind === 'pull');
 
   const q1 = el('div', 'sum-sec');
-  q1.append(el('h3', null, '1 · สาเหตุหลัก'));
+  q1.append(el('h3', null, '1 · สาเหตุหลักที่พบ'));
   if (!mainCause) {
-    q1.append(el('p', null, 'ยังมีคำตอบไม่พอจะสรุป'));
+    q1.append(el('p', null, 'จำนวนคำตอบยังไม่เพียงพอต่อการสรุป'));
   } else {
     const p = el('p', 'sum-lead');
-    let html = `คนไม่ดูข่าวโลกเพราะ <b>“${mainCause.label}”</b> มากที่สุด — ` +
-               `${mainCause.share}% ของผู้ตอบ`;
+    let html = `เหตุผลที่ผู้ตอบเลือกมากที่สุดในการไม่ดูข่าวโลกคือ <b>“${mainCause.label}”</b> ` +
+               `คิดเป็น ${mainCause.share}% ของผู้ตอบ`;
     // จะบอกว่า "ตรงกัน" ได้ ต่อเมื่อคำตอบปลายเปิดพูดถึงอุปสรรคเหมือนกัน
     if (barrierTheme) {
-      html += ` คำตอบปลายเปิดบอกตรงกันว่า <b>“${barrierTheme.label}”</b> (${barrierTheme.share}%)`;
+      html += ` คำตอบปลายเปิดให้ผลสอดคล้องกัน โดยระบุถึง <b>“${barrierTheme.label}”</b> (${barrierTheme.share}%)`;
     } else if (pullTheme) {
-      html += ` ส่วนคำตอบปลายเปิดไม่ได้พูดถึงอุปสรรค แต่บอกว่าสิ่งที่ทำให้หยุดดูคือ ` +
-              `<b>“${pullTheme.label}”</b> (${pullTheme.share}%) — คือสิ่งที่ข่าวโลกต้องมี`;
+      html += ` ส่วนคำตอบปลายเปิดไม่ได้ระบุถึงอุปสรรค แต่ระบุว่าปัจจัยที่ทำให้หยุดดูคือ ` +
+              `<b>“${pullTheme.label}”</b> (${pullTheme.share}%) ซึ่งเป็นคุณสมบัติที่ข่าวโลกยังขาด`;
     }
     p.innerHTML = html;
     q1.append(p);
@@ -548,13 +548,13 @@ function conclusion(host, b, rows, cfg) {
 
   /* ---- 2. ทำไมเป็นแบบนี้ ---- */
   const q2 = el('div', 'sum-sec');
-  q2.append(el('h3', null, '2 · ทำไมเป็นแบบนี้'));
+  q2.append(el('h3', null, '2 · หลักฐานประกอบข้อสรุป'));
   const ev = el('ul', 'evidence');
   ev.append(el('li', null,
     `ผู้ตอบ ${fmt(v.n)} คน รู้จักข่าวโลก ${fmt(round1(v.world))} ข่าว ` +
     `ข่าวดราม่า ${fmt(round1(v.drama))} ข่าว → ${v.answer}`));
   if (pl[0]) ev.append(el('li', null,
-    `ข่าวดราม่าชนะเพราะ “${pl[0].label}” (${pl[0].share}%) — สิ่งที่ข่าวโลกมักไม่มี`));
+    `ข่าวดราม่าได้เปรียบจาก “${pl[0].label}” (${pl[0].share}%) ซึ่งเป็นคุณสมบัติที่ข่าวโลกมักไม่มี`));
   CONTEXT_FACTS.slice(0, b.factCount || 3).forEach(f => {
     const li = el('li');
     li.append(document.createTextNode(f.text + ' '));
@@ -567,12 +567,12 @@ function conclusion(host, b, rows, cfg) {
   /* ---- 3. ทำอะไรก่อน ----
      เรียงตามจำนวนคนที่ติดปัญหานั้น ทุกข้อบอกครบว่า ทำอะไร / แก้ที่ไหน / งานวิจัยพบอะไร */
   const q3 = el('div', 'sum-sec');
-  q3.append(el('h3', null, '3 · ทำอะไรก่อน'));
-  q3.append(el('p', 'sec-note', 'เรียงตามจำนวนคนที่ติดปัญหานั้น — ข้อบนสุดคุ้มที่สุด'));
+  q3.append(el('h3', null, '3 · ข้อเสนอแนะตามลำดับความสำคัญ'));
+  q3.append(el('p', 'sec-note', 'เรียงตามจำนวนผู้ตอบที่ระบุปัญหานั้น ข้อแรกจึงครอบคลุมผู้ตอบมากที่สุด'));
 
   const steps = el('ol', 'steps');
   if (!rec.actions.length) {
-    steps.append(el('li', null, 'ยังมีข้อมูลไม่พอจะเสนอแนวทาง'));
+    steps.append(el('li', null, 'ข้อมูลยังไม่เพียงพอต่อการเสนอแนวทาง'));
   }
   rec.actions.forEach(a => {
     const li = el('li');
@@ -628,11 +628,11 @@ function pageDigest(host, b, rows, cfg) {
     { page: 'gap', icon: 'balance',
       big: v.stats ? (v.stats.meanDiff > 0 ? '+' : '') + round1(v.stats.meanDiff) : '–',
       unit: 'ข่าว/คน',
-      line: `ข่าวดราม่านำข่าวโลกเท่านี้ต่อคน — ${v.answer}` },
+      line: `ผลต่างของจำนวนข่าวที่รู้จักต่อผู้ตอบหนึ่งคน · ${v.answer}` },
 
     { page: 'reasons', icon: 'psychology',
       big: cz ? cz.share : '–', unit: '%',
-      line: cz ? `ไม่ดูข่าวโลกเพราะ “${cz.label}” มากที่สุด` : 'ยังไม่มีคำตอบ' },
+      line: cz ? `เหตุผลที่ถูกเลือกมากที่สุดคือ “${cz.label}”` : 'ยังไม่มีคำตอบ' },
 
     { page: 'behavior', icon: 'touch_app',
       big: accident ? accident.share : '–', unit: '%',
@@ -642,7 +642,7 @@ function pageDigest(host, b, rows, cfg) {
 
     { page: 'conclusion', icon: 'lightbulb',
       big: rec ? rec.share : '–', unit: '%',
-      line: rec ? `ทำก่อน: ${rec.do}` : 'ยังมีข้อมูลไม่พอจะเสนอแนวทาง' },
+      line: rec ? `ทำก่อน: ${rec.do}` : 'ข้อมูลยังไม่เพียงพอต่อการเสนอแนวทาง' },
 
     { page: 'data', icon: 'database',
       big: rows.length, unit: 'แถว',
@@ -716,8 +716,9 @@ function slides(host, b, rows, cfg) {
                          showPercent: true, valueUnit: unit || 'คน',
                          color: 'var(--purple)' }, rows);
 
-  const figDonut = col => host2 =>
-    CHARTS.donut(host2, { x: col, agg: 'count', sort: 'value', colors: undefined }, rows);
+  /* ใช้วงกลมสัดส่วนชุดเดียวกับหน้า "ทางเลือกของผู้ตอบ" ผู้ฟังจึงเห็นภาพเดิมทั้งบนสไลด์และในแดชบอร์ด */
+  const figPie = col => host2 =>
+    CHARTS.pie(host2, { x: col, agg: 'count', sort: 'value' }, rows);
 
   // เทียบสองฝั่งแบบกระชับ: ตัวเลขใหญ่ + หลอดแบ่งช่องชุดเดียวกับทั้งเว็บ
   const figVersus = host2 => {
@@ -837,15 +838,15 @@ function slides(host, b, rows, cfg) {
       build: s => {
         s.append(el('p', 'slide-quote', '“คนไทยชอบเสพสื่อดราม่า แต่ไม่เสพข่าวโลก จริงหรือไม่?”'));
         s.append(list([
-          'เป็นความเชื่อที่ได้ยินกันบ่อย แต่ยังไม่เคยมีตัวเลขยืนยัน',
-          'ถ้าจริง — ต้องรู้ต่อว่าติดตรงไหน จะได้แก้ถูกจุด',
-          'ถ้าไม่จริง — ก็ไม่ควรตัดสินใจบนความเชื่อนั้นอีก'
+          'เป็นข้อสังเกตที่พบได้ทั่วไป แต่ยังไม่มีข้อมูลในบริบทนี้ยืนยัน',
+          'หากเป็นจริง ต้องระบุให้ได้ว่าอุปสรรคอยู่ที่จุดใด เพื่อแก้ให้ตรงจุด',
+          'หากไม่เป็นจริง ก็ไม่ควรใช้ข้อสังเกตนี้เป็นฐานในการตัดสินใจต่อไป'
         ]));
       } },
 
-    { tag: 'สิ่งที่คาดไว้', title: 'สมมติฐานก่อนเก็บข้อมูล',
+    { tag: 'สมมติฐาน', title: 'สมมติฐานก่อนเก็บข้อมูล',
       build: s => {
-        s.append(el('p', 'slide-lead', 'ตั้งไว้สามข้อ เพื่อให้ตรวจสอบได้ทีละข้อว่าถูกหรือผิด'));
+        s.append(el('p', 'slide-lead', 'กำหนดไว้สามข้อ เพื่อให้ตรวจสอบได้เป็นรายข้อว่าข้อมูลสนับสนุนหรือไม่'));
         s.append(list([
           '<b>1 · ดราม่าเป็นเรื่องใกล้ตัว</b> ใครก็เข้าถึงได้ และรู้สึกว่าอาจเกิดกับตัวเอง คนจึงจำได้มากกว่า',
           '<b>2 · แพลตฟอร์มดันเรื่องที่เรียกความสนใจ</b> คนจึงเจอดราม่าโดยไม่ได้ตั้งใจหา',
@@ -890,23 +891,23 @@ function slides(host, b, rows, cfg) {
         ]));
       } },
 
-    { tag: 'ผลที่ได้', title: 'ทำไมข่าวโลกถึงถูกข้าม',
+    { tag: 'ผลที่ได้', title: 'เหตุผลที่ข่าวโลกไม่ถูกเลือกดู',
       fig: figRank(A.whyNotWorldCol, 4),
       build: s => {
-        s.append(el('p', 'slide-lead', 'เหตุผลที่ผู้ตอบเลือกเอง เรียงจากที่ถูกเลือกมากที่สุด'));
-        s.append(list(cz.map((c, i) => `<b>${i + 1}. ${c.label}</b> — ${c.share}% ของผู้ตอบ`)));
-        if (cz[0]) s.append(el('p', 'slide-sub', 'ข้อแรกคือจุดที่คุ้มที่สุดที่จะแก้ก่อน'));
+        s.append(el('p', 'slide-lead', 'เหตุผลที่ผู้ตอบเลือกไว้ในแบบสอบถาม เรียงจากข้อที่มีผู้เลือกมากที่สุด'));
+        s.append(list(cz.map((c, i) => `<b>${i + 1}. ${c.label}</b> · ${c.share}% ของผู้ตอบ`)));
+        if (cz[0]) s.append(el('p', 'slide-sub', 'ข้อแรกครอบคลุมผู้ตอบมากที่สุด จึงเป็นข้อที่ควรแก้ก่อน'));
       } },
 
-    { tag: 'ผลที่ได้', title: 'ข่าวดราม่าได้เปรียบตรงไหน',
+    { tag: 'ผลที่ได้', title: 'ข้อได้เปรียบของข่าวดราม่า',
       fig: figRank(A.whyDramaCol, 4),
       build: s => {
-        s.append(el('p', 'slide-lead', 'องค์ประกอบที่ทำให้คนหยุดดู ซึ่งข่าวโลกมักไม่มี'));
-        s.append(list(pl.map(p => `<b>${p.label}</b> — ${p.share}% ของผู้ตอบ`)));
+        s.append(el('p', 'slide-lead', 'องค์ประกอบที่ทำให้ผู้ตอบหยุดดู ซึ่งข่าวโลกในชุดข้อมูลนี้มักไม่มี'));
+        s.append(list(pl.map(p => `<b>${p.label}</b> · ${p.share}% ของผู้ตอบ`)));
       } },
 
-    { tag: 'ผลที่ได้', title: 'คนเจอข่าวได้อย่างไร',
-      fig: figDonut(A.howFoundCol),
+    { tag: 'ผลที่ได้', title: 'วิธีที่ผู้ตอบเข้าถึงข่าว',
+      fig: figPie(A.howFoundCol),
       build: s => {
         s.append(el('p', 'slide-lead', 'จุดนี้ชี้ว่าควรไปวางข่าวไว้ตรงไหน'));
         s.append(list([

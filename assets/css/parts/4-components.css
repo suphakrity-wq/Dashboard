@@ -581,55 +581,6 @@ td.is-fixed{color:var(--lime-ink);background:var(--lime-soft)}
   .grp-row{grid-template-columns:78px minmax(0,1fr) 62px;gap:8px}
 }
 
-/* ---- คอลัมน์สถานะตัวกรองในตารางข้อมูลดิบ ---- */
-.th-flag{white-space:nowrap}
-.td-flag{white-space:nowrap;display:flex;gap:5px;align-items:center}
-.flag-chip{display:inline-block;padding:2px 9px;border-radius:var(--r-pill);
-  font-size:var(--t-xs);font-weight:700;line-height:1.5;white-space:nowrap}
-.flag-chip.is-ok{background:var(--hair);color:var(--muted)}
-.flag-chip.is-drop{background:var(--red-soft);color:var(--red)}
-.flag-chip.is-fix{background:var(--lime-soft);color:var(--lime-ink)}
-/* ช่องที่ถูกตัด: ขีดฆ่าให้เห็นว่ามีข้อมูลอยู่แต่ไม่ถูกนับ */
-td.is-dropped{color:var(--red);text-decoration:line-through;text-decoration-thickness:1px}
-td.is-fixed{color:var(--lime-ink);background:var(--lime-soft)}
-
-/* ---- คอลัมน์สถานะตัวกรองในตารางข้อมูลดิบ ---- */
-.th-flag{white-space:nowrap}
-.td-flag{white-space:nowrap;display:flex;gap:5px;align-items:center}
-.flag-chip{display:inline-block;padding:2px 9px;border-radius:var(--r-pill);
-  font-size:var(--t-xs);font-weight:700;line-height:1.5;white-space:nowrap}
-.flag-chip.is-ok{background:var(--hair);color:var(--muted)}
-.flag-chip.is-drop{background:var(--red-soft);color:var(--red)}
-.flag-chip.is-fix{background:var(--lime-soft);color:var(--lime-ink)}
-/* ช่องที่ถูกตัด: ขีดฆ่าให้เห็นว่ามีข้อมูลอยู่แต่ไม่ถูกนับ */
-td.is-dropped{color:var(--red);text-decoration:line-through;text-decoration-thickness:1px}
-td.is-fixed{color:var(--lime-ink);background:var(--lime-soft)}
-
-/* ---- คอลัมน์สถานะตัวกรองในตารางข้อมูลดิบ ---- */
-.th-flag{white-space:nowrap}
-.td-flag{white-space:nowrap;display:flex;gap:5px;align-items:center}
-.flag-chip{display:inline-block;padding:2px 9px;border-radius:var(--r-pill);
-  font-size:var(--t-xs);font-weight:700;line-height:1.5;white-space:nowrap}
-.flag-chip.is-ok{background:var(--hair);color:var(--muted)}
-.flag-chip.is-drop{background:var(--red-soft);color:var(--red)}
-.flag-chip.is-fix{background:var(--lime-soft);color:var(--lime-ink)}
-/* ช่องที่ถูกตัด: ขีดฆ่าให้เห็นว่ามีข้อมูลอยู่แต่ไม่ถูกนับ */
-td.is-dropped{color:var(--red);text-decoration:line-through;text-decoration-thickness:1px}
-td.is-fixed{color:var(--lime-ink);background:var(--lime-soft)}
-
-/* ---- คอลัมน์สถานะตัวกรองในตารางข้อมูลดิบ ---- */
-.th-flag{white-space:nowrap}
-.td-flag{white-space:nowrap;display:flex;gap:5px;align-items:center}
-.flag-chip{display:inline-block;padding:2px 9px;border-radius:var(--r-pill);
-  font-size:var(--t-xs);font-weight:700;line-height:1.5;white-space:nowrap}
-.flag-chip.is-ok{background:var(--hair);color:var(--muted)}
-.flag-chip.is-drop{background:var(--red-soft);color:var(--red)}
-.flag-chip.is-fix{background:var(--lime-soft);color:var(--lime-ink)}
-/* ช่องที่ถูกตัด: ขีดฆ่าให้เห็นว่ามีข้อมูลอยู่แต่ไม่ถูกนับ */
-td.is-dropped{color:var(--red);text-decoration:line-through;text-decoration-thickness:1px}
-td.is-fixed{color:var(--lime-ink);background:var(--lime-soft)}
-
-
 /* อ่านกราฟง่ายขึ้น: บอกหน่วยและสัดส่วนไว้ในกราฟเลย ไม่ต้องเดาว่าตัวเลขคืออะไร */
 .bubble-share{display:block;margin-top:2px;font-size:var(--t-xs);color:var(--muted);
   font-variant-numeric:tabular-nums}
@@ -637,7 +588,7 @@ td.is-fixed{color:var(--lime-ink);background:var(--lime-soft)}
 
 /* บรรทัด "วิธีอ่าน" ให้เห็นชัดว่าเป็นคำแนะนำการอ่าน ไม่ใช่ข้อมูล */
 .hint{display:flex;gap:8px;align-items:flex-start}
-.hint::before{content:"อ่านยังไง";flex:0 0 auto;font-weight:800;color:var(--purple);
+.hint::before{content:"วิธีอ่าน";flex:0 0 auto;font-weight:800;color:var(--purple);
   background:var(--purple-soft);border-radius:var(--r-pill);padding:1px 9px;line-height:1.5}
 
 /* ฐานของกราฟ — บอกว่ากราฟใบนี้คำนวณจากคนกี่คน อ่านการ์ดเดียวจบ */
@@ -681,3 +632,29 @@ tr.is-excluded .td-no{color:var(--red)}
 .bad-list{margin:0 0 4px;padding:10px 14px;border-radius:var(--r-md);
   background:var(--red-soft);color:var(--red);font-size:var(--t-xs);
   font-weight:600;line-height:1.5;word-break:break-word}
+
+/* ---------- วงกลมสัดส่วน (pie) ----------
+   วางวงคู่กับคำอธิบายเสมอ ผู้อ่านจึงไม่ต้องเทียบสีจากความจำ
+   ตัวเลข % อยู่ในกล่องพื้นขาวมุมมน ไม่ใช้เส้นขอบตัวอักษร
+   เพราะเส้นขอบทำให้เส้นของตัวเลขบางลงและอ่านยากเมื่อทับสีอ่อน */
+.pie-wrap{display:flex;align-items:center;gap:24px;flex-wrap:wrap}
+.pie-chart{width:238px;height:238px;flex-shrink:0}
+.pie{width:100%;height:100%;display:block;overflow:visible}
+.pie-tagbox{fill:#fff;stroke:var(--line);stroke-width:.4}
+.pie-pct{fill:var(--ink);font-size:6.4px;font-weight:800;text-anchor:middle;
+  dominant-baseline:central;font-variant-numeric:tabular-nums}
+.pie-legend{flex:1 1 210px;min-width:0;display:flex;flex-direction:column;gap:9px}
+.pl-row{display:grid;grid-template-columns:10px minmax(0,1fr) auto auto;
+  gap:9px;align-items:center;font-size:var(--t-sm)}
+.pl-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--ink-2)}
+.pl-row b{font-weight:800;font-variant-numeric:tabular-nums}
+.pl-n{font-size:var(--t-xs);color:var(--muted);white-space:nowrap;
+  font-variant-numeric:tabular-nums}
+
+@media (max-width:640px){
+  .pie-wrap{gap:16px}
+  .pie-chart{width:196px;height:196px}
+}
+@media (max-width:400px){
+  .pie-chart{width:168px;height:168px}
+}

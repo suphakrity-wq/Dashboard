@@ -1,15 +1,19 @@
-/* รวมทุกหน้าไว้ที่เดียว — ลำดับในอาร์เรย์คือลำดับในเมนูด้านซ้าย
-   เพิ่มหน้าใหม่: สร้างไฟล์ในโฟลเดอร์นี้ แล้ว import มาต่อท้าย */
+/* รวมทุกหน้าไว้ที่เดียว ลำดับในอาร์เรย์คือลำดับของเมนูด้านซ้าย
+   ลำดับนี้เดินตามเส้นเรื่องของรายงาน:
+     ภาพรวมการสำรวจ -> ผลการสำรวจ -> เหตุผลของคำตอบ
+     -> ทางเลือกของผู้ตอบ -> สรุปผลและข้อเสนอแนะ
+   สองหน้าท้ายเป็นส่วนประกอบ: สไลด์สำหรับนำเสนอ และข้อมูลดิบสำหรับตรวจสอบย้อนกลับ
+   เพิ่มหน้าใหม่: สร้างไฟล์ในโฟลเดอร์นี้ แล้ว import เข้ามาต่อในอาร์เรย์ */
 
-import summary  from './summary.js?v=147';
-import present  from './present.js?v=147';
-import gap      from './gap.js?v=147';
-import reasons  from './reasons.js?v=147';
-import behavior from './behavior.js?v=147';
-import conclusion from './conclusion.js?v=147';
-import data     from './data.js?v=147';
+import summary  from './summary.js?v=150';
+import present  from './present.js?v=150';
+import gap      from './gap.js?v=150';
+import reasons  from './reasons.js?v=150';
+import behavior from './behavior.js?v=150';
+import conclusion from './conclusion.js?v=150';
+import data     from './data.js?v=150';
 
-export const PAGES = [summary, present, gap, reasons, behavior, conclusion, data];
+export const PAGES = [summary, gap, reasons, behavior, conclusion, present, data];
 
-export { COMPUTED, TABS, FILTERS } from './columns.js?v=147';
-export { ANALYSIS } from './analysis.js?v=147';
+export { COMPUTED, TABS, FILTERS } from './columns.js?v=150';
+export { ANALYSIS } from './analysis.js?v=150';

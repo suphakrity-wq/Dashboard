@@ -41,7 +41,9 @@ export const C = {
   faint:  "#cdc2ff",
   scale:  ["#6d4dfb", "#2a2a30", "#b9a9ff", "#c3c3cb"],  // ใช้กับ waffle
   // ไล่เฉดจากเข้มไปอ่อนตามลำดับค่า (ค่ามากสุด = เข้มสุด) ใช้กับ donut / stacked
-  ramp:   ["var(--sc-5)", "var(--sc-4)", "var(--sc-3)", "var(--sc-2)", "var(--sc-1)"]
+  ramp:   ["var(--sc-5)", "var(--sc-4)", "var(--sc-3)", "var(--sc-2)", "var(--sc-1)"],
+  // ใช้กับวงกลมสัดส่วน (pie) เท่านั้น ดูเหตุผลที่ --pie-1..5 ใน 1-tokens.css
+  pie:    ["var(--pie-1)", "var(--pie-2)", "var(--pie-3)", "var(--pie-4)", "var(--pie-5)"]
 };
 
 /** แท็บและตัวกรองด้านบน ใช้ร่วมกันทุกหน้า */

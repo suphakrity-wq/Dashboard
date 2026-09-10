@@ -1,11 +1,11 @@
 /* [ui] เปลือกของแอป: เมนูซ้าย, แถบเครื่องมือ, แถบสรุปด้านบน, สถานะการโหลด */
 
-import { $, el, countUp } from './dom.js?v=147';
-import { aggregate } from '../core/compute.js?v=147';
-import { wilsonInterval } from '../core/stats.js?v=147';
-import { store } from '../core/store.js?v=147';
-import { sparkline } from './charts.js?v=147';
-import { auditSummary } from '../core/quality.js?v=147';
+import { $, el, countUp } from './dom.js?v=150';
+import { aggregate } from '../core/compute.js?v=150';
+import { wilsonInterval } from '../core/stats.js?v=150';
+import { store } from '../core/store.js?v=150';
+import { sparkline } from './charts.js?v=150';
+import { auditSummary } from '../core/quality.js?v=150';
 
 /* ---- ปุ่มเปิด/ปิดเมนูบนจอโทรศัพท์ ----
    จอคอมกับแท็บเล็ตเมนูโชว์อยู่แล้ว ปุ่มนี้ถูกซ่อนด้วย CSS
@@ -200,7 +200,7 @@ export function renderOddToggle(cfg, onChange) {
                   `<span class="odd-txt">คัดคำตอบเสีย</span>` +
                   `<span class="odd-n">${info.excluded}</span>`;
   btn.title = (on ? `กำลังคัดออก ${info.excluded} คน` : `ยังนับรวม ${info.excluded} คนที่คำตอบใช้ไม่ได้`) +
-    ' — กดเพื่อสลับ\n' + info.reasons.map(r => `\u00b7 ${r.label} (${r.count})`).join('\n');
+    ' · เลือกเพื่อสลับสถานะ\n' + info.reasons.map(r => `\u00b7 ${r.label} (${r.count})`).join('\n');
 
   btn.onclick = () => {
     store.hideOdd = !store.hideOdd;
@@ -222,8 +222,8 @@ export function renderStatus() {
   const parts = [];
 
   if (store.status === 'loading' && !store.rows.length) parts.push('กำลังโหลดข้อมูล…');
-  if (store.status === 'empty') parts.push('เชื่อมต่อชีตสำเร็จ แต่ยังไม่มีใครตอบแบบสอบถาม — ตัวเลขทั้งหมดจะขึ้นเองเมื่อมีคำตอบเข้ามา');
-  if (store.status === 'error') parts.push('โหลดข้อมูลไม่สำเร็จ — ตรวจสอบว่าชีตเปิดสิทธิ์ให้เข้าถึงแล้ว');
+  if (store.status === 'empty') parts.push('เชื่อมต่อชีตสำเร็จ แต่ยังไม่มีคำตอบในชีต ตัวเลขทั้งหมดจะแสดงเมื่อมีคำตอบเข้ามา');
+  if (store.status === 'error') parts.push('โหลดข้อมูลไม่สำเร็จ กรุณาตรวจสอบว่าชีตเปิดสิทธิ์การเข้าถึงแล้ว');
   store.errors.forEach(e => parts.push('⚠︎ ' + e));
   if (store.fromCache && store.status === 'loading') parts.push('กำลังอัปเดตข้อมูลใหม่…');
 
