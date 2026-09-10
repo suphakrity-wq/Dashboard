@@ -8,18 +8,18 @@
  * ห้าม: ใส่สูตรคำนวณในไฟล์นี้ — ให้เรียกจาก core/ แทน
  */
 
-import { $, el, growBar, segmentBars } from './dom.js?v=150';
-import { fmt, round1, pct } from '../core/format.js?v=150';
-import { splitValues, isNumericColumn } from '../core/compute.js?v=150';
-import { store } from '../core/store.js?v=150';
-import { verdict as calcVerdict, causes as calcCauses, pulls as calcPulls } from '../core/insight.js?v=150';
-import { recommend } from '../core/recommend.js?v=150';
-import { analyzeText } from '../core/textAnalysis.js?v=150';
-import { auditRows } from '../core/quality.js?v=150';
-import { wilsonInterval } from '../core/stats.js?v=150';
-import { SOURCES, CONTEXT_FACTS, compareBenchmarks } from '../core/benchmarks.js?v=150';
-import { aggregate, groupBy as groupRows } from '../core/compute.js?v=150';
-import { CHARTS } from './charts.js?v=150';
+import { $, el, growBar, segmentBars } from './dom.js?v=155';
+import { fmt, round1, pct } from '../core/format.js?v=155';
+import { splitValues, isNumericColumn } from '../core/compute.js?v=155';
+import { store } from '../core/store.js?v=155';
+import { verdict as calcVerdict, causes as calcCauses, pulls as calcPulls } from '../core/insight.js?v=155';
+import { recommend } from '../core/recommend.js?v=155';
+import { analyzeText } from '../core/textAnalysis.js?v=155';
+import { auditRows } from '../core/quality.js?v=155';
+import { wilsonInterval } from '../core/stats.js?v=155';
+import { SOURCES, CONTEXT_FACTS, compareBenchmarks } from '../core/benchmarks.js?v=155';
+import { aggregate, groupBy as groupRows } from '../core/compute.js?v=155';
+import { CHARTS } from './charts.js?v=155';
 
 let rerender = () => {};
 export const onRerender = fn => { rerender = fn; };
@@ -60,8 +60,11 @@ function charts(host, b, rows) {
     draw(body, cf, rows);
     if (cf.hint) body.append(el('p', 'hint', cf.hint));
     /* ทุกกราฟต้องบอกฐานของตัวเองเสมอ อ่านการ์ดใบเดียวก็รู้ว่ามาจากคนกี่คน
+       แต่ถ้ากราฟนั้นมีบรรทัดสเกลที่บอกจำนวนผู้ตอบอยู่แล้ว ก็ไม่ต้องขึ้นซ้ำอีกบรรทัด
        (ปิดเป็นรายกราฟได้ด้วย base:false เช่นกราฟที่นับ 'คำตอบ' ไม่ใช่ 'คน') */
-    if (cf.base !== false)
+    const saidBase = [...body.querySelectorAll('.scale-note')]
+      .some(n => n.textContent.includes('ผู้ตอบ'));
+    if (cf.base !== false && !saidBase)
       body.append(el('p', 'chart-base', `ฐานข้อมูล: ผู้ตอบ ${fmt(rows.length)} คน`));
   });
   sec.append(grid);

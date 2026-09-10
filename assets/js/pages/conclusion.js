@@ -1,7 +1,7 @@
 /* หน้า 5 สรุปผลและข้อเสนอแนะ เป็นบทสรุปปิดท้ายของรายงาน
    ยืนบนหลักฐานสามชั้น: คำตอบแบบเลือกตอบ คำตอบปลายเปิด และงานวิจัยภายนอก */
 
-import { Q, COL } from './columns.js?v=150';
+import { Q, COL } from './columns.js?v=155';
 
 export default {
   id: "conclusion",

@@ -131,11 +131,8 @@ function scaleNote(group, plan, max, unitName) {
     anchor.after(group.note);
   }
   const u = unitName ? ' ' + unitName : '';
-  /* บอกด้วยว่าช่องว่างระหว่างช่องไม่ได้แทนค่าใด เป็นเส้นแบ่งเฉย ๆ
-     กฎเดียวกับช่องว่างระหว่างชิ้นของวงกลมสัดส่วน (ดู UI.md) */
   group.note.textContent = plan
-    ? `หลอดเต็ม = ${fmtNum(plan.n * plan.per)}${u} · 1 ช่อง = ${fmtNum(plan.per)}${u} · `
-      + `ช่องว่างระหว่างช่องมีไว้แบ่งช่อง ไม่ได้แทนค่าใด`
+    ? `หลอดเต็ม = ${fmtNum(plan.n * plan.per)}${u} · 1 ช่อง = ${fmtNum(plan.per)}${u}`
     : `หลอดเต็ม = ${fmtNum(max)}${u}`;
 }
 

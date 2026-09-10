@@ -39,7 +39,8 @@
 .stat-label{font-size:var(--t-xs);font-weight:500;color:var(--muted);line-height:1.3}
 .stat-value{font-size:var(--t-lg);font-weight:900;line-height:1.2;font-variant-numeric:tabular-nums;color:var(--ink)}
 .stat-value.is-text{font-size:var(--t-sm);font-weight:700}
-.stat-value .unit{font-size:var(--t-xs);font-weight:500;color:var(--muted);margin-left:4px}
+/* หน่วยอยู่ในก้อนตัวเลขเดียวกัน จึงใช้น้ำหนักเดียวกัน แยกลำดับด้วยขนาดกับสี */
+.stat-value .unit{font-size:var(--t-xs);font-weight:inherit;color:var(--muted);margin-left:4px}
 /* รายละเอียดรอง (จำนวนคน/ช่วงเชื่อมั่น) ซ่อนไว้ใน tooltip ไม่ให้กินความสูง */
 .stat-sub{display:none}
 .stat-spark{height:40px;margin-top:8px}
@@ -118,7 +119,8 @@
 .rank-row:hover .rank-label{-webkit-line-clamp:6;max-height:8.7em}
 .rank-track{height:8px;max-width:var(--bar-max)}
 .rank-val{display:flex;align-items:baseline;justify-content:flex-end;gap:10px}
-.rank-val b{font-size:var(--t-md);font-weight:700;font-variant-numeric:tabular-nums}
+.rank-val{font-weight:700}
+.rank-val b{font-size:var(--t-md);font-weight:inherit;font-variant-numeric:tabular-nums}
 .rank-val span{font-size:var(--t-xs);color:var(--muted);font-variant-numeric:tabular-nums;min-width:3.2em;text-align:right}
 /* ---- อันดับ 1: ทำเป็นแถบเด่นเต็มใบ ----
    ต่างจากแถวอื่นทั้ง พื้นหลัง / เส้นขอบซ้าย / ขนาดตัวอักษร / ความหนาหลอด / ป้ายกำกับ */
@@ -142,7 +144,7 @@
 .vs-label{display:flex;align-items:center;gap:9px;font-size:var(--t-sm);font-weight:600;color:var(--ink-2)}
 .vs-num{font-size:var(--t-3xl);font-weight:900;line-height:1.05;letter-spacing:-.03em;
   font-variant-numeric:tabular-nums;margin:6px 0 14px}
-.vs-num small{font-size:var(--t-xs);font-weight:500;color:var(--muted);margin-left:8px;letter-spacing:0}
+.vs-num small{font-size:var(--t-xs);font-weight:inherit;color:var(--muted);margin-left:8px;letter-spacing:0}
 .vs-track{height:9px}
 .vs-track i{display:block;height:100%;width:0;border-radius:var(--r-pill);background:var(--c);
   transition:width var(--t-slow) var(--ease)}
@@ -183,9 +185,9 @@
 .donut-mid b{font-size:var(--t-xl);font-weight:900;line-height:1}
 .donut-mid span{font-size:var(--t-xs);color:var(--muted)}
 .donut-legend{flex:1 1 200px;min-width:0;display:flex;flex-direction:column;gap:8px}
-.dl-row{display:flex;align-items:center;gap:10px;font-size:var(--t-sm)}
+.dl-row{display:flex;align-items:center;gap:10px;font-size:var(--t-sm);font-weight:600}
 .dl-name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--ink-2)}
-.dl-row b{font-weight:700;font-variant-numeric:tabular-nums;flex-shrink:0}
+.dl-row b{font-weight:inherit;color:var(--ink);font-variant-numeric:tabular-nums;flex-shrink:0}
 
 /* ---------- ตาราง ---------- */
 .table-tools{display:flex;align-items:center;justify-content:space-between;gap:16px;
@@ -242,8 +244,9 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;padding-right:2
 .heat-line{display:contents}
 .heat-col{display:flex;flex-direction:column;align-items:center;gap:1px;padding:0 4px 10px;
   text-align:center;line-height:1.25}
-.heat-col b{font-size:var(--t-xs);font-weight:700;color:var(--ink-2)}
-.heat-col span{font-size:var(--t-xs);color:var(--muted);font-weight:400}
+.heat-col{font-weight:600}
+.heat-col b{font-size:var(--t-xs);font-weight:inherit;color:var(--ink-2)}
+.heat-col span{font-size:var(--t-xs);color:var(--muted);font-weight:inherit}
 .heat-row{font-size:var(--t-sm);color:var(--ink);display:flex;align-items:center;
   padding:0 14px 0 0;border-top:1px solid var(--hair);min-height:46px;
   overflow:hidden;text-overflow:ellipsis;white-space:nowrap;transition:color var(--t-fast) ease}
@@ -443,11 +446,13 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;padding-right:2
 .chips-cloud{display:flex;flex-wrap:wrap;gap:9px}
 .cloud-chip{display:inline-flex;align-items:center;gap:9px;padding:8px 14px;border-radius:var(--r-pill);
   background:var(--gray-soft);color:var(--ink-2);font-size:var(--t-sm);line-height:1.35;
-  transition:transform var(--t-fast) var(--ease)}
+  font-weight:600;transition:transform var(--t-fast) var(--ease)}
 .cloud-chip:hover{transform:translateY(-2px)}
-.cloud-chip b{font-weight:700;font-variant-numeric:tabular-nums;color:var(--ink)}
-.cloud-chip.is-mid{background:var(--purple-soft);color:var(--ink)}
-.cloud-chip.is-strong{background:var(--purple);color:#fff}
+/* ในชิปเดียวใช้น้ำหนักเดียว เดิมมีสามน้ำหนัก (ชื่อ / จำนวนคน / %) อ่านแล้วสะดุด
+   ลำดับความสำคัญบอกด้วยสีและขนาดแทน — ตัวเลขเข้มกว่าชื่อ ส่วน % จางกว่าทั้งคู่ */
+.cloud-chip b{font-weight:inherit;font-variant-numeric:tabular-nums;color:var(--ink)}
+.cloud-chip.is-mid{background:var(--purple-soft);color:var(--ink-2)}
+.cloud-chip.is-strong{background:var(--purple);color:rgba(255,255,255,.82)}
 .cloud-chip.is-strong b{color:#fff}
 
 /* ============ 6 · ปรับสำหรับจอเล็ก ============
@@ -640,14 +645,19 @@ tr.is-excluded .td-no{color:var(--red)}
 .pie-wrap{display:flex;align-items:center;gap:24px;flex-wrap:wrap}
 .pie-chart{width:238px;height:238px;flex-shrink:0}
 .pie{width:100%;height:100%;display:block;overflow:visible}
+/* ชั้นหลังของวง: รางสีเทาที่ถูกแบ่งช่องด้วยมุมชุดเดียวกับชิ้นสี
+   ทำให้เห็นว่าวงถูกแบ่งเป็นกี่ช่องแม้ชิ้นนั้นจะเล็กมาก
+   และช่องว่างอ่านเป็น "เส้นแบ่ง" ไม่ใช่ "ข้อมูลขาดหาย" */
+.pie-track{fill:var(--track)}
 .pie-tagbox{fill:#fff;stroke:var(--line);stroke-width:.4}
-.pie-pct{fill:var(--ink);font-size:6.4px;font-weight:800;text-anchor:middle;
+.pie-pct{fill:var(--ink);font-size:7px;font-weight:800;text-anchor:middle;
   dominant-baseline:central;font-variant-numeric:tabular-nums}
 .pie-legend{flex:1 1 210px;min-width:0;display:flex;flex-direction:column;gap:9px}
 .pl-row{display:grid;grid-template-columns:10px minmax(0,1fr) auto auto;
-  gap:9px;align-items:center;font-size:var(--t-sm)}
+  gap:9px;align-items:center;font-size:var(--t-sm);font-weight:600}
 .pl-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--ink-2)}
-.pl-row b{font-weight:800;font-variant-numeric:tabular-nums}
+/* น้ำหนักเดียวทั้งแถว ลำดับบอกด้วยสี: % เข้มสุด ชื่อรองลงมา จำนวนคนจางสุด */
+.pl-row b{font-weight:inherit;color:var(--ink);font-variant-numeric:tabular-nums}
 .pl-n{font-size:var(--t-xs);color:var(--muted);white-space:nowrap;
   font-variant-numeric:tabular-nums}
 

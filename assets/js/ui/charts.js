@@ -8,10 +8,10 @@
  * ข้อตกลง: ดึงข้อมูลผ่าน groupBy/crossTab จาก core/compute.js เท่านั้น
  */
 
-import { el, growBar, segmentBars } from './dom.js?v=150';
-import { fmt, round1, pct } from '../core/format.js?v=150';
-import { num, groupBy, crossTab, avgOf, pickGroupColumn, distinctValues, compareGroups } from '../core/compute.js?v=150';
-import { welchTTest } from '../core/stats.js?v=150';
+import { el, growBar, segmentBars } from './dom.js?v=155';
+import { fmt, round1, pct } from '../core/format.js?v=155';
+import { num, groupBy, crossTab, avgOf, pickGroupColumn, distinctValues, compareGroups } from '../core/compute.js?v=155';
+import { welchTTest } from '../core/stats.js?v=155';
 
 /* สีของหลอดสื่อ "สถานะ" ไม่ใช่ชื่อชุดข้อมูล:
    ฝั่งที่มีค่ามากกว่า = ม่วง (สีเด่นของงานนี้) อีกฝั่ง = เทาเข้ม
@@ -818,58 +818,105 @@ export function pie(host, cf, rows) {
   svg.setAttribute('viewBox', '0 0 100 100');
   svg.setAttribute('class', 'pie');
 
-  const CX = 50, CY = 50, R = 38, W = 15;
-  /* ช่องว่างระหว่างชิ้น วัดเป็นองศา ชิ้นที่แคบกว่าช่องว่างจะหายไป
-     จึงตัดช่องว่างของชิ้นนั้นทิ้ง แล้วบีบให้เหลืออย่างน้อยพอมองเห็น */
-  const GAP = slices.length > 1 ? 4 : 0;
-  const MIN_ARC = 2;
+  /* หลอดของวงต้องหนาพอให้กล่องตัวเลขวางอยู่ในเนื้อหลอดได้เต็มใบ
+     W = 22 คือความหนาที่กล่องสูง 12 หน่วยยังเหลือขอบบน-ล่างข้างละ 5 หน่วย
+     R + W/2 = 49 จึงยังไม่ล้นกรอบ viewBox 100 หน่วย */
+  const CX = 50, CY = 50, R = 38, W = 22;
+  const RO = R + W / 2, RI = R - W / 2;
+  const CORNER = 4;                 // มุมกึ่งโค้ง ไม่ใช่ปลายมนเต็มใบ (ปลายมนเต็มใบ = W/2 = 11)
+  const GAP = slices.length > 1 ? 4 : 0;   // ช่องว่างระหว่างชิ้น หน่วยเป็นองศา
+  const TRACK_GAP = GAP * 0.4;             // ชั้นหลังเว้นแคบกว่า จึงโผล่พ้นชิ้นสีทั้งสองด้าน
+  const MIN_SWEEP = 1.6;                   // ชิ้นที่เล็กมากยังต้องเห็นเป็นเส้นบาง ๆ ไม่ใช่หายไป
+
   const at = (deg, rad) => {
     const a = (deg - 90) * Math.PI / 180;
     return [CX + rad * Math.cos(a), CY + rad * Math.sin(a)];
   };
+  const P = (deg, rad) => at(deg, rad).map(v => v.toFixed(3)).join(' ');
+  const deg = (len, rad) => len / rad * 180 / Math.PI;
+
+  /* วาดชิ้นเป็น "รูปปิดที่ระบายสี" ไม่ใช่เส้นหนา
+     เส้นหนาบังคับให้ปลายเป็นตัด (butt) หรือมนเต็มใบ (round) เท่านั้น เลือกกึ่งโค้งไม่ได้
+     รูปปิดจึงกำหนดรัศมีมุมได้เอง และช่องว่างที่เว้นไว้ก็เป็นช่องว่างจริงตามมุมที่คำนวณ
+     ไม่ถูกปลายมนกินหายไปเหมือนตอนใช้เส้นหนา */
+  const sectorPath = (from, sweep) => {
+    const to = from + sweep;
+    if (sweep >= 359.9) {                       // ชิ้นเดียวกินทั้งวง วาดเป็นวงแหวนเต็ม
+      return `M ${P(0, RO)} A ${RO} ${RO} 0 1 1 ${P(180, RO)} A ${RO} ${RO} 0 1 1 ${P(0, RO)} Z ` +
+             `M ${P(0, RI)} A ${RI} ${RI} 0 1 0 ${P(180, RI)} A ${RI} ${RI} 0 1 0 ${P(0, RI)} Z`;
+    }
+    /* มุมโค้งกินพื้นที่ทั้งตามแนวโค้งและแนวรัศมี ชิ้นที่แคบกว่านั้นต้องลดรัศมีมุมลงตาม
+       ไม่งั้นเส้นจะไขว้กันเองจนรูปบิด */
+    const r = Math.min(CORNER, W / 2 - 0.5, sweep / 2 / (180 / Math.PI) * RI * 0.9);
+    if (!(r > 0.4)) {                            // แคบเกินกว่าจะโค้ง วาดเป็นสี่เหลี่ยมโค้งมนไม่ได้
+      return `M ${P(from, RO)} A ${RO} ${RO} 0 0 1 ${P(to, RO)} ` +
+             `L ${P(to, RI)} A ${RI} ${RI} 0 0 0 ${P(from, RI)} Z`;
+    }
+    const ao = deg(r, RO), ai = deg(r, RI);
+    const big = sweep - 2 * ao > 180 ? 1 : 0;
+    return [
+      `M ${P(from + ao, RO)}`,
+      `A ${RO} ${RO} 0 ${big} 1 ${P(to - ao, RO)}`,
+      `A ${r} ${r} 0 0 1 ${P(to, RO - r)}`,
+      `L ${P(to, RI + r)}`,
+      `A ${r} ${r} 0 0 1 ${P(to - ai, RI)}`,
+      `A ${RI} ${RI} 0 ${big} 0 ${P(from + ai, RI)}`,
+      `A ${r} ${r} 0 0 1 ${P(from, RI + r)}`,
+      `L ${P(from, RO - r)}`,
+      `A ${r} ${r} 0 0 1 ${P(from + ao, RO)}`,
+      'Z'
+    ].join(' ');
+  };
+
+  /* หักช่องว่างเท่ากันทุกชิ้น ความกว้างที่ตาเห็นจึงลดลงชิ้นละเท่ากัน สัดส่วนระหว่างชิ้นไม่เพี้ยน */
+  const inset = (from, full, gapDeg) => {
+    const sweep = Math.max(MIN_SWEEP, full - gapDeg);
+    return { from: from + (full - sweep) / 2, sweep };
+  };
+
+  /* ---- ชั้นหลัง: รางสีเทาแบ่งช่องด้วยมุมชุดเดียวกับชิ้นสี ----
+     ทำให้เห็นว่าวงถูกแบ่งเป็นกี่ช่องแม้ชิ้นนั้นจะเล็กมาก
+     และช่องว่างอ่านเป็น "เส้นแบ่ง" ไม่ใช่ "ข้อมูลขาดหาย" */
+  if (slices.length > 1) {
+    let tstart = 0;
+    slices.forEach(g => {
+      const full = g.n / total * 360;
+      const { from, sweep } = inset(tstart, full, TRACK_GAP);
+      const t = mk('path');
+      t.setAttribute('d', sectorPath(from, sweep));
+      t.setAttribute('class', 'pie-track');
+      svg.append(t);
+      tstart += full;
+    });
+  }
 
   let start = 0;
   const labelBoxes = [];
   slices.forEach((g, i) => {
-    const share = g.n / total;
-    const full = share * 360;
+    const full = g.n / total * 360;
     const color = g.color || palette[i % palette.length];
+    const { from, sweep } = slices.length === 1
+      ? { from: 0, sweep: 360 } : inset(start, full, GAP);
 
-    if (slices.length === 1) {
-      const ring = mk('circle');
-      ring.setAttribute('cx', CX); ring.setAttribute('cy', CY); ring.setAttribute('r', R);
-      ring.setAttribute('fill', 'none');
-      ring.setAttribute('stroke', color);
-      ring.setAttribute('stroke-width', W);
-      svg.append(ring);
-    } else {
-      const arc = Math.max(MIN_ARC, full - GAP);
-      const from = start + (full - arc) / 2;
-      const [x1, y1] = at(from, R), [x2, y2] = at(from + arc, R);
-      const path = mk('path');
-      path.setAttribute('d',
-        `M ${x1.toFixed(3)} ${y1.toFixed(3)} ` +
-        `A ${R} ${R} 0 ${arc > 180 ? 1 : 0} 1 ${x2.toFixed(3)} ${y2.toFixed(3)}`);
-      path.setAttribute('fill', 'none');
-      path.setAttribute('stroke', color);
-      path.setAttribute('stroke-width', W);
-      path.setAttribute('stroke-linecap', 'round');
-      const t = mk('title');
-      t.textContent = `${g.label} · ${fmt(g.n)} คน (${pct(g.n, total)}%)`;
-      path.append(t);
-      svg.append(path);
-    }
+    const shape = mk('path');
+    shape.setAttribute('d', sectorPath(from, sweep));
+    shape.setAttribute('fill', color);
+    if (slices.length === 1) shape.setAttribute('fill-rule', 'evenodd');
+    const t = mk('title');
+    t.textContent = `${g.label} · ${fmt(g.n)} คน (${pct(g.n, total)}%)`;
+    shape.append(t);
+    svg.append(shape);
 
     /* ตัวเลขวางบนกึ่งกลางความหนาของวง ชิ้นที่แคบกว่านี้กล่องจะทับชิ้นข้างเคียง
        จึงปล่อยให้อ่านจากคำอธิบายด้านข้างแทน */
-    if (full >= 26) labelBoxes.push({ deg: start + full / 2, text: pct(g.n, total) + '%' });
+    if (full >= 40) labelBoxes.push({ deg: start + full / 2, text: pct(g.n, total) + '%' });
     start += full;
   });
 
   /* วาดกล่องตัวเลขทีหลังทั้งชุด เพื่อให้อยู่เหนือทุกชิ้นเสมอ ไม่ถูกชิ้นถัดไปทับ */
   labelBoxes.forEach(({ deg, text }) => {
     const [lx, ly] = at(deg, R);
-    const w = text.length * 4.6 + 7, h = 11;
+    const w = text.length * 5 + 8, h = 12;
     const box = mk('rect');
     box.setAttribute('x', (lx - w / 2).toFixed(2));
     box.setAttribute('y', (ly - h / 2).toFixed(2));
@@ -903,9 +950,7 @@ export function pie(host, cf, rows) {
   chart.append(svg);
   wrap.append(chart, legend);
   host.append(wrap);
-  host.append(el('p', 'scale-note',
-    `ทั้งวงเท่ากับผู้ตอบ ${fmt(total)} คน · แต่ละชิ้นคือสัดส่วนของคำตอบนั้น · ` +
-    `ช่องว่างระหว่างชิ้นมีไว้แบ่งชิ้น ไม่ได้แทนค่าใด`));
+  host.append(el('p', 'scale-note', `ทั้งวง = ผู้ตอบ ${fmt(total)} คน`));
 }
 
 Object.assign(CHARTS, { waffle, gauge, heatmap, bubbles, stacked, paired, chips, grouped, split, pie });
